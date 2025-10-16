@@ -1,0 +1,34 @@
+[gd_scene load_steps=6 format=3 uid="uid://cievfbu1ewn2o"]
+
+[ext_resource type="Script" uid="uid://c1cdnktb8w48p" path="res://Charaktere/Props/Fauna/plant.gd" id="1_afvgy"]
+[ext_resource type="Texture2D" uid="uid://ckapqueagnjh3" path="res://Charaktere/Props/Fauna/Sprite/gen_plant.png" id="1_j4ejm"]
+[ext_resource type="PackedScene" uid="uid://d0yfn5b3keu55" path="res://Generic/Hitbox/Hitbox.tscn" id="2_afvgy"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j4ejm"]
+radius = 32.0
+height = 64.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_afvgy"]
+radius = 29.0
+height = 58.0
+
+[node name="Plant" type="Area2D"]
+script = ExtResource("1_afvgy")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_j4ejm")
+
+[node name="HItbox" parent="." instance=ExtResource("2_afvgy")]
+collision_layer = 256
+collision_mask = 3
+
+[node name="HitBoxCollision" type="CollisionShape2D" parent="HItbox"]
+position = Vector2(-1, 20)
+shape = SubResource("CapsuleShape2D_j4ejm")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+collision_layer = 16
+
+[node name="StaticCollision" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(0, 20)
+shape = SubResource("CapsuleShape2D_afvgy")

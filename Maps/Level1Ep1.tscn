@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://xeyawcaoed1b"]
+
+[ext_resource type="PackedScene" uid="uid://bycnxispuqyfy" path="res://Charaktere/SPC/Shalka/shalka.tscn" id="1_kjij2"]
+[ext_resource type="PackedScene" uid="uid://cxu3yfsp56geu" path="res://Ressources/Tilemaps/Grass-01.tscn" id="1_qsoin"]
+[ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://Charaktere/Props/Fauna/Plant.tscn" id="4_iaeds"]
+
+[node name="Level1Ep1" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Grass01" parent="." instance=ExtResource("1_qsoin")]
+position = Vector2(-161, -320)
+
+[node name="Shalka" parent="." instance=ExtResource("1_kjij2")]
+y_sort_enabled = true
+position = Vector2(268, 201)
+collision_layer = 3
+collision_mask = 1
+
+[node name="Plant" parent="." instance=ExtResource("4_iaeds")]
+position = Vector2(-89, 268)
+
+[node name="Plant2" parent="." instance=ExtResource("4_iaeds")]
+position = Vector2(-204, 45)
+
+[node name="Plant3" parent="." instance=ExtResource("4_iaeds")]
+position = Vector2(105, 234)

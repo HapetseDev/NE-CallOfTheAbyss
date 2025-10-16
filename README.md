@@ -1,2 +1,2 @@
-# NECOTA2D
+# CoTA2D
 
