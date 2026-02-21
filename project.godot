@@ -8,12 +8,16 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="NE- Call of the Abyss (2D)"
 config/version="0.1"
 run/main_scene="uid://xeyawcaoed1b"
-config/features=PackedStringArray("4.5", "Forward Plus")
+config/features=PackedStringArray("4.6", "Forward Plus")
 boot_splash/image="uid://b5ubgw6jktu33"
 config/icon="uid://b5ubgw6jktu33"
 
