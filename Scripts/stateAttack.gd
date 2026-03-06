@@ -9,8 +9,8 @@ var attacking : bool = false
 
 @onready var walk: State = $"../Walk"
 @onready var animation_player: AnimationPlayer = $"../../AnimationPlayer"
-@onready var e_effecct_anim_player: AnimationPlayer = $"../../Sprite2D/E-Effect/E-EffecctAnimPlayer"
-@onready var audioPlayer: AudioStreamPlayer2D = $"../../Audio/AudioStreamPlayer2D"
+@onready var e_effecct_anim_player: AnimationPlayer = $"../../Sprite3D/E-Effect/E-EffecctAnimPlayer"
+@onready var audioPlayer: AudioStreamPlayer3D = $"../../Audio/AudioStreamPlayer3D"
 @onready var hurt_box: HurtBox = %AttackHurtBox
 
 # Was passiert, wenn der State betreten wird?
@@ -32,12 +32,12 @@ func Exit() -> void:
 	attacking = false
 	hurt_box.monitoring = false
 	pass
-		
+
 # Was passiert beim _process Update?
 func Process(_delta: float) -> State:
 	player.velocity -= player.velocity * decelerateSpeed * _delta
 	if attacking == false:
-		if player.direction == Vector2.ZERO:
+		if player.direction == Vector3.ZERO:
 			return idle
 		else:
 			return walk
@@ -46,7 +46,7 @@ func Process(_delta: float) -> State:
 # Was passiert im _physics Prozess in diesem State?
 func Physics(_delta: float) -> State:
 	return null
-	
+
 # Was passiert mit input Events in diesem State?
 func HandleInput(_event: InputEvent) -> State:
 	return null

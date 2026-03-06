@@ -1,4 +1,4 @@
-class_name Plant extends Node2D
+class_name Plant extends Node3D
 @onready var h_itbox: Hitbox = $HItbox
 
 

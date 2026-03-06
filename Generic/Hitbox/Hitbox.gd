@@ -1,4 +1,4 @@
-class_name Hitbox extends Area2D
+class_name Hitbox extends Area3D
 
 signal Damaged( damage : int)
 

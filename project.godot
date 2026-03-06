@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="NE- Call of the Abyss (2D)"
 config/version="0.1"
-run/main_scene="uid://xeyawcaoed1b"
+run/main_scene="res://UI/MainMenu/MainMenu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 boot_splash/image="uid://b5ubgw6jktu33"
 config/icon="uid://b5ubgw6jktu33"
@@ -42,7 +42,8 @@ folder_colors={
 "res://Generic/": "red",
 "res://Maps/": "blue",
 "res://Ressources/": "orange",
-"res://Scripts/": "gray"
+"res://Scripts/": "gray",
+"res://UI/": "purple"
 }
 
 [input]
@@ -81,6 +82,10 @@ Attack={
 [layer_names]
 
 2d_physics/layer_1="Player"
+3d_physics/layer_1="Player"
 2d_physics/layer_2="PlayerHurt"
+3d_physics/layer_2="PlayerHurt"
 2d_physics/layer_5="Walls"
+3d_physics/layer_5="Walls"
 2d_physics/layer_9="NPC"
+3d_physics/layer_9="NPC"

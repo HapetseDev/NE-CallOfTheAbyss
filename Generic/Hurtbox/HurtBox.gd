@@ -1,4 +1,4 @@
-class_name HurtBox extends Area2D
+class_name HurtBox extends Area3D
 
 @export var damage : int = 1
 
@@ -12,7 +12,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	pass
 
-func AreaEntered(a : Area2D) -> void:
+func AreaEntered(a : Area3D) -> void:
 	if a is Hitbox:
 		a.TakeDamage ( damage)
 	pass

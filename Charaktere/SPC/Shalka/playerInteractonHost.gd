@@ -1,22 +1,22 @@
-class_name PlayerInteractionHost extends Node2D
+class_name PlayerInteractionHost extends Node3D
 @onready var player: Shalka = $".."
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	player.DirectionChanged.connect(UpdateDirection)
-	pass # Replace with function body.
+	pass
 
-func UpdateDirection ( newDirection : Vector2 ) -> void:
+func UpdateDirection ( newDirection : Vector3 ) -> void:
 	match newDirection:
-		Vector2.DOWN:
-			rotation_degrees = 0 
-		Vector2.UP:
-			rotation_degrees = 180
-		Vector2.RIGHT:
-			rotation_degrees = -90
-		Vector2.LEFT:
-			rotation_degrees = 90
+		Vector3(0, 0, 1):  # DOWN
+			rotation_degrees.y = 0
+		Vector3(0, 0, -1):  # UP
+			rotation_degrees.y = 180
+		Vector3(1, 0, 0):  # RIGHT
+			rotation_degrees.y = -90
+		Vector3(-1, 0, 0):  # LEFT
+			rotation_degrees.y = 90
 		_:
-			rotation_degrees = 0
+			rotation_degrees.y = 0
 	pass

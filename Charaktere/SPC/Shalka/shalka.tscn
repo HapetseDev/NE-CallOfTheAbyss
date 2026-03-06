@@ -12,10 +12,11 @@
 [ext_resource type="Script" uid="uid://dyehe27ouladm" path="res://Charaktere/SPC/Shalka/playerInteractonHost.gd" id="10_5blqt"]
 [ext_resource type="PackedScene" uid="uid://bp8w5eihw3am5" path="res://Generic/Hurtbox/HurtBox.tscn" id="10_8lehy"]
 [ext_resource type="Script" uid="uid://chbae5ysale58" path="res://Scripts/PlayerCamera.gd" id="11_i8yr6"]
+[ext_resource type="Script" path="res://Systems/Footsteps/FootstepPlayer.gd" id="12_footstep"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hlb18"]
-radius = 27.0
-height = 54.0
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hlb18"]
+radius = 0.27
+height = 0.54
 
 [sub_resource type="Animation" id="Animation_i8yr6"]
 length = 0.001
@@ -41,7 +42,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(75, -31)]
+"values": [Vector3(0.75, -0.31, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -107,7 +108,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(75, -31)]
+"values": [Vector3(0.75, -0.31, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -157,15 +158,15 @@ _data = {
 &"attack_up": SubResource("Animation_trmfr")
 }
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_5blqt"]
-radius = 76.537575
+[sub_resource type="SphereShape3D" id="SphereShape3D_5blqt"]
+radius = 0.76537575
 
 [sub_resource type="Animation" id="Animation_plxar"]
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -181,7 +182,7 @@ length = 0.3
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -197,7 +198,7 @@ length = 0.3
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -213,7 +214,7 @@ length = 0.3
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -230,7 +231,7 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -247,7 +248,7 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -264,7 +265,7 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -281,7 +282,7 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -298,7 +299,7 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -315,7 +316,7 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -339,51 +340,54 @@ _data = {
 &"walk_up": SubResource("Animation_3fsuu")
 }
 
-[node name="Shalka" type="CharacterBody2D"]
+[node name="Shalka" type="CharacterBody3D"]
 collision_mask = 16
-motion_mode = 1
-wall_min_slide_angle = 0.17453292
 script = ExtResource("1_hlb18")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CapsuleShape2D_hlb18")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_hlb18")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-z_as_relative = false
-texture_filter = 2
-position = Vector2(3, -94)
+[node name="Sprite3D" type="Sprite3D" parent="."]
+billboard = 1
+texture_filter = 0
+pixel_size = 0.01
+position = Vector3(0.03, 0.94, 0)
 texture = ExtResource("2_ax5u6")
 hframes = 6
 vframes = 4
 
-[node name="E-Effect" type="Sprite2D" parent="Sprite2D"]
+[node name="E-Effect" type="Sprite3D" parent="Sprite3D"]
 visible = false
-position = Vector2(75, -31)
+billboard = 1
+texture_filter = 0
+pixel_size = 0.01
+position = Vector3(0.75, 0.31, 0)
 texture = ExtResource("3_7qxdf")
 
-[node name="E-EffecctAnimPlayer" type="AnimationPlayer" parent="Sprite2D/E-Effect"]
+[node name="E-EffecctAnimPlayer" type="AnimationPlayer" parent="Sprite3D/E-Effect"]
 libraries = {
 &"": SubResource("AnimationLibrary_w64td")
 }
 
-[node name="Shadow" type="Sprite2D" parent="Sprite2D"]
+[node name="Shadow" type="Sprite3D" parent="Sprite3D"]
 modulate = Color(0, 0, 0, 0.70980394)
-show_behind_parent = true
-position = Vector2(-7, 100)
-scale = Vector2(2, 2)
+billboard = 1
+texture_filter = 0
+pixel_size = 0.01
+position = Vector3(-0.07, -1.0, 0.01)
+scale = Vector3(2, 2, 2)
 texture = ExtResource("4_rr3s5")
 
-[node name="AttackHurtBox" parent="Sprite2D" instance=ExtResource("10_8lehy")]
+[node name="AttackHurtBox" parent="Sprite3D" instance=ExtResource("10_8lehy")]
 unique_name_in_owner = true
-position = Vector2(-3, 110)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.03, -1.1, 0)
 collision_layer = 2
 collision_mask = 256
 monitoring = false
 damage = 1
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D/AttackHurtBox"]
-shape = SubResource("CircleShape2D_5blqt")
-debug_color = Color(0.9647059, 0, 0.18431373, 0.3529412)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Sprite3D/AttackHurtBox"]
+shape = SubResource("SphereShape3D_5blqt")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -403,14 +407,24 @@ script = ExtResource("5_3fsuu")
 script = ExtResource("6_3fsuu")
 attack_sound = ExtResource("8_rr3s5")
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(-1, -207)
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 6, 8)
+fov = 50.0
 script = ExtResource("11_i8yr6")
+follow_distance = 8.0
+camera_height = 6.0
+pitch_angle = -45.0
+look_ahead_distance = 3.0
 
-[node name="Audio" type="Node2D" parent="."]
+[node name="Audio" type="Node3D" parent="."]
 
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Audio"]
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Audio"]
 max_polyphony = 4
 
-[node name="Interactions" type="Node2D" parent="."]
+[node name="Interactions" type="Node3D" parent="."]
 script = ExtResource("10_5blqt")
+
+[node name="FootstepPlayer" type="Node3D" parent="."]
+script = ExtResource("12_footstep")
+step_interval = 0.35
+sprint_step_interval = 0.25
