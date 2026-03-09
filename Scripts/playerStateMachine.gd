@@ -20,7 +20,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	ChangeState( current_state.HandleInput(event))
 	pass
 		
-func Initialize( _player : Player) -> void:
+func Initialize( _player : Playable) -> void:
 	states = []
 	for c in get_children():
 		if c is State:
