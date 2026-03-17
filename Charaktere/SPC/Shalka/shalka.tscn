@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bp8w5eihw3am5" path="res://Generic/Hurtbox/HurtBox.tscn" id="10_8lehy"]
 [ext_resource type="Script" uid="uid://chbae5ysale58" path="res://Scripts/PlayerCamera.gd" id="11_i8yr6"]
 [ext_resource type="Script" path="res://Systems/Footsteps/FootstepPlayer.gd" id="12_footstep"]
+[ext_resource type="Script" uid="uid://kpu3sj2c3f8q" path="res://Scripts/stateActionMenu.gd" id="13_action"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hlb18"]
 radius = 0.27
@@ -406,6 +407,10 @@ script = ExtResource("5_3fsuu")
 [node name="Attack" type="Node" parent="StateMachine"]
 script = ExtResource("6_3fsuu")
 attack_sound = ExtResource("8_rr3s5")
+
+[node name="ActionMenu" type="Node" parent="StateMachine"]
+script = ExtResource("13_action")
+action_range = 1.5
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 6, 8)

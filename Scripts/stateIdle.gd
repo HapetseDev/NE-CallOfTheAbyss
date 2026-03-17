@@ -2,6 +2,7 @@ class_name StateIdle extends State
 
 @onready var walk: State = $"../Walk"
 @onready var attack: State = $"../Attack"
+@onready var action_menu = $"../ActionMenu"
 
 # Was passiert, wenn der State betreten wird?
 func Enter() -> void:
@@ -26,5 +27,6 @@ func Physics(_delta: float) -> State:
 # Was passiert mit input Events in diesem State?
 func HandleInput(_event: InputEvent) -> State:
 	if _event.is_action_pressed("Attack"):
-		return attack
+		print("[Idle] Attack-Taste erkannt. action_menu = ", action_menu)
+		return action_menu
 	return null
