@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://cnpctest0001a"]
+
+[ext_resource type="Script" uid="uid://cjc84d3q4dvic" path="res://Charaktere/NPC/NPC.gd" id="1_npc"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.3
+height = 0.8
+
+[sub_resource type="QuadMesh" id="QuadMesh_1"]
+size = Vector2(0.6, 1.0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(1, 0.2, 0.2, 1)
+billboard_mode = 1
+
+[node name="TestNPC" type="CharacterBody3D"]
+script = ExtResource("1_npc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("QuadMesh_1")
+surface_material_override/0 = SubResource("StandardMaterial3D_1")

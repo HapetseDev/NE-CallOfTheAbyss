@@ -17,18 +17,22 @@ func _physics_process(delta: float) -> void:
 	pass
 	
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		print("[StateMachine] Taste erkannt: ", event.keycode, " current_state=", current_state)
 	ChangeState( current_state.HandleInput(event))
 	pass
 		
-func Initialize( _player : Player) -> void:
+func Initialize( _player : Playable) -> void:
 	states = []
 	for c in get_children():
 		if c is State:
 			states.append(c)
+	print("[StateMachine] Initialize: ", states.size(), " States gefunden: ", states)
 	if states.size() > 0:
 		states[0].player = _player
 		ChangeState( states[0])
 		process_mode = Node.PROCESS_MODE_INHERIT
+		print("[StateMachine] process_mode auf INHERIT gesetzt")
 	
 func ChangeState(new_state : State) -> void:
 	if new_state == null || new_state == current_state:

@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://bycnxispuqyfy" path="res://Charaktere/SPC/Shalka/shalka.tscn" id="1_kjij2"]
 [ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://Charaktere/Props/Fauna/Plant.tscn" id="4_iaeds"]
+[ext_resource type="PackedScene" uid="uid://cnpctest0001a" path="res://Charaktere/NPC/TestNPC.tscn" id="5_testnpc"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.4, 0.6, 0.9, 1)
@@ -58,6 +59,9 @@ shape = SubResource("BoxShape3D_ground")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)
 collision_layer = 3
 collision_mask = 1
+
+[node name="TestNPC" parent="." instance=ExtResource("5_testnpc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
 
 [node name="Plant" parent="." unique_id=2114659948 instance=ExtResource("4_iaeds")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.89, 0.47626615, 2.68)

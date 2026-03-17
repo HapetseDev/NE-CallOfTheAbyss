@@ -10,7 +10,11 @@ var is_sprinting : bool = false
 
 @onready var idle: State = $"../Idle"
 @onready var attack: State = $"../Attack"
+@onready var action_menu = $"../ActionMenu"
 
+
+func _ready() -> void:
+	print("[Walk] _ready: action_menu = ", action_menu)
 
 # Was passiert, wenn der State betreten wird?
 func Enter() -> void:
@@ -67,5 +71,6 @@ func Physics(_delta: float) -> State:
 # Was passiert mit input Events in diesem State?
 func HandleInput(_event: InputEvent) -> State:
 	if _event.is_action_pressed("Attack"):
-		return attack
+		print("[Walk] Attack erkannt. action_menu = ", action_menu)
+		return action_menu
 	return null
