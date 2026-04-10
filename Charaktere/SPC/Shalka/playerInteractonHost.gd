@@ -4,10 +4,10 @@ class_name PlayerInteractionHost extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	player.DirectionChanged.connect(UpdateDirection)
+	player.direction_changed.connect(update_direction)
 	pass
 
-func UpdateDirection ( newDirection : Vector3 ) -> void:
+func update_direction ( newDirection : Vector3 ) -> void:
 	match newDirection:
 		Vector3(0, 0, 1):  # DOWN
 			rotation_degrees.y = 0

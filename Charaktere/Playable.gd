@@ -12,7 +12,7 @@ const DIR_4 = [Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(-1, 0, 0), Vector3(0,
 # Optionales Schrittsound-System (wird von abgeleiteten Klassen gesetzt)
 var footstep_player: FootstepPlayer
 
-signal DirectionChanged(new_direction: Vector3)
+signal direction_changed(new_direction: Vector3)
 
 # --- Stats ---
 @export var max_health: int = 100
@@ -71,7 +71,7 @@ func get_move_direction() -> Vector3:
 
 # --- Bewegungs-Hilfsmethoden ---
 
-func SetDirection() -> bool:
+func set_direction() -> bool:
 	if direction == Vector3.ZERO:
 		return false
 	var dir_2d := Vector2(direction.x, direction.z)
@@ -81,18 +81,18 @@ func SetDirection() -> bool:
 	if new_dir == cardinal_direction:
 		return false
 	cardinal_direction = new_dir
-	DirectionChanged.emit(new_dir)
+	direction_changed.emit(new_dir)
 	if sprite_3d:
 		sprite_3d.flip_h = true if cardinal_direction == Vector3(-1, 0, 0) else false
 	return true
 
 
-func UpdateAnimation(state: String) -> void:
+func update_animation(state: String) -> void:
 	if animation_player:
-		animation_player.play(state + "_" + AnimDirection())
+		animation_player.play(state + "_" + anim_direction())
 
 
-func AnimDirection() -> String:
+func anim_direction() -> String:
 	if cardinal_direction == Vector3(0, 0, 1):
 		return "down"
 	elif cardinal_direction == Vector3(0, 0, -1):

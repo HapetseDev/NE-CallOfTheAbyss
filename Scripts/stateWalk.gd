@@ -13,12 +13,9 @@ var is_sprinting : bool = false
 @onready var action_menu = $"../ActionMenu"
 
 
-func _ready() -> void:
-	print("[Walk] _ready: action_menu = ", action_menu)
-
 # Was passiert, wenn der State betreten wird?
-func Enter() -> void:
-	player.UpdateAnimation("walk")
+func enter() -> void:
+	player.update_animation("walk")
 	current_speed = base_speed
 	is_sprinting = false
 
@@ -28,7 +25,7 @@ func Enter() -> void:
 	pass
 
 # Was passiert beim Verlassen des States?
-func Exit() -> void:
+func exit() -> void:
 	is_sprinting = false
 
 	# Schrittgeräusche stoppen
@@ -37,7 +34,7 @@ func Exit() -> void:
 	pass
 
 # Was passiert beim _process Update?
-func Process(_delta: float) -> State:
+func process(_delta: float) -> State:
 	if player.direction == Vector3.ZERO:
 		return idle
 
@@ -60,17 +57,16 @@ func Process(_delta: float) -> State:
 
 	player.velocity = player.direction * current_speed
 
-	if player.SetDirection():
-		player.UpdateAnimation("walk")
+	if player.set_direction():
+		player.update_animation("walk")
 	return null
 
 # Was passiert im _physics Prozess in diesem State?
-func Physics(_delta: float) -> State:
+func physics(_delta: float) -> State:
 	return null
 
 # Was passiert mit input Events in diesem State?
-func HandleInput(_event: InputEvent) -> State:
+func handle_input(_event: InputEvent) -> State:
 	if _event.is_action_pressed("Attack"):
-		print("[Walk] Attack erkannt. action_menu = ", action_menu)
 		return action_menu
 	return null

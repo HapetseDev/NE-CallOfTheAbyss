@@ -19,8 +19,8 @@ func _ready() -> void:
 	if target:
 		_update_camera_position(1.0)
 		# Verbinde Signal für Richtungsänderung
-		if target.has_signal("DirectionChanged"):
-			target.DirectionChanged.connect(_on_direction_changed)
+		if target.has_signal("direction_changed"):
+			target.direction_changed.connect(_on_direction_changed)
 	pass
 
 func _process(delta: float) -> void:

@@ -4,7 +4,6 @@ class_name Interactable extends Node3D
 
 
 func _ready() -> void:
-	print("[Interactable] ", name, " registriert in Gruppe 'interactable'")
 	add_to_group("interactable")
 
 

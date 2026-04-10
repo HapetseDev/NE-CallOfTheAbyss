@@ -7,7 +7,7 @@ class_name Player extends Playable
 
 func _ready() -> void:
 	footstep_player = $FootstepPlayer as FootstepPlayer
-	state_machine.Initialize(self)
+	state_machine.initialize(self)
 	super._ready()
 
 
