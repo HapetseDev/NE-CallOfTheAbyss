@@ -3,7 +3,7 @@ class_name StateAttack extends State
 var attacking : bool = false
 
 @export var attack_sound : AudioStream
-@export_range(1,20,0.5) var decelerateSpeed : float = 5.0
+@export_range(1,20,0.5) var decelerate_speed : float = 5.0
 
 @onready var idle: State = $"../Idle"
 
@@ -14,10 +14,10 @@ var attacking : bool = false
 @onready var hurt_box: HurtBox = %AttackHurtBox
 
 # Was passiert, wenn der State betreten wird?
-func Enter() -> void:
-	player.UpdateAnimation("attack")
-	e_effecct_anim_player.play("attack_" + player.AnimDirection())
-	animation_player.animation_finished.connect( EndAttack)
+func enter() -> void:
+	player.update_animation("attack")
+	e_effecct_anim_player.play("attack_" + player.anim_direction())
+	animation_player.animation_finished.connect( end_attack)
 	audioPlayer.stream = attack_sound
 	audioPlayer.pitch_scale = randf_range(0.9,1.1)
 	audioPlayer.play()
@@ -27,15 +27,15 @@ func Enter() -> void:
 	pass
 
 # Was passiert beim Verlassen des States?
-func Exit() -> void:
-	animation_player.animation_finished.disconnect( EndAttack)
+func exit() -> void:
+	animation_player.animation_finished.disconnect( end_attack)
 	attacking = false
 	hurt_box.monitoring = false
 	pass
 
 # Was passiert beim _process Update?
-func Process(_delta: float) -> State:
-	player.velocity -= player.velocity * decelerateSpeed * _delta
+func process(_delta: float) -> State:
+	player.velocity -= player.velocity * decelerate_speed * _delta
 	if attacking == false:
 		if player.direction == Vector3.ZERO:
 			return idle
@@ -44,12 +44,12 @@ func Process(_delta: float) -> State:
 	return null
 
 # Was passiert im _physics Prozess in diesem State?
-func Physics(_delta: float) -> State:
+func physics(_delta: float) -> State:
 	return null
 
 # Was passiert mit input Events in diesem State?
-func HandleInput(_event: InputEvent) -> State:
+func handle_input(_event: InputEvent) -> State:
 	return null
 
-func EndAttack( _newAnimName : String) -> void:
+func end_attack( _newAnimName : String) -> void:
 	attacking = false

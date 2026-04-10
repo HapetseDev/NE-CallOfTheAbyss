@@ -7,15 +7,15 @@ class_name Plant extends Interactable
 
 func _ready() -> void:
 	super._ready()  # add_to_group("interactable")
-	h_itbox.Damaged.connect(TakeDamage)
+	h_itbox.damaged.connect(take_damage)
 
 
-func TakeDamage(_damage: int) -> void:
+func take_damage(_damage: int) -> void:
 	queue_free()
 
 
 # Prüft, ob der Spieler das Werkzeug zum Schneiden besitzt (ausgerüstet oder im Inventar)
-func canSchneiden(player: Playable) -> bool:
+func can_schneiden(player: Playable) -> bool:
 	if not is_schneidbar:
 		return false
 	if player.equipment.get("waffe") == "Messer":
@@ -25,7 +25,7 @@ func canSchneiden(player: Playable) -> bool:
 
 func get_actions(player: Playable) -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
-	if canSchneiden(player):
+	if can_schneiden(player):
 		actions.append({"label": "Schneiden", "action_id": "schneiden"})
 	return actions
 

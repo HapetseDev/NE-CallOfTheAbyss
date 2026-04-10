@@ -8,7 +8,7 @@ var _target_direction: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
 	if state_machine:
-		state_machine.Initialize(self)
+		state_machine.initialize(self)
 	super._ready()
 
 

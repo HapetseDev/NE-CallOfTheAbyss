@@ -2,17 +2,9 @@ class_name HurtBox extends Area3D
 
 @export var damage : int = 1
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	area_entered.connect(AreaEntered)
-	pass # Replace with function body.
+	area_entered.connect(area_entered_handler)
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass
-
-func AreaEntered(a : Area3D) -> void:
+func area_entered_handler(a : Area3D) -> void:
 	if a is Hitbox:
-		a.TakeDamage ( damage)
-	pass
+		a.take_damage ( damage)

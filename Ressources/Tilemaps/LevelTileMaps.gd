@@ -4,10 +4,10 @@ class_name LevelGround extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	GlobalLevelManager.ChangeTileMapBounds(GetGroundBounds())
+	GlobalLevelManager.change_tilemap_bounds(get_ground_bounds())
 	pass
 
-func GetGroundBounds() -> Array[Vector3]:
+func get_ground_bounds() -> Array[Vector3]:
 	var bounds : Array[Vector3] = []
 	var half_size = ground_size / 2
 	bounds.append(Vector3(-half_size.x, 0, -half_size.y))

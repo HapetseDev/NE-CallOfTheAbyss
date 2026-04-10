@@ -7,38 +7,35 @@ var current_state : State
 func _ready():
 	process_mode = Node.PROCESS_MODE_DISABLED
 	pass
-	
+
 func _process(delta: float) -> void:
-	ChangeState(current_state.Process( delta))
+	change_state(current_state.process( delta))
 	pass
-	
+
 func _physics_process(delta: float) -> void:
-	ChangeState(current_state.Physics( delta))
+	change_state(current_state.physics( delta))
 	pass
-	
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed:
-		print("[StateMachine] Taste erkannt: ", event.keycode, " current_state=", current_state)
-	ChangeState( current_state.HandleInput(event))
+	change_state( current_state.handle_input(event))
 	pass
-		
-func Initialize( _player : Playable) -> void:
+
+func initialize( _player : Playable) -> void:
 	states = []
 	for c in get_children():
 		if c is State:
 			states.append(c)
-	print("[StateMachine] Initialize: ", states.size(), " States gefunden: ", states)
 	if states.size() > 0:
-		states[0].player = _player
-		ChangeState( states[0])
+		for state in states:
+			state.player = _player
+		change_state( states[0])
 		process_mode = Node.PROCESS_MODE_INHERIT
-		print("[StateMachine] process_mode auf INHERIT gesetzt")
-	
-func ChangeState(new_state : State) -> void:
+
+func change_state(new_state : State) -> void:
 	if new_state == null || new_state == current_state:
 		return
-	if current_state: 
-		current_state.Exit()
+	if current_state:
+		current_state.exit()
 	prev_state = current_state
 	current_state = new_state
-	current_state.Enter()
+	current_state.enter()

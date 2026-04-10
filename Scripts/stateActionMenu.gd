@@ -11,23 +11,21 @@ var _action_done: bool = false
 var _has_shown_menu: bool = false
 
 
-func Enter() -> void:
-	print("[ActionMenu] Enter() aufgerufen")
+func enter() -> void:
 	player.velocity = Vector3.ZERO
-	player.UpdateAnimation("idle")
+	player.update_animation("idle")
 	_action_done = false
 	_has_shown_menu = false
 	var actions := _collect_actions()
-	print("[ActionMenu] Gefundene Aktionen: ", actions)
 	_build_menu(actions)
 	_has_shown_menu = true
 
 
-func Exit() -> void:
+func exit() -> void:
 	_destroy_menu()
 
 
-func Process(_delta: float) -> State:
+func process(_delta: float) -> State:
 	if _action_done:
 		if player.direction != Vector3.ZERO:
 			return walk
@@ -36,7 +34,7 @@ func Process(_delta: float) -> State:
 	return null
 
 
-func HandleInput(_event: InputEvent) -> State:
+func handle_input(_event: InputEvent) -> State:
 	if _event.is_action_pressed("ui_cancel"):
 		return idle
 	return null
@@ -47,18 +45,14 @@ func HandleInput(_event: InputEvent) -> State:
 func _collect_actions() -> Array:
 	var result: Array = []
 	var interactables := get_tree().get_nodes_in_group("interactable")
-	print("[ActionMenu] Interactables in Szene: ", interactables.size())
 	for node in interactables:
 		var node3d := node as Node3D
 		if node3d == null:
 			continue
 		var dist: float = node3d.global_position.distance_to(player.global_position)
-		print("[ActionMenu]   -> ", node3d.name, " Distanz: ", snappedf(dist, 0.01), " (max: ", action_range, ")")
 		if not node3d.has_method("get_actions"):
-			print("[ActionMenu]      kein get_actions()")
 			continue
 		if dist > action_range:
-			print("[ActionMenu]      zu weit entfernt")
 			continue
 		var node_actions: Array = node3d.get_actions(player)
 		for action in node_actions:
