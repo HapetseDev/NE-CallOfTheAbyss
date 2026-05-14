@@ -37,7 +37,8 @@ NECOTA2D/
 │   ├── playerStateMachine.gd     # State Machine Controller
 │   ├── stateIdle.gd              # Idle State
 │   ├── stateWalk.gd              # Walk State mit Sprint
-│   └── stateAttack.gd            # Attack State
+│   ├── stateActionMenu.gd        # Kontextmenü (Objekte, später Dialoge)
+│   └── stateAttack.gd            # (Archiv) Echtzeit-Schlag — nicht an Shalka-FSM angebunden
 ├── Systems/
 │   └── Footsteps/                # Schrittgeräusche-System
 ├── UI/
@@ -211,7 +212,7 @@ Die Bewegung wird über eine State Machine gesteuert. Der Sprint hat eine Anlauf
 |-------|--------|
 | W/A/S/D | Bewegung |
 | Shift (halten) | Sprint |
-| E | Angriff |
+| E | **Interaktion** — öffnet das Kontextmenü für Objekte in Reichweite (Gruppe `interactable`) |
 
 ### Funktionsweise Sprint
 
@@ -333,7 +334,7 @@ func on_damaged(damage: int):
 | Layer | Name | Verwendung |
 |-------|------|------------|
 | 1 | Player | Spieler-Körper |
-| 2 | PlayerHurt | Spieler-Angriffe |
+| 2 | PlayerHurt | Vom Spieler ausgelöste Schadens-/Kontaktbereiche (z. B. später Items, Effekte) |
 | 5 | Walls | Hindernisse |
 | 9 | NPC | NPCs |
 | 256 | Hitbox | Schadens-Empfänger |
@@ -342,14 +343,20 @@ func on_damaged(damage: int):
 
 ## State Machine
 
-### Struktur
+### Ausrichtung
+
+Erkundung nutzt die State Machine für **Bewegung** und **Interaktion** (Kontextmenü). **Kampf** ist für später als **rundenbasiert** vorgesehen (eigene Szene oder Modus), nicht als Echtzeit-Angriff in Idle/Walk.
+
+### Struktur (Shalka)
 
 ```
 StateMachine (Node)
 ├── Idle (Node) → stateIdle.gd
 ├── Walk (Node) → stateWalk.gd
-└── Attack (Node) → stateAttack.gd
+└── ActionMenu (Node) → stateActionMenu.gd
 ```
+
+Das Script `stateAttack.gd` bleibt im Projekt, ist aber **nicht** als Kind der Shalka-State-Machine eingebunden (kein Action-Kampf als Standard).
 
 ### State-Basis (state.gd)
 
@@ -514,6 +521,11 @@ print(state_machine.current_state.name)
 ---
 
 ## Changelog
+
+### Nach 0.1 Alpha
+
+- Input-Aktion `Attack` → `Interact` (Semantik: Umwelt & Objekte, kein Echtzeit-Schlag)
+- Shalka-State-Machine: Echtzeit-`Attack`-State entfernt; Fokus auf Exploration + Kontextmenü
 
 ### Version 0.1 Alpha
 

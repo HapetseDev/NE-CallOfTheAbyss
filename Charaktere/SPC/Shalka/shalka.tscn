@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://bycnxispuqyfy"]
+[gd_scene load_steps=30 format=3 uid="uid://bycnxispuqyfy"]
 
 [ext_resource type="Script" uid="uid://drou7suaqf8x7" path="res://Charaktere/SPC/Shalka/shalka.gd" id="1_hlb18"]
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://Charaktere/SPC/Shalka/Sprites/shalka_sprite.png" id="2_ax5u6"]
@@ -7,8 +7,6 @@
 [ext_resource type="Script" uid="uid://bsfjnoxk4rkmk" path="res://Scripts/stateIdle.gd" id="4_ax5u6"]
 [ext_resource type="Texture2D" uid="uid://cha3i6k7s51uk" path="res://Charaktere/SPC/Shalka/Sprites/shadow.png" id="4_rr3s5"]
 [ext_resource type="Script" uid="uid://bj5dqejdsrlq7" path="res://Scripts/stateWalk.gd" id="5_3fsuu"]
-[ext_resource type="Script" uid="uid://dt6vyu5ytq6iq" path="res://Scripts/stateAttack.gd" id="6_3fsuu"]
-[ext_resource type="AudioStream" uid="uid://bmni84xc6t3cx" path="res://Charaktere/SPC/Shalka/sounds/646618__darknightprincess__cute-anime-ah-sound-effect.mp3" id="8_rr3s5"]
 [ext_resource type="Script" uid="uid://dyehe27ouladm" path="res://Charaktere/SPC/Shalka/playerInteractonHost.gd" id="10_5blqt"]
 [ext_resource type="PackedScene" uid="uid://bp8w5eihw3am5" path="res://Generic/Hurtbox/HurtBox.tscn" id="10_8lehy"]
 [ext_resource type="Script" uid="uid://chbae5ysale58" path="res://Scripts/PlayerCamera.gd" id="11_i8yr6"]
@@ -403,10 +401,6 @@ script = ExtResource("4_ax5u6")
 
 [node name="Walk" type="Node" parent="StateMachine"]
 script = ExtResource("5_3fsuu")
-
-[node name="Attack" type="Node" parent="StateMachine"]
-script = ExtResource("6_3fsuu")
-attack_sound = ExtResource("8_rr3s5")
 
 [node name="ActionMenu" type="Node" parent="StateMachine"]
 script = ExtResource("13_action")
