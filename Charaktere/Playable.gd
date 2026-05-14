@@ -13,6 +13,7 @@ const DIR_4 = [Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(-1, 0, 0), Vector3(0,
 var footstep_player: FootstepPlayer
 
 signal direction_changed(new_direction: Vector3)
+signal inventar_geaendert
 
 # --- Stats ---
 @export var max_health: int = 100
@@ -137,19 +138,55 @@ func _level_up() -> void:
 
 # --- Inventar ---
 
-func add_item(item: Variant) -> void:
-	inventory.append(item)
+func add_item(item: Variant, anzahl: int = 1) -> void:
+	if item is Item:
+		for slot in inventory:
+			if slot is Dictionary and slot.get("item") is Item \
+					and (slot["item"] as Item).item_id == (item as Item).item_id:
+				slot["count"] = mini(slot["count"] + anzahl, (item as Item).max_stapel)
+				inventar_geaendert.emit()
+				return
+		inventory.append({"item": item, "count": anzahl})
+	else:
+		inventory.append(item)
+	inventar_geaendert.emit()
 
 
-func remove_item(item: Variant) -> bool:
+func remove_item(item: Variant, anzahl: int = 1) -> bool:
+	if item is Item:
+		for i in inventory.size():
+			var slot = inventory[i]
+			if slot is Dictionary and slot.get("item") is Item \
+					and (slot["item"] as Item).item_id == (item as Item).item_id:
+				slot["count"] -= anzahl
+				if slot["count"] <= 0:
+					inventory.remove_at(i)
+				inventar_geaendert.emit()
+				return true
+		return false
 	var idx := inventory.find(item)
 	if idx >= 0:
 		inventory.remove_at(idx)
+		inventar_geaendert.emit()
 		return true
 	return false
 
 
 func has_item(item: Variant) -> bool:
+	if item is String:
+		for slot in inventory:
+			if slot == item:
+				return true
+			if slot is Dictionary and slot.get("item") is Item \
+					and (slot["item"] as Item).item_id == item:
+				return true
+		return false
+	if item is Item:
+		for slot in inventory:
+			if slot is Dictionary and slot.get("item") is Item \
+					and (slot["item"] as Item).item_id == (item as Item).item_id:
+				return true
+		return false
 	return inventory.has(item)
 
 
@@ -160,6 +197,7 @@ func equip(slot: String, item: Variant) -> void:
 		push_warning("Playable: Unbekannter Ausrüstungsslot '%s'" % slot)
 		return
 	equipment[slot] = item
+	inventar_geaendert.emit()
 
 
 func unequip(slot: String) -> Variant:
@@ -168,6 +206,7 @@ func unequip(slot: String) -> Variant:
 		return null
 	var item: Variant = equipment[slot]
 	equipment[slot] = null
+	inventar_geaendert.emit()
 	return item
 
 
