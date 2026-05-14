@@ -9,7 +9,6 @@ var current_speed : float = 0.0
 var is_sprinting : bool = false
 
 @onready var idle: State = $"../Idle"
-@onready var attack: State = $"../Attack"
 @onready var action_menu = $"../ActionMenu"
 
 
@@ -67,6 +66,6 @@ func physics(_delta: float) -> State:
 
 # Was passiert mit input Events in diesem State?
 func handle_input(_event: InputEvent) -> State:
-	if _event.is_action_pressed("Attack"):
+	if _event.is_action_pressed("Interact"):
 		return action_menu
 	return null
