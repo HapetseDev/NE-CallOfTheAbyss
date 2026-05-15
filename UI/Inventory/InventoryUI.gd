@@ -20,6 +20,8 @@ func _ready() -> void:
 
 func _build_ui() -> void:
 	var overlay := ColorRect.new()
+	overlay.set_script(load("res://UI/Inventory/inventory_drop_zone.gd"))
+	overlay.set("inventory_ui", self)
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.color = Color(0, 0, 0, 0.65)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -117,11 +119,23 @@ func _build_ui() -> void:
 
 	for i in INV_COLS * INV_ROWS:
 		var btn := Button.new()
+		btn.set_script(load("res://UI/Inventory/inventory_slot_button.gd"))
+		btn.set("slot_index", i)
+		btn.set("inventory_ui", self)
 		btn.custom_minimum_size = SLOT_SIZE
 		btn.clip_text = true
 		btn.pressed.connect(_on_inv_slot_pressed.bind(i))
 		inv_grid.add_child(btn)
 		_inv_slots.append(btn)
+
+
+func drop_item_from_slot(index: int) -> void:
+	if playable == null or index < 0 or index >= playable.inventory.size():
+		return
+	var slot = playable.inventory[index]
+	if not (slot is Dictionary and slot.get("item") is Item):
+		return
+	playable.drop_item_to_world(slot["item"] as Item)
 
 
 func _on_close_pressed() -> void:
@@ -142,7 +156,13 @@ func _refresh() -> void:
 				var item: Item = slot["item"]
 				btn.text = "%s\nx%d" % [item.item_name, slot["count"]] if item.max_stapel > 1 else item.item_name
 				btn.icon = item.icon
-				btn.tooltip_text = item.beschreibung
+				var hint := item.beschreibung
+				hint += "\n(Ziehen auf dunklen Bereich: Ablegen)"
+				if item.verbrauchbar:
+					hint += "\n(Klicken: Verwenden)"
+				elif not item.ausrüstungs_slot.is_empty():
+					hint += "\n(Klicken: Ausrüsten)"
+				btn.tooltip_text = hint
 			else:
 				btn.text = str(slot)
 				btn.icon = null
@@ -176,6 +196,9 @@ func _on_inv_slot_pressed(index: int) -> void:
 	if not (slot is Dictionary and slot.get("item") is Item):
 		return
 	var item: Item = slot["item"]
+	if item.verbrauchbar:
+		playable.consume_item(item)
+		return
 	if item.ausrüstungs_slot.is_empty():
 		return
 	playable.remove_item(item)

@@ -175,7 +175,7 @@ func remove_item(item: Variant, anzahl: int = 1) -> bool:
 func has_item(item: Variant) -> bool:
 	if item is String:
 		for slot in inventory:
-			if slot == item:
+			if slot is String and slot == item:
 				return true
 			if slot is Dictionary and slot.get("item") is Item \
 					and (slot["item"] as Item).item_id == item:
@@ -188,6 +188,45 @@ func has_item(item: Variant) -> bool:
 				return true
 		return false
 	return inventory.has(item)
+
+
+func consume_item(item: Item) -> bool:
+	if item == null or not item.verbrauchbar:
+		return false
+	if not remove_item(item, 1):
+		return false
+	item.apply_effects(self)
+	return true
+
+
+const _BASIC_ITEM_SCENE: PackedScene = preload("res://Charaktere/Props/Items/basic_item.tscn")
+
+
+func drop_item_to_world(item: Item) -> bool:
+	if item == null or not remove_item(item, 1):
+		return false
+	_spawn_world_item(item.duplicate_item())
+	return true
+
+
+func get_drop_spawn_position() -> Vector3:
+	var forward := Vector3(cardinal_direction.x, 0.0, cardinal_direction.z)
+	if forward.length_squared() < 0.01:
+		forward = Vector3(0, 0, 1)
+	forward = forward.normalized()
+	return global_position + forward * 1.1 + Vector3(0, 0.45, 0)
+
+
+func _spawn_world_item(item: Item) -> void:
+	var world := get_tree().current_scene
+	if world == null:
+		return
+	var inst := _BASIC_ITEM_SCENE.instantiate() as BasicItem
+	inst.item_data = item
+	world.add_child(inst)
+	inst.global_position = get_drop_spawn_position()
+	var toss := Vector3(cardinal_direction.x, 1.2, cardinal_direction.z).normalized() * 1.8
+	inst.apply_central_impulse(toss)
 
 
 # --- Ausrüstung ---

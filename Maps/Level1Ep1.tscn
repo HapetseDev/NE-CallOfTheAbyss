@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://bycnxispuqyfy" path="res://Charaktere/SPC/Shalka/shalka.tscn" id="1_kjij2"]
 [ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://Charaktere/Props/Fauna/Plant.tscn" id="4_iaeds"]
 [ext_resource type="PackedScene" uid="uid://cnpctest0001a" path="res://Charaktere/NPC/TestNPC.tscn" id="5_testnpc"]
+[ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://Charaktere/Props/Items/basic_item.tscn" id="6_basicitem"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.4, 0.6, 0.9, 1)
@@ -28,10 +29,6 @@ albedo_color = Color(0.3, 0.6, 0.2, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(20, 0.1, 20)
-
-[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_qsoin"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_u01oq"]
 
 [node name="Level1Ep1" type="Node3D" unique_id=1863077889]
 
@@ -60,7 +57,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)
 collision_layer = 3
 collision_mask = 1
 
-[node name="TestNPC" parent="." instance=ExtResource("5_testnpc")]
+[node name="TestNPC" parent="." unique_id=393529490 instance=ExtResource("5_testnpc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
 
 [node name="Plant" parent="." unique_id=2114659948 instance=ExtResource("4_iaeds")]
@@ -72,10 +69,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.04, 0.4842894, 0.45)
 [node name="Plant3" parent="." unique_id=2109516733 instance=ExtResource("4_iaeds")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8144226, 0.4563117, 2.34)
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=2083345693]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.871685, 0)
-physics_material_override = SubResource("PhysicsMaterial_qsoin")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1006428843]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9881799, 0)
-shape = SubResource("BoxShape3D_u01oq")
+[node name="Heiltrank" parent="." instance=ExtResource("6_basicitem")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0.5, 1.2)
