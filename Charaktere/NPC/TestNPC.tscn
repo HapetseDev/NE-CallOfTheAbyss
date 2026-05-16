@@ -1,26 +1,25 @@
 [gd_scene format=3 uid="uid://cnpctest0001a"]
 
 [ext_resource type="Script" uid="uid://cjc84d3q4dvic" path="res://Charaktere/NPC/NPC.gd" id="1_npc"]
+[ext_resource type="Texture2D" uid="uid://ctmg08x4p1pe6" path="res://Ressources/7f063f70-aeaa-4ab2-bcf1-69c627e0f406.png" id="2_a7hos"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.3
 height = 0.8
 
-[sub_resource type="QuadMesh" id="QuadMesh_1"]
-size = Vector2(0.6, 1.0)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
-albedo_color = Color(1, 0.2, 0.2, 1)
-billboard_mode = 1
-
-[node name="TestNPC" type="CharacterBody3D"]
+[node name="TestNPC" type="CharacterBody3D" unique_id=1294383912]
 script = ExtResource("1_npc")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1707130487]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("QuadMesh_1")
-surface_material_override/0 = SubResource("StandardMaterial3D_1")
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=60354323]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, -0.008221388, 0.8977224, -0.008125067)
+billboard = 1
+texture = ExtResource("2_a7hos")
+
+[node name="Sprite3D2" type="Sprite3D" parent="." unique_id=1670048284]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, -0.008221388, 0.8977224, -0.008125067)
+billboard = 1
+texture = ExtResource("2_a7hos")
