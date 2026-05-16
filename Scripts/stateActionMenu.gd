@@ -12,6 +12,8 @@ var _has_shown_menu: bool = false
 
 
 func enter() -> void:
+	if player is Player:
+		(player as Player).clear_click_move()
 	player.velocity = Vector3.ZERO
 	player.update_animation("idle")
 	_action_done = false

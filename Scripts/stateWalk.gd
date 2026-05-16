@@ -37,18 +37,20 @@ func process(_delta: float) -> State:
 	if player.direction == Vector3.ZERO:
 		return idle
 
-	# Sprint-Status prüfen (kontinuierlich, nicht event-basiert)
-	var was_sprinting = is_sprinting
-	is_sprinting = Input.is_action_pressed("Run")
+	var target_speed: float
+	var was_sprinting := is_sprinting
 
-	# Schrittgeräusche-Sprint-Status aktualisieren
+	if player is Player and (player as Player).uses_mouse_locomotion():
+		target_speed = (player as Player).get_mouse_locomotion_speed()
+		var mid := (base_speed + sprint_speed) * 0.5
+		is_sprinting = target_speed >= mid
+	else:
+		is_sprinting = Input.is_action_pressed("Run")
+		target_speed = sprint_speed if is_sprinting else base_speed
+
 	if is_sprinting != was_sprinting and player.footstep_player:
 		player.footstep_player.set_sprinting(is_sprinting)
 
-	# Zielgeschwindigkeit bestimmen
-	var target_speed = sprint_speed if is_sprinting else base_speed
-
-	# Sanftes Beschleunigen/Abbremsen
 	if current_speed < target_speed:
 		current_speed = min(current_speed + acceleration * _delta, target_speed)
 	elif current_speed > target_speed:
