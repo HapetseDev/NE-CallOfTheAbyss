@@ -1,5 +1,5 @@
 class_name PlayerInteractionHost extends Node3D
-@onready var player: Shalka = $".."
+@onready var player: Playable = $".."
 
 
 # Called when the node enters the scene tree for the first time.

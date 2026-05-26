@@ -1,4 +1,4 @@
-class_name Shalka extends Player
+class_name Shalka extends PartyFollower
 
 
  

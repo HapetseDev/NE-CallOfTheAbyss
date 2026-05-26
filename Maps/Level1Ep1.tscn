@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://xeyawcaoed1b"]
 
-[ext_resource type="PackedScene" uid="uid://bycnxispuqyfy" path="res://Charaktere/SPC/Shalka/shalka.tscn" id="1_kjij2"]
+[ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://Charaktere/Party/party.tscn" id="1_party"]
 [ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://Charaktere/Props/Fauna/Plant.tscn" id="4_iaeds"]
 [ext_resource type="PackedScene" uid="uid://cnpctest0001a" path="res://Charaktere/NPC/TestNPC.tscn" id="5_testnpc"]
 [ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://Charaktere/Props/Items/basic_item.tscn" id="6_basicitem"]
@@ -52,10 +52,8 @@ metadata/surface_type = "grass"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
 shape = SubResource("BoxShape3D_ground")
 
-[node name="Shalka" parent="." unique_id=193066405 instance=ExtResource("1_kjij2")]
+[node name="Party" parent="." instance=ExtResource("1_party")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)
-collision_layer = 3
-collision_mask = 1
 
 [node name="TestNPC" parent="." unique_id=393529490 instance=ExtResource("5_testnpc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.62687826, -0.94132805)

@@ -14,7 +14,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="NE- Call of the Abyss (2D)"
+config/name="NE- Call of the Abyss"
 config/version="0.1"
 run/main_scene="res://UI/MainMenu/MainMenu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
@@ -29,11 +29,16 @@ GlobalLevelManager="*res://Globals/GlobalLevelManager.gd"
 
 window/size/window_width_override=1920
 window/size/window_height_override=1080
-window/stretch/mode="viewport"
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [dotnet]
 
 project/assembly_name="RPG-SW"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg")
 
 [file_customization]
 
@@ -95,3 +100,7 @@ Inventar={
 3d_physics/layer_5="Walls"
 2d_physics/layer_9="NPC"
 3d_physics/layer_9="NPC"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=2

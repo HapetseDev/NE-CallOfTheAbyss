@@ -1,6 +1,6 @@
-[gd_scene load_steps=30 format=3 uid="uid://bycnxispuqyfy"]
+[gd_scene load_steps=30 format=3 uid="uid://d4nn3rm4nscn01"]
 
-[ext_resource type="Script" uid="uid://drou7suaqf8x7" path="res://Charaktere/SPC/Shalka/shalka.gd" id="1_hlb18"]
+[ext_resource type="Script" uid="uid://d4nn3rm4ngd01" path="res://Charaktere/SPC/Dannerman/dannerman.gd" id="1_hlb18"]
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://Charaktere/SPC/Shalka/Sprites/shalka_sprite.png" id="2_ax5u6"]
 [ext_resource type="Texture2D" uid="uid://c50fdqiuagepc" path="res://Charaktere/SPC/Shalka/Sprites/attack.png" id="3_7qxdf"]
 [ext_resource type="Script" uid="uid://dpaufxefwbb6s" path="res://Scripts/playerStateMachine.gd" id="3_plxar"]
@@ -339,7 +339,7 @@ _data = {
 &"walk_up": SubResource("Animation_3fsuu")
 }
 
-[node name="Shalka" type="CharacterBody3D"]
+[node name="Dannerman" type="CharacterBody3D"]
 collision_mask = 16
 script = ExtResource("1_hlb18")
 
@@ -393,10 +393,35 @@ libraries = {
 &"": SubResource("AnimationLibrary_oxkgk")
 }
 
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("3_plxar")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("4_ax5u6")
+
+[node name="Walk" type="Node" parent="StateMachine"]
+script = ExtResource("5_3fsuu")
+
+[node name="ActionMenu" type="Node" parent="StateMachine"]
+script = ExtResource("13_action")
+action_range = 1.5
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 6, 8)
+fov = 50.0
+script = ExtResource("11_i8yr6")
+follow_distance = 8.0
+camera_height = 6.0
+pitch_angle = -45.0
+look_ahead_distance = 3.0
+
 [node name="Audio" type="Node3D" parent="."]
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Audio"]
 max_polyphony = 4
+
+[node name="Interactions" type="Node3D" parent="."]
+script = ExtResource("10_5blqt")
 
 [node name="FootstepPlayer" type="Node3D" parent="."]
 script = ExtResource("12_footstep")
