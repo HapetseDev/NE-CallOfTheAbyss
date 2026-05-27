@@ -16,6 +16,7 @@ signal direction_changed(new_direction: Vector3)
 signal inventar_geaendert
 
 # --- Stats ---
+@export var character_name: String = ""
 @export var max_health: int = 100
 var _health: int = 0
 var health: int:
@@ -50,6 +51,12 @@ var equipment: Dictionary = {
 	"beine":   null,
 	"füße":    null,
 }
+
+
+func get_display_name() -> String:
+	if not character_name.is_empty():
+		return character_name
+	return name
 
 
 func _ready() -> void:

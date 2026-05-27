@@ -42,6 +42,7 @@ func _ready() -> void:
 	add_child(_inventory_layer)
 	var ui := InventoryUI.new()
 	ui.playable = self
+	ui.party = _find_party()
 	_inventory_layer.add_child(ui)
 	if inventory.is_empty():
 		add_item(load("res://Ressources/Items/messer.tres") as Item)
@@ -51,6 +52,7 @@ func _process(delta: float) -> void:
 	super._process(delta)
 	if Input.is_action_just_pressed("Inventar"):
 		_inventory_layer.visible = not _inventory_layer.visible
+		_sync_hud_with_inventory()
 	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		_mouse_lmb_held = false
 	elif _mouse_lmb_held:
@@ -128,3 +130,18 @@ func get_move_direction() -> Vector3:
 			return Vector3.ZERO
 		return to.normalized()
 	return Vector3.ZERO
+
+
+func _find_party() -> Party:
+	var node: Node = self
+	while node:
+		if node is Party:
+			return node as Party
+		node = node.get_parent()
+	return null
+
+
+func _sync_hud_with_inventory() -> void:
+	var found_party := _find_party()
+	if found_party:
+		found_party.set_game_hud_visible(not _inventory_layer.visible)

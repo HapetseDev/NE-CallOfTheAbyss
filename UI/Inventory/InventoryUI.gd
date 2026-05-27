@@ -1,6 +1,9 @@
 class_name InventoryUI extends Control
 
 var playable: Playable
+var party: Party
+
+var _menu_hud: PartyHud
 
 const SLOT_SIZE := Vector2(64, 64)
 const INV_COLS := 5
@@ -43,6 +46,15 @@ func _build_ui() -> void:
 
 	var vbox := VBoxContainer.new()
 	margin.add_child(vbox)
+
+	_menu_hud = PartyHud.new()
+	_menu_hud.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if party:
+		_menu_hud.setup(party)
+	vbox.add_child(_menu_hud)
+
+	var hud_sep := HSeparator.new()
+	vbox.add_child(hud_sep)
 
 	var title_row := HBoxContainer.new()
 	vbox.add_child(title_row)
