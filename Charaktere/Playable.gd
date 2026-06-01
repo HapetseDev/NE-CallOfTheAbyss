@@ -8,6 +8,7 @@ const DIR_4 = [Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(-1, 0, 0), Vector3(0,
 # --- Nodes (optional – werden nur genutzt wenn vorhanden) ---
 @onready var animation_player: AnimationPlayer = get_node_or_null("AnimationPlayer") as AnimationPlayer
 @onready var sprite_3d: Sprite3D = get_node_or_null("Sprite3D") as Sprite3D
+@onready var model_root: Node3D = get_node_or_null("Model") as Node3D
 
 # Optionales Schrittsound-System (wird von abgeleiteten Klassen gesetzt)
 var footstep_player: FootstepPlayer
@@ -62,6 +63,7 @@ func get_display_name() -> String:
 func _ready() -> void:
 	health = max_health
 	mana = max_mana
+	_apply_cardinal_facing()
 
 
 func _process(_delta: float) -> void:
@@ -90,12 +92,30 @@ func set_direction() -> bool:
 		return false
 	cardinal_direction = new_dir
 	direction_changed.emit(new_dir)
-	if sprite_3d:
-		sprite_3d.flip_h = true if cardinal_direction == Vector3(-1, 0, 0) else false
+	_apply_cardinal_facing()
 	return true
 
 
+func _apply_cardinal_facing() -> void:
+	if model_root:
+		model_root.rotation.y = _yaw_for_cardinal(cardinal_direction)
+	elif sprite_3d:
+		sprite_3d.flip_h = cardinal_direction == Vector3(-1, 0, 0)
+
+
+func _yaw_for_cardinal(dir: Vector3) -> float:
+	if dir == Vector3(0, 0, -1):
+		return PI
+	if dir == Vector3(1, 0, 0):
+		return -PI / 2.0
+	if dir == Vector3(-1, 0, 0):
+		return PI / 2.0
+	return 0.0
+
+
 func update_animation(state: String) -> void:
+	if model_root and sprite_3d and not sprite_3d.visible:
+		return
 	if animation_player:
 		animation_player.play(state + "_" + anim_direction())
 

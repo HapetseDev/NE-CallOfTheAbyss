@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://bycnxispuqyfy"]
+[gd_scene load_steps=31 format=3 uid="uid://bycnxispuqyfy"]
 
 [ext_resource type="Script" uid="uid://drou7suaqf8x7" path="res://Charaktere/SPC/Shalka/shalka.gd" id="1_hlb18"]
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://Charaktere/SPC/Shalka/Sprites/shalka_sprite.png" id="2_ax5u6"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://chbae5ysale58" path="res://Scripts/PlayerCamera.gd" id="11_i8yr6"]
 [ext_resource type="Script" path="res://Systems/Footsteps/FootstepPlayer.gd" id="12_footstep"]
 [ext_resource type="Script" uid="uid://kpu3sj2c3f8q" path="res://Scripts/stateActionMenu.gd" id="13_action"]
+[ext_resource type="PackedScene" uid="uid://b0aj30p16cyu7" path="res://Charaktere/SPC/Shalka/Sprites/Shalka.gltf" id="14_shalka_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hlb18"]
 radius = 0.27
@@ -346,7 +347,35 @@ script = ExtResource("1_hlb18")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_hlb18")
 
+[node name="Model" parent="." instance=ExtResource("14_shalka_model")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="E-Effect" type="Sprite3D" parent="Model"]
+visible = false
+billboard = 1
+texture_filter = 0
+pixel_size = 0.01
+position = Vector3(0.75, 0.94, 0)
+texture = ExtResource("3_7qxdf")
+
+[node name="E-EffecctAnimPlayer" type="AnimationPlayer" parent="Model/E-Effect"]
+libraries = {
+&"": SubResource("AnimationLibrary_w64td")
+}
+
+[node name="AttackHurtBox" parent="Model" instance=ExtResource("10_8lehy")]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+collision_layer = 2
+collision_mask = 256
+monitoring = false
+damage = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Model/AttackHurtBox"]
+shape = SubResource("SphereShape3D_5blqt")
+
 [node name="Sprite3D" type="Sprite3D" parent="."]
+visible = false
 billboard = 1
 texture_filter = 0
 pixel_size = 0.01
@@ -355,20 +384,8 @@ texture = ExtResource("2_ax5u6")
 hframes = 6
 vframes = 4
 
-[node name="E-Effect" type="Sprite3D" parent="Sprite3D"]
-visible = false
-billboard = 1
-texture_filter = 0
-pixel_size = 0.01
-position = Vector3(0.75, 0.31, 0)
-texture = ExtResource("3_7qxdf")
-
-[node name="E-EffecctAnimPlayer" type="AnimationPlayer" parent="Sprite3D/E-Effect"]
-libraries = {
-&"": SubResource("AnimationLibrary_w64td")
-}
-
 [node name="Shadow" type="Sprite3D" parent="Sprite3D"]
+visible = false
 modulate = Color(0, 0, 0, 0.70980394)
 billboard = 1
 texture_filter = 0
@@ -376,17 +393,6 @@ pixel_size = 0.01
 position = Vector3(-0.07, -1.0, 0.01)
 scale = Vector3(2, 2, 2)
 texture = ExtResource("4_rr3s5")
-
-[node name="AttackHurtBox" parent="Sprite3D" instance=ExtResource("10_8lehy")]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.03, -1.1, 0)
-collision_layer = 2
-collision_mask = 256
-monitoring = false
-damage = 1
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Sprite3D/AttackHurtBox"]
-shape = SubResource("SphereShape3D_5blqt")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
