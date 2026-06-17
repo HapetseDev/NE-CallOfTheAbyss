@@ -1,0 +1,120 @@
+[gd_scene load_steps=5 format=3 uid="uid://bqoai2wavcsv8"]
+
+[ext_resource type="StyleBox" uid="uid://dht0kdyh7xrrk" path="res://addons/Turn_Based_System/scenes/classic/classic_status_container/style_box_player_stats_container.tres" id="1_8vcj3"]
+[ext_resource type="Script" uid="uid://cilfei1gpnqfw" path="res://addons/Turn_Based_System/scenes/classic/classic_status_container/player_stats_container.gd" id="1_risdc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmcvd"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j6au3"]
+bg_color = Color(0.811369, 0.533935, 1.54018e-06, 1)
+
+[node name="PlayerStatsContainer" type="PanelContainer"]
+offset_left = -1.0
+offset_right = 471.0
+offset_bottom = 35.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("1_8vcj3")
+script = ExtResource("1_risdc")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="hBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/hBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847474, 0.847474, 0.847474, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "Name"
+
+[node name="HPLabel1" type="Label" parent="MarginContainer/VBoxContainer/hBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.964706, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "HP"
+
+[node name="HPLabel2" type="Label" parent="MarginContainer/VBoxContainer/hBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(71, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847474, 0.847474, 0.847474, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "00000"
+horizontal_alignment = 2
+
+[node name="MPBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer/hBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MPLabel3" type="Label" parent="MarginContainer/VBoxContainer/hBoxContainer/MPBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.298039, 0, 0.898039, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "MP"
+
+[node name="MPLabel4" type="Label" parent="MarginContainer/VBoxContainer/hBoxContainer/MPBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(57, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847474, 0.847474, 0.847474, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "0000"
+horizontal_alignment = 2
+
+[node name="HPMaxBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer/hBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="maxHP1" type="Label" parent="MarginContainer/VBoxContainer/hBoxContainer/HPMaxBox"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847474, 0.847474, 0.847474, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "/"
+horizontal_alignment = 2
+
+[node name="maxHP2" type="Label" parent="MarginContainer/VBoxContainer/hBoxContainer/HPMaxBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(71, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.847474, 0.847474, 0.847474, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "00000"
+horizontal_alignment = 2
+
+[node name="overDriveBar" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_cmcvd")
+theme_override_styles/fill = SubResource("StyleBoxFlat_j6au3")
+step = 1.0
+value = 50.0
+show_percentage = false

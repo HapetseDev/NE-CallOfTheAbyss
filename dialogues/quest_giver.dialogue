@@ -1,0 +1,16 @@
+~ start
+Elara: Endlich jemand! Die Kreaturen werden immer aggressiver.
+Elara: Kannst du mir helfen, den Banditen zu besiegen?
+- Ich kümmere mich darum.
+	Elara: Viel Glück! Er hält sich westlich von hier auf.
+	do GameState.set_flag("quest_bandit_started", true)
+	=> END
+- Vielleicht später.
+	Elara: Kein Problem. Ich warte hier.
+	=> END
+
+~ quest_done
+Elara: Du hast den Bandit besiegt? Danke — hier, nimm etwas Gold.
+do player.gold += 20
+do GameState.set_flag("quest_bandit_done", true)
+=> END

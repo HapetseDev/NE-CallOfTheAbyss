@@ -12,7 +12,9 @@ var _has_shown_menu: bool = false
 
 
 func enter() -> void:
-	player.velocity = Vector3.ZERO
+	if player is Player:
+		(player as Player).clear_click_move()
+	player.stop_horizontal_velocity()
 	player.update_animation("idle")
 	_action_done = false
 	_has_shown_menu = false
@@ -30,7 +32,7 @@ func process(_delta: float) -> State:
 		if player.direction != Vector3.ZERO:
 			return walk
 		return idle
-	player.velocity = Vector3.ZERO
+	player.stop_horizontal_velocity()
 	return null
 
 

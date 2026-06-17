@@ -1,0 +1,9 @@
+~ start
+Händler: Willkommen in meinem Laden! Heiltränke und mehr.
+- Was hast du im Angebot?
+	Händler: Schau selbst — ich öffne mein Sortiment.
+	do GameDialogueBridge.open_shop("haendler_01")
+	=> END
+- Auf Wiedersehen.
+	Händler: Bis bald!
+	=> END

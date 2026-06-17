@@ -16,7 +16,7 @@ func exit() -> void:
 func process(_delta: float) -> State:
 	if player.direction != Vector3.ZERO:
 		return walk
-	player.velocity = Vector3.ZERO
+	player.stop_horizontal_velocity()
 	return null
 
 # Was passiert im _physics Prozess in diesem State?
@@ -25,6 +25,8 @@ func physics(_delta: float) -> State:
 
 # Was passiert mit input Events in diesem State?
 func handle_input(_event: InputEvent) -> State:
+	if GameDialogueBridge.is_player_input_locked():
+		return null
 	if _event.is_action_pressed("Interact"):
 		return action_menu
 	return null

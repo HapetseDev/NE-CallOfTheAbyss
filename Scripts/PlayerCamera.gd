@@ -6,15 +6,27 @@ class_name PlayerCamera extends Camera3D
 @export var smooth_speed : float = 5.0     # Glättung der Kamerabewegung
 @export var look_ahead_distance : float = 3.0  # Maximaler Versatz in Blickrichtung
 
+@export_group("Zoom")
+@export var zoom_distance_min := 3.5
+@export var zoom_distance_max := 18.0
+## Abstand-Schritt Mausrad oder ± (positiv = weiter weg).
+@export var zoom_step_scroll := 0.65
+
+
 # Goldener Schnitt: 1 / 1.618 ≈ 0.618 (größerer Teil) und 0.382 (kleinerer Teil)
 const GOLDEN_RATIO : float = 0.618
 
 var target : Node3D
 var current_offset : Vector3 = Vector3.ZERO
 var target_look_offset : Vector3 = Vector3.ZERO
+var _height_distance_ratio := 0.75
 
 func _ready() -> void:
 	target = get_parent()
+	if follow_distance > 0.0:
+		_height_distance_ratio = camera_height / follow_distance
+	else:
+		_height_distance_ratio = 0.75
 	# Initiale Position setzen
 	if target:
 		_update_camera_position(1.0)
@@ -22,6 +34,36 @@ func _ready() -> void:
 		if target.has_signal("direction_changed"):
 			target.direction_changed.connect(_on_direction_changed)
 	pass
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		match event.button_index:
+			MOUSE_BUTTON_WHEEL_DOWN:
+				_apply_zoom(+zoom_step_scroll)
+				get_viewport().set_input_as_handled()
+			MOUSE_BUTTON_WHEEL_UP:
+				_apply_zoom(-zoom_step_scroll)
+				get_viewport().set_input_as_handled()
+	elif event is InputEventKey and event.pressed:
+		match event.physical_keycode:
+			KEY_KP_ADD, KEY_EQUAL:
+				_apply_zoom(-zoom_step_scroll)
+				get_viewport().set_input_as_handled()
+			KEY_KP_SUBTRACT, KEY_MINUS:
+				_apply_zoom(+zoom_step_scroll)
+				get_viewport().set_input_as_handled()
+			_:
+				pass
+
+
+func _apply_zoom(distance_delta_signed: float) -> void:
+	# Positiver delta = weiter weg (= rauszoomen): follow_distance erhöhen
+	var new_follow := clampf(follow_distance + distance_delta_signed, zoom_distance_min, zoom_distance_max)
+	if is_equal_approx(new_follow, follow_distance):
+		return
+	follow_distance = new_follow
+	camera_height = follow_distance * _height_distance_ratio
 
 func _process(delta: float) -> void:
 	if target:

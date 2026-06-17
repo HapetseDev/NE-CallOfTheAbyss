@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://b330mlkpk17qq"]
+
+[ext_resource type="Script" uid="uid://cjc84d3q4dvic" path="res://Charaktere/NPC/NPC.gd" id="1_npc"]
+[ext_resource type="Texture2D" uid="uid://ctmg08x4p1pe6" path="res://Ressources/7f063f70-aeaa-4ab2-bcf1-69c627e0f406.png" id="2_tex"]
+[ext_resource type="Script" path="res://Charaktere/NPC/npc_interaction.gd" id="3_interaction"]
+[ext_resource type="Resource" path="res://Ressources/NPC/merchant_01_data.tres" id="4_data"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.35
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.9, 0.75, 0.2, 1)
+
+[node name="MerchantNPC" type="CharacterBody3D"]
+collision_layer = 256
+collision_mask = 17
+script = ExtResource("1_npc")
+character_name = "Händler"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 1.0, 0)
+material_override = SubResource("StandardMaterial3D_1")
+billboard = 1
+texture = ExtResource("2_tex")
+
+[node name="Interaction" type="Node3D" parent="."]
+script = ExtResource("3_interaction")
+data = ExtResource("4_data")

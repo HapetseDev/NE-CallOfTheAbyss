@@ -1,0 +1,61 @@
+class_name Party extends Node3D
+
+var leader: Player
+var followers: Array[PartyFollower] = []
+
+var _hud_layer: CanvasLayer
+var _game_hud: PartyHud
+
+
+func _ready() -> void:
+	_find_party_members()
+	_wire_followers()
+	_setup_game_hud()
+	BattleManager.apply_pending_party_state(self)
+
+
+func get_all_members() -> Array[Playable]:
+	var members: Array[Playable] = []
+	if leader:
+		members.append(leader)
+	for follower in followers:
+		members.append(follower)
+	return members
+
+
+func get_party_hud() -> PartyHud:
+	return _game_hud
+
+
+func set_game_hud_visible(visible: bool) -> void:
+	if _hud_layer:
+		_hud_layer.visible = visible
+
+
+func _find_party_members() -> void:
+	for child in get_children():
+		if child is Player and leader == null:
+			leader = child as Player
+		elif child is PartyFollower:
+			followers.append(child as PartyFollower)
+
+
+func _wire_followers() -> void:
+	if leader == null:
+		push_warning("Party: Kein Party-Leader (Player) gefunden.")
+		return
+	for follower in followers:
+		follower.set_leader(leader)
+
+
+func _setup_game_hud() -> void:
+	_hud_layer = CanvasLayer.new()
+	_hud_layer.layer = 26
+	add_child(_hud_layer)
+
+	_game_hud = PartyHud.new()
+	_game_hud.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_game_hud.offset_left = 16.0
+	_game_hud.offset_top = 16.0
+	_hud_layer.add_child(_game_hud)
+	_game_hud.setup(self)
