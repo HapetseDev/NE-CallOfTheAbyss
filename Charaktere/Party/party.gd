@@ -11,6 +11,7 @@ func _ready() -> void:
 	_find_party_members()
 	_wire_followers()
 	_setup_game_hud()
+	BattleManager.apply_pending_party_state(self)
 
 
 func get_all_members() -> Array[Playable]:

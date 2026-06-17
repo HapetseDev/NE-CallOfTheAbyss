@@ -60,6 +60,8 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameDialogueBridge.is_player_input_locked():
+		return
 	if not event is InputEventMouseButton:
 		return
 	var mb := event as InputEventMouseButton
@@ -117,6 +119,8 @@ func _ground_point_under_mouse() -> Variant:
 
 # Spielereingabe als Bewegungsrichtung
 func get_move_direction() -> Vector3:
+	if GameDialogueBridge.is_player_input_locked():
+		return Vector3.ZERO
 	var kx := Input.get_axis("Left", "Right")
 	var kz := Input.get_axis("Up", "Down")
 	var wasd := Vector3(kx, 0.0, kz)

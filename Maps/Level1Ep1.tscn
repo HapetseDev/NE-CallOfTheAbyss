@@ -3,6 +3,9 @@
 [ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://Charaktere/Party/party.tscn" id="1_party"]
 [ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://Charaktere/Props/Fauna/Plant.tscn" id="4_iaeds"]
 [ext_resource type="PackedScene" uid="uid://cnpctest0001a" path="res://Charaktere/NPC/TestNPC.tscn" id="5_testnpc"]
+[ext_resource type="PackedScene" uid="uid://npcmerchant01" path="res://Charaktere/NPC/MerchantNPC.tscn" id="7_merchant"]
+[ext_resource type="PackedScene" uid="uid://npcenemy0001" path="res://Charaktere/NPC/EnemyNPC.tscn" id="8_enemy"]
+[ext_resource type="PackedScene" uid="uid://npcquest0001" path="res://Charaktere/NPC/QuestNPC.tscn" id="9_quest"]
 [ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://Charaktere/Props/Items/basic_item.tscn" id="6_basicitem"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
@@ -56,7 +59,16 @@ shape = SubResource("BoxShape3D_ground")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)
 
 [node name="TestNPC" parent="." unique_id=393529490 instance=ExtResource("5_testnpc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.62687826, -0.94132805)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -1)
+
+[node name="MerchantNPC" parent="." instance=ExtResource("7_merchant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 2)
+
+[node name="EnemyNPC" parent="." instance=ExtResource("8_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -2)
+
+[node name="QuestNPC" parent="." instance=ExtResource("9_quest")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
 
 [node name="Plant" parent="." unique_id=2114659948 instance=ExtResource("4_iaeds")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.89, 0.47626615, 2.68)

@@ -30,7 +30,7 @@ func get_move_direction() -> Vector3:
 
 func _physics_process(delta: float) -> void:
 	_update_follow(delta)
-	move_and_slide()
+	super._physics_process(delta)
 
 
 func _update_follow(_delta: float) -> void:
@@ -46,13 +46,13 @@ func _update_follow(_delta: float) -> void:
 	if moving:
 		direction = to.normalized()
 		set_direction()
-		velocity = direction * follow_speed
+		set_horizontal_velocity(direction * follow_speed)
 		update_animation("walk")
 		if footstep_player and not _was_moving:
 			footstep_player.start_walking(false)
 	else:
 		direction = Vector3.ZERO
-		velocity = Vector3.ZERO
+		stop_horizontal_velocity()
 		update_animation("idle")
 		if footstep_player and _was_moving:
 			footstep_player.stop_walking()
@@ -62,14 +62,14 @@ func _update_follow(_delta: float) -> void:
 
 func _stop_follow_motion() -> void:
 	direction = Vector3.ZERO
-	velocity = Vector3.ZERO
+	stop_horizontal_velocity()
 	if footstep_player and _was_moving:
 		footstep_player.stop_walking()
 	_was_moving = false
 
 
 func _get_follow_target_position() -> Vector3:
-	var back := Vector3(-leader.cardinal_direction.x, 0.0, -leader.cardinal_direction.z)
+	var back := Vector3(-leader.facing_direction.x, 0.0, -leader.facing_direction.z)
 	if back.length_squared() < 0.01:
 		back = Vector3(0.0, 0.0, 1.0)
 	return leader.global_position + back.normalized() * follow_distance

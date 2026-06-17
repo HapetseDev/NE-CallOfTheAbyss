@@ -1,14 +1,18 @@
 class_name Playable extends CharacterBody3D
 
 # --- Bewegung ---
-var cardinal_direction: Vector3 = Vector3(0, 0, 1)  # DOWN
+var cardinal_direction: Vector3 = Vector3(0, 0, 1)  # Nächste Kardinalrichtung (Legacy / Sprites)
+var facing_direction: Vector3 = Vector3(0, 0, 1)  # Normalisierte Blickrichtung (XZ)
 var direction: Vector3 = Vector3.ZERO
 const DIR_4 = [Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(-1, 0, 0), Vector3(0, 0, -1)]
+const FACING_CHANGE_EPSILON_SQ := 0.0001
 
 # --- Nodes (optional – werden nur genutzt wenn vorhanden) ---
 @onready var animation_player: AnimationPlayer = get_node_or_null("AnimationPlayer") as AnimationPlayer
 @onready var sprite_3d: Sprite3D = get_node_or_null("Sprite3D") as Sprite3D
 @onready var model_root: Node3D = get_node_or_null("Model") as Node3D
+
+var model_animator: CharacterModelAnimator
 
 # Optionales Schrittsound-System (wird von abgeleiteten Klassen gesetzt)
 var footstep_player: FootstepPlayer
@@ -18,12 +22,18 @@ signal inventar_geaendert
 
 # --- Stats ---
 @export var character_name: String = ""
+## Zusatzrotation für GLTF-Modelle (Blockbench exportiert oft +Z statt Godot -Z).
+@export var model_yaw_offset: float = PI
+@export var gravity_enabled: bool = true
+@export var gravity: float = -1.0
+@export var max_fall_speed: float = 28.0
 @export var max_health: int = 100
 var _health: int = 0
 var health: int:
 	get: return _health
 	set(value): _health = clampi(value, 0, max_health)
 
+@export var gold: int = 50
 @export var max_mana: int = 50
 var _mana: int = 0
 var mana: int:
@@ -61,17 +71,31 @@ func get_display_name() -> String:
 
 
 func _ready() -> void:
+	if gravity < 0.0:
+		gravity = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 	health = max_health
 	mana = max_mana
-	_apply_cardinal_facing()
+	_ensure_model_animator()
+	_apply_facing()
 
 
 func _process(_delta: float) -> void:
 	direction = get_move_direction()
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_apply_gravity(delta)
 	move_and_slide()
+
+
+func _apply_gravity(delta: float) -> void:
+	if not gravity_enabled:
+		return
+	if is_on_floor():
+		if velocity.y < 0.0:
+			velocity.y = 0.0
+	else:
+		velocity.y = maxf(velocity.y - gravity * delta, -max_fall_speed)
 
 
 # Wird von Player (Input) und NPC (KI) überschrieben
@@ -79,54 +103,89 @@ func get_move_direction() -> Vector3:
 	return Vector3.ZERO
 
 
+func set_horizontal_velocity(horizontal: Vector3) -> void:
+	velocity.x = horizontal.x
+	velocity.z = horizontal.z
+
+
+func stop_horizontal_velocity() -> void:
+	velocity.x = 0.0
+	velocity.z = 0.0
+
+
 # --- Bewegungs-Hilfsmethoden ---
 
 func set_direction() -> bool:
 	if direction == Vector3.ZERO:
 		return false
-	var dir_2d := Vector2(direction.x, direction.z)
-	var cardinal_2d := Vector2(cardinal_direction.x, cardinal_direction.z)
-	var direction_id := int(round((dir_2d + cardinal_2d * 0.1).angle() / TAU * DIR_4.size()))
-	var new_dir: Vector3 = DIR_4[direction_id]
-	if new_dir == cardinal_direction:
+	var flat := Vector3(direction.x, 0.0, direction.z)
+	if flat.length_squared() < FACING_CHANGE_EPSILON_SQ:
 		return false
-	cardinal_direction = new_dir
-	direction_changed.emit(new_dir)
-	_apply_cardinal_facing()
-	return true
+	flat = flat.normalized()
+
+	var facing_changed := facing_direction.distance_squared_to(flat) > FACING_CHANGE_EPSILON_SQ
+	facing_direction = flat
+	_apply_facing()
+
+	var new_cardinal := _nearest_cardinal(flat)
+	var cardinal_changed := new_cardinal != cardinal_direction
+	if cardinal_changed:
+		cardinal_direction = new_cardinal
+
+	if facing_changed or cardinal_changed:
+		direction_changed.emit(facing_direction)
+		return true
+	return false
 
 
-func _apply_cardinal_facing() -> void:
+func get_facing_yaw() -> float:
+	return atan2(-facing_direction.x, -facing_direction.z) + model_yaw_offset
+
+
+func _apply_facing() -> void:
 	if model_root:
-		model_root.rotation.y = _yaw_for_cardinal(cardinal_direction)
+		model_root.rotation.y = get_facing_yaw()
 	elif sprite_3d:
-		sprite_3d.flip_h = cardinal_direction == Vector3(-1, 0, 0)
+		sprite_3d.flip_h = facing_direction.x < 0.0
 
 
-func _yaw_for_cardinal(dir: Vector3) -> float:
-	if dir == Vector3(0, 0, -1):
-		return PI
-	if dir == Vector3(1, 0, 0):
-		return -PI / 2.0
-	if dir == Vector3(-1, 0, 0):
-		return PI / 2.0
-	return 0.0
+func _nearest_cardinal(dir: Vector3) -> Vector3:
+	var dir_2d := Vector2(dir.x, dir.z)
+	var direction_id := int(round(dir_2d.angle() / TAU * DIR_4.size())) % DIR_4.size()
+	return DIR_4[direction_id]
+
+
+func _ensure_model_animator() -> void:
+	if model_root == null:
+		return
+	model_animator = model_root.get_node_or_null("ModelAnimator") as CharacterModelAnimator
+	if model_animator:
+		return
+	model_animator = CharacterModelAnimator.new()
+	model_animator.name = "ModelAnimator"
+	model_root.add_child(model_animator)
+
+
+func _uses_model_visual() -> bool:
+	return model_root != null and (sprite_3d == null or not sprite_3d.visible)
 
 
 func update_animation(state: String) -> void:
-	if model_root and sprite_3d and not sprite_3d.visible:
+	if _uses_model_visual():
+		if model_animator:
+			model_animator.play_state(state)
 		return
 	if animation_player:
 		animation_player.play(state + "_" + anim_direction())
 
 
 func anim_direction() -> String:
-	if cardinal_direction == Vector3(0, 0, 1):
-		return "down"
-	elif cardinal_direction == Vector3(0, 0, -1):
-		return "up"
-	else:
-		return "side"
+	var dir := facing_direction
+	if dir.length_squared() < FACING_CHANGE_EPSILON_SQ:
+		dir = cardinal_direction
+	if absf(dir.z) >= absf(dir.x):
+		return "down" if dir.z > 0.0 else "up"
+	return "side"
 
 
 # --- Kampf ---
@@ -237,8 +296,8 @@ func drop_item_to_world(item: Item) -> bool:
 
 
 func get_drop_spawn_position() -> Vector3:
-	var forward := Vector3(cardinal_direction.x, 0.0, cardinal_direction.z)
-	if forward.length_squared() < 0.01:
+	var forward := Vector3(facing_direction.x, 0.0, facing_direction.z)
+	if forward.length_squared() < FACING_CHANGE_EPSILON_SQ:
 		forward = Vector3(0, 0, 1)
 	forward = forward.normalized()
 	return global_position + forward * 1.1 + Vector3(0, 0.45, 0)
@@ -252,7 +311,7 @@ func _spawn_world_item(item: Item) -> void:
 	inst.item_data = item
 	world.add_child(inst)
 	inst.global_position = get_drop_spawn_position()
-	var toss := Vector3(cardinal_direction.x, 1.2, cardinal_direction.z).normalized() * 1.8
+	var toss := Vector3(facing_direction.x, 1.2, facing_direction.z).normalized() * 1.8
 	inst.apply_central_impulse(toss)
 
 

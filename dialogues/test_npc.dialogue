@@ -1,0 +1,8 @@
+~ start
+Test-NPC: Hallo, Reisender! Willkommen in Level 1.
+Test-NPC: Ich bin nur ein Test-NPC. Probiere die anderen Charaktere aus!
+=> END
+
+~ defeated
+Test-NPC: Du hast mich schon besiegt... lass mich in Ruhe.
+=> END

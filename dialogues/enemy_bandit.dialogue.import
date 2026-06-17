@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://bjpuennvjvb2i"
+path="res://.godot/imported/enemy_bandit.dialogue-4f839fe9270e8bdad388d9352c467baf.tres"
+
+[deps]
+
+source_file="res://dialogues/enemy_bandit.dialogue"
+dest_files=["res://.godot/imported/enemy_bandit.dialogue-4f839fe9270e8bdad388d9352c467baf.tres"]
+
+[params]
+
+defaults=true

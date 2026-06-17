@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="BattleSkill" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Ressources/Battle/skills/battle_skill.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+name = "Angriff"
+manaCost = 0
+turnOrderCost = -0.9
+isAllowed = true
+targetType = 0
+commandType = 0
+targetCount = 1
+damage = 18

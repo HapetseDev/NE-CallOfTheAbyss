@@ -35,7 +35,10 @@ func exit() -> void:
 
 # Was passiert beim _process Update?
 func process(_delta: float) -> State:
-	player.velocity -= player.velocity * decelerate_speed * _delta
+	var horizontal := Vector3(player.velocity.x, 0.0, player.velocity.z)
+	horizontal -= horizontal * decelerate_speed * _delta
+	player.velocity.x = horizontal.x
+	player.velocity.z = horizontal.z
 	if attacking == false:
 		if player.direction == Vector3.ZERO:
 			return idle
