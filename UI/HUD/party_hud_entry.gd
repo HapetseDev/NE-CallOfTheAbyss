@@ -40,12 +40,12 @@ func _init() -> void:
 	_name_label.add_theme_font_size_override(&"font_size", 14)
 	stats.add_child(_name_label)
 
-	_hp_label = _make_stat_caption("HP")
+	_hp_label = _make_stat_caption("SP")
 	stats.add_child(_hp_label)
 	_hp_bar = _make_stat_bar(Color(0.75, 0.2, 0.2))
 	stats.add_child(_hp_bar)
 
-	_mp_label = _make_stat_caption("MP")
+	_mp_label = _make_stat_caption("KP")
 	stats.add_child(_mp_label)
 	_mp_bar = _make_stat_bar(Color(0.2, 0.35, 0.85))
 	stats.add_child(_mp_bar)
@@ -82,9 +82,9 @@ func bind(playable: Playable) -> void:
 func refresh() -> void:
 	if member == null:
 		return
-	_hp_bar.max_value = member.max_health
-	_hp_bar.value = member.health
-	_hp_label.text = "HP %d / %d" % [member.health, member.max_health]
-	_mp_bar.max_value = member.max_mana
-	_mp_bar.value = member.mana
-	_mp_label.text = "MP %d / %d" % [member.mana, member.max_mana]
+	_hp_bar.max_value = member.get_max_health()
+	_hp_bar.value = clampf(float(member.health), float(-member.get_max_health()), float(member.get_max_health()))
+	_hp_label.text = "SP %d / %d" % [member.health, member.get_max_health()]
+	_mp_bar.max_value = member.get_max_mana()
+	_mp_bar.value = clampf(float(member.mana), float(-member.get_max_mana()), float(member.get_max_mana()))
+	_mp_label.text = "KP %d / %d" % [member.mana, member.get_max_mana()]

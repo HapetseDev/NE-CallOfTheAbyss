@@ -8,11 +8,11 @@ const HEAL_SKILL := preload("res://Ressources/Battle/skills/heal.tres")
 static func from_playable(playable: Playable) -> BattleCharacterResource:
 	var res := BattleCharacterResource.new()
 	res.name = playable.get_display_name()
-	res.maxHealth = playable.max_health
+	res.maxHealth = playable.get_max_health()
 	res.currentHealth = playable.health
-	res.maxMana = playable.max_mana
+	res.maxMana = playable.get_max_mana()
 	res.currentMana = playable.mana
-	res.speed = 40 + playable.level * 5
+	res.speed = 30 + playable.get_effective_attribute(CharacterEnums.Attribute.GEWANDHEIT) * 3
 	res.basicAttack = NORMAL_ATTACK
 	res.run = RUN_SKILL
 	res.skills = [HEAL_SKILL]

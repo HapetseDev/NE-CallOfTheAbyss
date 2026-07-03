@@ -29,6 +29,7 @@ GameDialogueBridge="*res://Systems/Dialogue/game_dialogue_bridge.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 ShopManager="*res://Globals/ShopManager.gd"
 BattleManager="*res://Globals/BattleManager.gd"
+SkillCatalog="*res://Globals/SkillCatalog.gd"
 
 [display]
 
