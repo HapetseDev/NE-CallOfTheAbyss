@@ -17,7 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="NE- Call of the Abyss"
 config/version="0.1"
 run/main_scene="res://UI/MainMenu/MainMenu.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/image="uid://b5ubgw6jktu33"
 config/icon="uid://b5ubgw6jktu33"
 
@@ -29,6 +29,7 @@ GameDialogueBridge="*res://Systems/Dialogue/game_dialogue_bridge.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 ShopManager="*res://Globals/ShopManager.gd"
 BattleManager="*res://Globals/BattleManager.gd"
+SkillCatalog="*res://Globals/SkillCatalog.gd"
 
 [display]
 

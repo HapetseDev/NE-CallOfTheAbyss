@@ -32,6 +32,17 @@ func set_game_hud_visible(visible: bool) -> void:
 		_hud_layer.visible = visible
 
 
+func is_moving() -> bool:
+	const MOVING_EPSILON_SQ := 0.02
+	for member in get_all_members():
+		if member.direction.length_squared() > MOVING_EPSILON_SQ:
+			return true
+		var horizontal := Vector3(member.velocity.x, 0.0, member.velocity.z)
+		if horizontal.length_squared() > MOVING_EPSILON_SQ:
+			return true
+	return false
+
+
 func _find_party_members() -> void:
 	for child in get_children():
 		if child is Player and leader == null:

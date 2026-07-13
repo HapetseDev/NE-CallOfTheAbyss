@@ -27,18 +27,38 @@ signal inventar_geaendert
 @export var gravity_enabled: bool = true
 @export var gravity: float = -1.0
 @export var max_fall_speed: float = 28.0
+# --- Charakterbogen (Nascent Eternity) ---
+@export var character_sheet: CharacterSheet
+
+# --- Legacy-Fallback, wenn kein CharacterSheet gesetzt ist ---
 @export var max_health: int = 100
 var _health: int = 0
-var health: int:
-	get: return _health
-	set(value): _health = clampi(value, 0, max_health)
-
-@export var gold: int = 50
 @export var max_mana: int = 50
 var _mana: int = 0
+
+var health: int:
+	get:
+		if character_sheet:
+			return character_sheet.staerkepunkte
+		return _health
+	set(value):
+		if character_sheet:
+			character_sheet.staerkepunkte = value
+			return
+		_health = clampi(value, 0, max_health)
+
 var mana: int:
-	get: return _mana
-	set(value): _mana = clampi(value, 0, max_mana)
+	get:
+		if character_sheet:
+			return character_sheet.konzentrationspunkte
+		return _mana
+	set(value):
+		if character_sheet:
+			character_sheet.konzentrationspunkte = value
+			return
+		_mana = clampi(value, 0, max_mana)
+
+var gold: int = 50
 
 var experience: int = 0
 var level: int = 1
@@ -73,10 +93,55 @@ func get_display_name() -> String:
 func _ready() -> void:
 	if gravity < 0.0:
 		gravity = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
-	health = max_health
-	mana = max_mana
+	_setup_character_sheet()
+	if character_sheet:
+		character_sheet.ensure_initialized()
+	else:
+		health = max_health
+		mana = max_mana
 	_ensure_model_animator()
 	_apply_facing()
+
+
+func _setup_character_sheet() -> void:
+	if character_sheet == null:
+		return
+	if not character_sheet.resource_local_to_scene:
+		character_sheet = character_sheet.duplicate(true)
+	if character_name.is_empty() and not character_sheet.character_name.is_empty():
+		character_name = character_sheet.character_name
+	elif not character_name.is_empty():
+		character_sheet.character_name = character_name
+
+
+func get_max_health() -> int:
+	if character_sheet:
+		return character_sheet.get_staerkepunkte_basis()
+	return max_health
+
+
+func get_max_mana() -> int:
+	if character_sheet:
+		return character_sheet.get_konzentrationspunkte_basis()
+	return max_mana
+
+
+func is_character_dead() -> bool:
+	if character_sheet:
+		return character_sheet.is_dead()
+	return health <= 0
+
+
+func can_spend_mana(amount: int) -> bool:
+	if character_sheet:
+		return character_sheet.can_use_konzentration(amount)
+	return _mana >= amount
+
+
+func get_effective_attribute(attr: CharacterEnums.Attribute) -> int:
+	if character_sheet:
+		return character_sheet.get_effective_attribute(attr)
+	return 0
 
 
 func _process(_delta: float) -> void:
@@ -114,6 +179,16 @@ func stop_horizontal_velocity() -> void:
 
 
 # --- Bewegungs-Hilfsmethoden ---
+
+func face_world_position(world_pos: Vector3) -> void:
+	var to := world_pos - global_position
+	to.y = 0.0
+	if to.length_squared() < FACING_CHANGE_EPSILON_SQ:
+		return
+	facing_direction = to.normalized()
+	cardinal_direction = _nearest_cardinal(facing_direction)
+	_apply_facing()
+
 
 func set_direction() -> bool:
 	if direction == Vector3.ZERO:
@@ -191,14 +266,22 @@ func anim_direction() -> String:
 # --- Kampf ---
 
 func take_damage(amount: int) -> void:
-	health -= amount
+	if character_sheet:
+		character_sheet.apply_staerkeschaden(amount)
+	else:
+		health -= amount
 
 
 func heal(amount: int) -> void:
-	health += amount
+	if character_sheet:
+		character_sheet.heal_staerke(amount)
+	else:
+		health += amount
 
 
 func use_mana(amount: int) -> bool:
+	if character_sheet:
+		return character_sheet.spend_konzentration(amount)
 	if _mana < amount:
 		return false
 	mana -= amount
@@ -206,7 +289,15 @@ func use_mana(amount: int) -> bool:
 
 
 func restore_mana(amount: int) -> void:
-	mana += amount
+	if character_sheet:
+		character_sheet.restore_konzentration(amount)
+	else:
+		mana += amount
+
+
+func gain_skill_experience(skill_id: String, amount: int) -> void:
+	if character_sheet:
+		character_sheet.gain_action_erfahrung(skill_id, amount)
 
 
 # --- Erfahrung & Level ---

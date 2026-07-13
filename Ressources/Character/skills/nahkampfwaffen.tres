@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SkillDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Ressources/Character/skill_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+skill_id = "nahkampfwaffen"
+skill_name = "Nahkampfwaffen benutzen"
+beschreibung = "Steigert Körperkraft durch Kampf mit Nahwaffen."
+attribute = 0
