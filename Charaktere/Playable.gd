@@ -180,6 +180,16 @@ func stop_horizontal_velocity() -> void:
 
 # --- Bewegungs-Hilfsmethoden ---
 
+func face_world_position(world_pos: Vector3) -> void:
+	var to := world_pos - global_position
+	to.y = 0.0
+	if to.length_squared() < FACING_CHANGE_EPSILON_SQ:
+		return
+	facing_direction = to.normalized()
+	cardinal_direction = _nearest_cardinal(facing_direction)
+	_apply_facing()
+
+
 func set_direction() -> bool:
 	if direction == Vector3.ZERO:
 		return false

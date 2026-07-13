@@ -2,11 +2,10 @@
 
 [ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://Charaktere/Party/party.tscn" id="1_party"]
 [ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://Charaktere/Props/Fauna/Plant.tscn" id="4_iaeds"]
-[ext_resource type="PackedScene" uid="uid://cnpctest0001a" path="res://Charaktere/NPC/TestNPC.tscn" id="5_testnpc"]
-[ext_resource type="PackedScene" uid="uid://npcmerchant01" path="res://Charaktere/NPC/MerchantNPC.tscn" id="7_merchant"]
+[ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://Charaktere/Props/Items/basic_item.tscn" id="6_basicitem"]
+[ext_resource type="PackedScene" uid="uid://b330mlkpk17qq" path="res://Charaktere/NPC/MerchantNPC.tscn" id="7_merchant"]
 [ext_resource type="PackedScene" uid="uid://npcenemy0001" path="res://Charaktere/NPC/EnemyNPC.tscn" id="8_enemy"]
 [ext_resource type="PackedScene" uid="uid://npcquest0001" path="res://Charaktere/NPC/QuestNPC.tscn" id="9_quest"]
-[ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://Charaktere/Props/Items/basic_item.tscn" id="6_basicitem"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.4, 0.6, 0.9, 1)
@@ -55,19 +54,16 @@ metadata/surface_type = "grass"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
 shape = SubResource("BoxShape3D_ground")
 
-[node name="Party" parent="." instance=ExtResource("1_party")]
+[node name="Party" parent="." unique_id=1453274720 instance=ExtResource("1_party")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)
 
-[node name="TestNPC" parent="." unique_id=393529490 instance=ExtResource("5_testnpc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -1)
-
-[node name="MerchantNPC" parent="." instance=ExtResource("7_merchant")]
+[node name="MerchantNPC" parent="." unique_id=1776268600 instance=ExtResource("7_merchant")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 2)
 
-[node name="EnemyNPC" parent="." instance=ExtResource("8_enemy")]
+[node name="EnemyNPC" parent="." unique_id=1863488218 instance=ExtResource("8_enemy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -2)
 
-[node name="QuestNPC" parent="." instance=ExtResource("9_quest")]
+[node name="QuestNPC" parent="." unique_id=803841953 instance=ExtResource("9_quest")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
 
 [node name="Plant" parent="." unique_id=2114659948 instance=ExtResource("4_iaeds")]

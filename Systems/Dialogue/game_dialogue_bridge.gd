@@ -6,6 +6,7 @@ signal dialogue_ended
 var _current_player: Playable
 var _input_locked: bool = false
 var _active_balloon: Node
+var _active_npc: NPC
 
 
 func set_player_input_locked(locked: bool) -> void:
@@ -20,15 +21,20 @@ func get_current_player() -> Playable:
 	return _current_player
 
 
-func start_npc_dialogue(data: NPCData, player: Playable) -> void:
+func start_npc_dialogue(data: NPCData, player: Playable, source: NPCInteraction = null) -> void:
 	if data == null or player == null:
 		return
 	_current_player = player
+	_restore_dialogue_npc_facing()
+	_active_npc = _get_npc_from_interaction(source)
+	if _active_npc:
+		_active_npc.begin_dialogue_facing(player)
 	set_player_input_locked(true)
 	var start_cue := _resolve_start_cue(data)
 	var resource := load(data.dialogue_file) as DialogueResource
 	if resource == null:
 		push_warning("GameDialogueBridge: Dialog '%s' konnte nicht geladen werden." % data.dialogue_file)
+		_restore_dialogue_npc_facing()
 		set_player_input_locked(false)
 		return
 	if not DialogueManager.dialogue_ended.is_connected(_on_dialogue_ended):
@@ -53,8 +59,22 @@ func start_encounter(encounter_id: String) -> void:
 
 func _on_dialogue_ended(_resource: DialogueResource) -> void:
 	_active_balloon = null
+	_restore_dialogue_npc_facing()
 	set_player_input_locked(false)
 	dialogue_ended.emit()
+
+
+func _get_npc_from_interaction(source: NPCInteraction) -> NPC:
+	if source == null:
+		return null
+	var parent := source.get_parent()
+	return parent as NPC if parent is NPC else null
+
+
+func _restore_dialogue_npc_facing() -> void:
+	if _active_npc and is_instance_valid(_active_npc):
+		_active_npc.end_dialogue_facing()
+	_active_npc = null
 
 func _resolve_start_cue(data: NPCData) -> String:
 	var start_cue := data.dialogue_start if not data.dialogue_start.is_empty() else "start"

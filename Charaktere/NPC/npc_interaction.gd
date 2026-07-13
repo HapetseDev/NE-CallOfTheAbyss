@@ -37,7 +37,7 @@ func perform_action(action_id: String, player: Playable) -> void:
 		return
 	match action_id:
 		"talk":
-			GameDialogueBridge.start_npc_dialogue(data, player)
+			GameDialogueBridge.start_npc_dialogue(data, player, self)
 		"trade":
 			if data.can_trade and not data.shop_id.is_empty():
 				ShopManager.open(data.shop_id, player)
