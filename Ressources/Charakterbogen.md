@@ -176,3 +176,149 @@ Im Buch der Charaktere findet man Informationen zu allen einzelnen Punkten.
 | 0    | neutral                                 |
 | \-5  | misstrauisch                            |
 | \-10 | feindselig / tötet dich bei Gelegenheit |
+
+
+
+# Talente der verschiedenen Attribute
+
+## **Kraft**
+
+- Waffenloser Kampf
+- Hiebwaffenführung
+- Ringen & Grifftechniken
+- Heben & Tragen schwerer Lasten
+- Belagerungsgerät bedienen
+- Nahkampf mit Exoskeletten
+- Schwertkampf (klassisch)
+- Axtwerfen
+- Körperliche Zähigkeit (Schmerzresistenz)
+- Kickboxen / Martial Arts
+- Turmspringen / Weitsprung
+- Panzerplatten öffnen (Sci-Fi)
+- Brechstangen-Technik
+- Schwimmen gegen Strömungen
+- Zweihandwaffen (Hammer, Zweihänder)
+- Fahrzeugreparatur mit Muskelkraft (z. B. Panzerketten)
+
+------
+
+## **Robustheit (Konstitution)**
+
+- Ausdauerlauf / Marathon
+- Widerstand gegen Gifte
+- Kälte- und Hitzetoleranz
+- Fasten & Überleben ohne Nahrung
+- Rüstungstragen (Schwere Rüstung, Raumanzüge)
+- Meditation zur Regeneration
+- Bergsteigen unter Extrembedingungen
+- Resistenz gegen Strahlung (Sci-Fi)
+- Wundheilung beschleunigen (durch Training oder Geisttechniken)
+- Tauchen ohne Atemgerät
+- Schlafreduktion (weniger Schlaf, volle Leistung)
+- Immunstärkung (Heilkunst, Kräuter, Nanomedizin)
+- Kampftauchen (mit voller Ausrüstung)
+- Sturzresistenz (Abrollen, Knochenfestigkeit)
+
+------
+
+## **Gewandtheit**
+
+- Tai-Chi / Qi Gong
+- Akrobatik (Salti, Sprünge, Balance)
+- Klettern (urban & Felsen)
+- Parkour / Freerunning
+- Fechten
+- Bogenschießen
+- Schleichen & Tarnen
+- Fliegen kleiner Luftfahrzeuge (Gleiter, Jetpacks)
+- Reiten / Alien-Tiere lenken
+- Messerwerfen
+- Drohnensteuerung
+- Reflextraining (schnelle Reaktionen)
+- Jonglage / Feinmotorik
+- Tänze (Kampftanz, Ritualtanz, Cyberdance)
+- Schwertkunst mit Leichtwaffen (Rapier, Lichtschwert)
+- Pilotenmanöver (Sci-Fi Raumjäger)
+
+------
+
+## **Verstand**
+
+- Magiekunde (Arkan, Elementar, Illusion)
+- Alchemie
+- Heilkunde / Medizin
+- Astronomie & Navigation
+- Sprachwissenschaft (Alte Runen, Alien-Sprachen, KI-Codes)
+- Ingenieurskunst (klassisch & futuristisch)
+- Mechanik / Feinmechanik
+- Kryptografie / Codeknacken
+- Biologie (Pflanzen, Tiere, Xenobiologie)
+- Physik (Ballistik, Gravitation, Energie)
+- Programmieren / Hacking
+- Strategie & Taktik
+- Architektur / Städtebau
+- Geschichte & Kulturkunde
+- Theologie & Okkultismus
+- Nanotechnologie (Sci-Fi)
+
+------
+
+## **Willenskraft**
+
+- Schmerzresistenz (mentale Ebene)
+- Meditation / Trance
+- Hypnose widerstehen
+- Telepathie widerstehen
+- Konzentration in Gefecht & Chaos
+- Oath-Keeping (Schwüre halten, auch unter Folter)
+- Rausch-Resistenz (Alkohol, Drogen, Betäubungsgase)
+- Fokussierte Wut (Kampfrausch)
+- Illusionsresistenz (Magie oder VR)
+- Astralprojektion / Klartraumkontrolle
+- Durchhalten bei Schlafentzug
+- Cybernetic Override (künstliche Implantate mental steuern)
+- Geistesblitz (Eingebungen erzwingen)
+- Suggestion widerstehen
+- Panikresistenz (Terror, Cthulhu-Style Wesen, Alien-Begegnung)
+
+------
+
+## **Präsenz**
+
+- Rhetorik / Überzeugen
+- Diplomatie & Verhandlung
+- Einschüchtern (Körperhaltung, Stimme, Präsenz)
+- Schauspielerei / Täuschung
+- Führungsqualität (Motivieren, Befehligen)
+- Magische Aura (Ausstrahlung im Okkulten)
+- Charisma im digitalen Raum (Influencer, Propaganda)
+- Lügen & Manipulation
+- Verführung
+- Predigen / Inspirieren
+- Schauspiel & Maskenspiel (auch Sci-Fi Hologramme)
+- Bardenkunst / Musik / Performance
+- Kommando auf Schlachtfeld
+- Körpersprache deuten & einsetzen
+- Propaganda / Medienkontrolle
+- Psychologische Gesprächsführung
+
+------
+
+## **Bewusstsein (Achtsamkeit & Klarheit)**
+
+- Intuition
+- Gefahrensinn (präventives Wahrnehmen)
+- Omen lesen / Weissagung
+- Astralsicht / sechster Sinn
+- Wachträumen / Klarträumen
+- Meditation & Achtsamkeit
+- Scanner-Nutzung (Sci-Fi Geräte, magische Kristalle)
+- Wahrnehmungsschärfung (Geräusche, Gerüche, Licht)
+- Konzentration auf Details (Spurenlesen, Forensik)
+- Multitasking (mehrere Dinge gleichzeitig fokussiert halten)
+- Überwachungskunst (Sicherheitskameras, magische Spiegel)
+- Cyber Awareness (Gefahren in der Matrix / VR erkennen)
+- Empathie (Gefühle anderer spüren)
+- Taktisches Bewusstsein (Umgebungsanalyse im Kampf)
+- Meditation auf Reinheit des Geistes (Illusionsbrechung)
+- Instinktorientierung (handeln ohne bewusstes Nachdenken)

@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="CharacterSheet" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Ressources/Character/character_sheet.gd" id="1"]
+[ext_resource type="Script" path="res://Ressources/Character/learned_skill.gd" id="2"]
+
+[sub_resource type="Resource" id="LearnedSkill_ausweichen"]
+script = ExtResource("2")
+skill_id = "ausweichen"
+level = 2
+
+[sub_resource type="Resource" id="LearnedSkill_meditieren"]
+script = ExtResource("2")
+skill_id = "meditieren"
+level = 1
+
+[resource]
+script = ExtResource("1")
+character_name = "Shalka"
+ausbildung = 0
+spezies = 1
+herkunft = 1
+ziel = "Ihren Platz in der Welt finden"
+besonderheiten = Array[int]([2])
+koerperkraft = 2
+gewandheit = 3
+robustheit = 2
+willenskraft = 2
+verstand = 2
+bewusstsein = 3
+praesenz = 2
+learned_skills = [SubResource("LearnedSkill_ausweichen"), SubResource("LearnedSkill_meditieren")]
+active_training_skill_ids = Array[String](["ausweichen", "meditieren"])

@@ -2,6 +2,7 @@ class_name Player extends Playable
 
 ## Linksklick halten → Richtung zum Maus-Zielpunkt; Loslassen = Stopp.
 const CLICK_RAY_LENGTH := 2000.0
+const CharacterSheetUI = preload("res://UI/CharacterSheet/character_sheet_ui.gd")
 
 @export_group("Maus-Bewegung")
 @export var mouse_speed_min: float = 0.35
@@ -12,8 +13,11 @@ const CLICK_RAY_LENGTH := 2000.0
 @onready var collision_shape_3d: CollisionShape3D = $CollisionShape3D
 @onready var state_machine: PlayerStateMachine = $StateMachine
 @onready var hurt_box: HurtBox = %AttackHurtBox
+@onready var _inventory_layer: CanvasLayer = $InventoryLayer
+@onready var _inventory_ui: InventoryUI = $InventoryLayer/InventoryUI
+@onready var _character_sheet_layer: CanvasLayer = $CharacterSheetLayer
+@onready var _character_sheet_ui: Control = $CharacterSheetLayer/CharacterSheetUI
 
-var _inventory_layer: CanvasLayer
 var _mouse_lmb_held: bool = false
 var _mouse_target: Vector3 = Vector3.ZERO
 var _mouse_locomotion_speed: float = 0.0
@@ -36,14 +40,12 @@ func _ready() -> void:
 	footstep_player = $FootstepPlayer as FootstepPlayer
 	state_machine.initialize(self)
 	super._ready()
-	_inventory_layer = CanvasLayer.new()
-	_inventory_layer.layer = 25
 	_inventory_layer.visible = false
-	add_child(_inventory_layer)
-	var ui := InventoryUI.new()
-	ui.playable = self
-	ui.party = _find_party()
-	_inventory_layer.add_child(ui)
+	_character_sheet_layer.visible = false
+	_inventory_ui.bind_player(self, _find_party())
+	(_character_sheet_ui as CharacterSheetUI).bind_player(self)
+	if character_sheet and not character_sheet.sheet_changed.is_connected(_on_character_sheet_changed):
+		character_sheet.sheet_changed.connect(_on_character_sheet_changed)
 	if inventory.is_empty():
 		add_item(load("res://Ressources/Items/messer.tres") as Item)
 
@@ -53,6 +55,11 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("Inventar"):
 		_inventory_layer.visible = not _inventory_layer.visible
 		_sync_hud_with_inventory()
+	if Input.is_action_just_pressed("Charakterbogen"):
+		_character_sheet_layer.visible = not _character_sheet_layer.visible
+		if _character_sheet_layer.visible:
+			(_character_sheet_ui as CharacterSheetUI).refresh()
+		_sync_hud_with_overlays()
 	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		_mouse_lmb_held = false
 	elif _mouse_lmb_held:
@@ -146,6 +153,16 @@ func _find_party() -> Party:
 
 
 func _sync_hud_with_inventory() -> void:
+	_sync_hud_with_overlays()
+
+
+func _sync_hud_with_overlays() -> void:
 	var found_party := _find_party()
 	if found_party:
-		found_party.set_game_hud_visible(not _inventory_layer.visible)
+		var hud_visible := not _inventory_layer.visible and not _character_sheet_layer.visible
+		found_party.set_game_hud_visible(hud_visible)
+
+
+func _on_character_sheet_changed() -> void:
+	if _character_sheet_layer.visible:
+		(_character_sheet_ui as CharacterSheetUI).refresh()

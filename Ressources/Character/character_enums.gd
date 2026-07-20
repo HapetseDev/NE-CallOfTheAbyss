@@ -47,6 +47,16 @@ const MAX_BESONDERHEITEN := 2
 const BEZIEHUNG_MIN := -10
 const BEZIEHUNG_MAX := 10
 
+const ALL_ATTRIBUTES: Array[Attribute] = [
+	Attribute.KOERPERKRAFT,
+	Attribute.ROBUSTHEIT,
+	Attribute.GEWANDHEIT,
+	Attribute.VERSTAND,
+	Attribute.WILLENSKRAFT,
+	Attribute.BEWUSSTSEIN,
+	Attribute.PRAESENZ,
+]
+
 
 static func attribute_name(attr: Attribute) -> String:
 	match attr:
@@ -66,3 +76,19 @@ static func is_physical(attr: Attribute) -> bool:
 
 static func is_mental(attr: Attribute) -> bool:
 	return attr in [Attribute.WILLENSKRAFT, Attribute.VERSTAND, Attribute.BEWUSSTSEIN]
+
+
+static func attribute_influence(attr: Attribute) -> String:
+	match attr:
+		Attribute.KOERPERKRAFT, Attribute.GEWANDHEIT:
+			return "Beeinflusst Stärkepunkte"
+		Attribute.ROBUSTHEIT:
+			return "Beeinflusst Stärkepunkte ×2"
+		Attribute.VERSTAND, Attribute.WILLENSKRAFT:
+			return "Beeinflusst Konzentrationspunkte"
+		Attribute.BEWUSSTSEIN:
+			return "Beeinflusst Konzentrationspunkte ×2"
+		Attribute.PRAESENZ:
+			return "Beeinflusst soziale Interaktionen"
+		_:
+			return ""

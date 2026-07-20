@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://c8partyroot01"]
+[gd_scene load_steps=5 format=3 uid="uid://c8partyroot01"]
 
 [ext_resource type="Script" path="res://Charaktere/Party/party.gd" id="1_party"]
 [ext_resource type="PackedScene" uid="uid://d4nn3rm4nscn01" path="res://Charaktere/SPC/Dannerman/dannerman.tscn" id="2_dannerman"]
 [ext_resource type="PackedScene" uid="uid://bycnxispuqyfy" path="res://Charaktere/SPC/Shalka/shalka.tscn" id="3_shalka"]
+[ext_resource type="PackedScene" uid="uid://bpartyhudroot01" path="res://UI/HUD/party_hud.tscn" id="4_hud"]
 
 [node name="Party" type="Node3D"]
 script = ExtResource("1_party")
@@ -16,3 +17,8 @@ collision_mask = 1
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.25, 0, 1.1)
 collision_layer = 3
 collision_mask = 1
+
+[node name="GameHudLayer" type="CanvasLayer" parent="."]
+layer = 26
+
+[node name="PartyHud" parent="GameHudLayer" instance=ExtResource("4_hud")]
