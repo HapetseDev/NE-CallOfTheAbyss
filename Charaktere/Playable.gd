@@ -1,5 +1,7 @@
 class_name Playable extends CharacterBody3D
 
+const _SheetFactory = preload("res://Systems/Character/character_sheet_factory.gd")
+
 # --- Bewegung ---
 var cardinal_direction: Vector3 = Vector3(0, 0, 1)  # Nächste Kardinalrichtung (Legacy / Sprites)
 var facing_direction: Vector3 = Vector3(0, 0, 1)  # Normalisierte Blickrichtung (XZ)
@@ -27,6 +29,8 @@ signal inventar_geaendert
 @export var gravity_enabled: bool = true
 @export var gravity: float = -1.0
 @export var max_fall_speed: float = 28.0
+@export_group("Sprung")
+@export var jump_velocity: float = 6.5
 # --- Charakterbogen (Nascent Eternity) ---
 @export var character_sheet: CharacterSheet
 
@@ -104,10 +108,11 @@ func _ready() -> void:
 
 
 func _setup_character_sheet() -> void:
+	if character_sheet == null and not character_name.is_empty():
+		character_sheet = _SheetFactory.create_default(character_name)
 	if character_sheet == null:
 		return
-	if not character_sheet.resource_local_to_scene:
-		character_sheet = character_sheet.duplicate(true)
+	character_sheet = _SheetFactory.duplicate_for_runtime(character_sheet)
 	if character_name.is_empty() and not character_sheet.character_name.is_empty():
 		character_name = character_sheet.character_name
 	elif not character_name.is_empty():
@@ -176,6 +181,17 @@ func set_horizontal_velocity(horizontal: Vector3) -> void:
 func stop_horizontal_velocity() -> void:
 	velocity.x = 0.0
 	velocity.z = 0.0
+
+
+func try_jump() -> bool:
+	if not is_on_floor():
+		return false
+	velocity.y = jump_velocity
+	return true
+
+
+func is_airborne() -> bool:
+	return not is_on_floor()
 
 
 # --- Bewegungs-Hilfsmethoden ---

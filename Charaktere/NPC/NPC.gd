@@ -10,10 +10,31 @@ var _saved_cardinal_direction: Vector3 = Vector3(0, 0, 1)
 
 
 func _ready() -> void:
+	_resolve_character_sheet()
 	if state_machine:
 		state_machine.initialize(self)
 	super._ready()
 	update_animation("idle")
+
+
+func _resolve_character_sheet() -> void:
+	if character_sheet != null:
+		return
+
+	var interaction := get_node_or_null("Interaction") as NPCInteraction
+	if interaction and interaction.data:
+		var data := interaction.data
+		if not data.display_name.is_empty() and character_name.is_empty():
+			character_name = data.display_name
+		character_sheet = _SheetFactory.resolve_sheet(
+			data.npc_id,
+			data.display_name,
+			data.character_sheet
+		)
+		return
+
+	if character_sheet == null and not character_name.is_empty():
+		character_sheet = _SheetFactory.create_default(character_name)
 
 
 func begin_dialogue_facing(target: Node3D) -> void:

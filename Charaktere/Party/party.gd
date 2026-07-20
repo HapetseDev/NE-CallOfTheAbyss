@@ -3,8 +3,8 @@ class_name Party extends Node3D
 var leader: Player
 var followers: Array[PartyFollower] = []
 
-var _hud_layer: CanvasLayer
-var _game_hud: PartyHud
+@onready var _hud_layer: CanvasLayer = $GameHudLayer
+@onready var _game_hud: PartyHud = $GameHudLayer/PartyHud
 
 
 func _ready() -> void:
@@ -60,13 +60,7 @@ func _wire_followers() -> void:
 
 
 func _setup_game_hud() -> void:
-	_hud_layer = CanvasLayer.new()
-	_hud_layer.layer = 26
-	add_child(_hud_layer)
-
-	_game_hud = PartyHud.new()
 	_game_hud.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_game_hud.offset_left = 16.0
 	_game_hud.offset_top = 16.0
-	_hud_layer.add_child(_game_hud)
 	_game_hud.setup(self)

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CharacterSheet" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="CharacterSheet" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://Ressources/Character/character_sheet.gd" id="1"]
 [ext_resource type="Script" path="res://Ressources/Character/learned_skill.gd" id="2"]
@@ -11,6 +11,11 @@ level = 2
 [sub_resource type="Resource" id="LearnedSkill_meditieren"]
 script = ExtResource("2")
 skill_id = "meditieren"
+level = 1
+
+[sub_resource type="Resource" id="LearnedSkill_schwert"]
+script = ExtResource("2")
+skill_id = "schwertkampf_klassisch"
 level = 1
 
 [resource]
@@ -28,6 +33,6 @@ willenskraft = 2
 verstand = 2
 bewusstsein = 2
 praesenz = 3
-learned_skills = [SubResource("LearnedSkill_nahkampf"), SubResource("LearnedSkill_meditieren")]
-active_training_skill_ids = Array[String](["nahkampfwaffen", "meditieren"])
+learned_skills = [SubResource("LearnedSkill_nahkampf"), SubResource("LearnedSkill_meditieren"), SubResource("LearnedSkill_schwert")]
+active_training_skill_ids = Array[String](["nahkampfwaffen", "meditieren", "schwertkampf_klassisch"])
 erfahrungspunkte = 50
