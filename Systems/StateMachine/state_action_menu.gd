@@ -81,7 +81,7 @@ func _build_menu(actions: Array) -> void:
 	root_control.add_child(panel)
 
 	var vbox := VBoxContainer.new()
-	vbox.custom_minimum_size = Vector2(180, 0)
+	vbox.custom_minimum_size = Vector2(240, 0)
 	panel.add_child(vbox)
 
 	var title := Label.new()
@@ -100,6 +100,21 @@ func _build_menu(actions: Array) -> void:
 			btn.text = action["label"]
 			btn.pressed.connect(_on_action_pressed.bind(action))
 			vbox.add_child(btn)
+
+	var sep := HSeparator.new()
+	vbox.add_child(sep)
+
+	var debug_title := Label.new()
+	debug_title.text = "Debug"
+	debug_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	debug_title.add_theme_font_size_override(&"font_size", 12)
+	debug_title.add_theme_color_override(&"font_color", Color(0.85, 0.7, 0.35))
+	vbox.add_child(debug_title)
+
+	var debug_sheet_btn := Button.new()
+	debug_sheet_btn.text = "Charakterbogen bearbeiten"
+	debug_sheet_btn.pressed.connect(_on_debug_character_sheet_pressed)
+	vbox.add_child(debug_sheet_btn)
 
 	var cancel_btn := Button.new()
 	cancel_btn.text = "Abbrechen"
@@ -121,4 +136,10 @@ func _on_action_pressed(action_data: Dictionary) -> void:
 
 
 func _on_cancel_pressed() -> void:
+	_action_done = true
+
+
+func _on_debug_character_sheet_pressed() -> void:
+	if player is Playable:
+		DebugMenu.open_character_editor(player as Playable)
 	_action_done = true

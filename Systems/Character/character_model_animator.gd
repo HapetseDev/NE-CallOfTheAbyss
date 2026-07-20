@@ -7,6 +7,7 @@ class_name CharacterModelAnimator extends Node
 @export var anim_walk: StringName = &"Walking"
 @export var anim_run: StringName = &"Running"
 @export var anim_attack: StringName = &""
+@export var anim_jump: StringName = &""
 
 @export_group("Procedural Fallback")
 @export var idle_bob_height: float = 0.04
@@ -74,6 +75,8 @@ func _map_state_to_imported(state: String) -> StringName:
 			return anim_walk
 		"run", "sprint":
 			return anim_run
+		"jump", "fall":
+			return anim_jump if not anim_jump.is_empty() else anim_idle
 		"attack":
 			return anim_attack
 		_:
@@ -89,6 +92,8 @@ func _play_procedural_state(state: String) -> void:
 			anim_name = "walk"
 		"run", "sprint":
 			anim_name = "run"
+		"jump", "fall":
+			anim_name = "jump"
 		_:
 			anim_name = "idle"
 	if _current == anim_name and _procedural_player.is_playing():
@@ -108,6 +113,7 @@ func _setup_procedural_animations() -> void:
 	lib.add_animation("idle", _make_cycle_anim(idle_bob_height, idle_cycle_sec, idle_sway_rad, 0.0))
 	lib.add_animation("walk", _make_cycle_anim(walk_bob_height, walk_cycle_sec, walk_lean_rad * 0.35, walk_lean_rad))
 	lib.add_animation("run", _make_cycle_anim(run_bob_height, run_cycle_sec, run_lean_rad * 0.25, run_lean_rad))
+	lib.add_animation("jump", _make_cycle_anim(walk_bob_height * 1.4, walk_cycle_sec * 0.8, walk_lean_rad * 0.5, walk_lean_rad * 0.6))
 	if _procedural_player.has_animation_library(&""):
 		_procedural_player.remove_animation_library(&"")
 	_procedural_player.add_animation_library(&"", lib)

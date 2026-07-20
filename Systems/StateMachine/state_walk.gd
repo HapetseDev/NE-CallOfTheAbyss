@@ -27,7 +27,12 @@ func exit() -> void:
 
 
 func process(_delta: float) -> State:
-	if player.direction == Vector3.ZERO:
+	var airborne := not player.is_on_floor()
+	if airborne:
+		_update_airborne_animation()
+		if player.footstep_player:
+			player.footstep_player.stop_walking()
+	elif player.direction == Vector3.ZERO:
 		return idle
 
 	var target_speed: float
@@ -54,12 +59,15 @@ func process(_delta: float) -> State:
 	player.set_horizontal_velocity(player.direction * current_speed)
 
 	if player.set_direction():
-		_update_locomotion_animation()
+		if not airborne:
+			_update_locomotion_animation()
 	return null
 
 
 func handle_input(_event: InputEvent) -> State:
 	if GameDialogueBridge.is_player_input_locked():
+		return null
+	if _try_jump_from_input(_event):
 		return null
 	if _event.is_action_pressed("Interact"):
 		return action_menu

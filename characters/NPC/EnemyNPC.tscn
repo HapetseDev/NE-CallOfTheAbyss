@@ -3,31 +3,30 @@
 [ext_resource type="Script" uid="uid://cjc84d3q4dvic" path="res://characters/NPC/NPC.gd" id="1_npc"]
 [ext_resource type="Texture2D" uid="uid://ctmg08x4p1pe6" path="res://Resources/7f063f70-aeaa-4ab2-bcf1-69c627e0f406.png" id="2_tex"]
 [ext_resource type="Script" path="res://characters/NPC/npc_interaction.gd" id="3_interaction"]
+[ext_resource type="PackedScene" uid="uid://dld7lg3m1e1ed" path="res://Resources/Models/Quichel_Merged_Animations.glb" id="4_1g0g1"]
 [ext_resource type="Resource" path="res://Resources/NPC/bandit_01_data.tres" id="4_data"]
+[ext_resource type="Script" uid="uid://b2pawue8yff4i" path="res://Scripts/character_model_animator.gd" id="5_pxhpw"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35
 height = 1.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
-albedo_color = Color(0.85, 0.2, 0.2, 1)
-
-[node name="EnemyNPC" type="CharacterBody3D"]
+[node name="EnemyNPC" type="CharacterBody3D" unique_id=345073959]
 collision_layer = 256
 collision_mask = 17
 script = ExtResource("1_npc")
 character_name = "Bandit"
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=160670936]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="Sprite3D" type="Sprite3D" parent="."]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 1.0, 0)
-material_override = SubResource("StandardMaterial3D_1")
-billboard = 1
-texture = ExtResource("2_tex")
-
-[node name="Interaction" type="Node3D" parent="."]
+[node name="Interaction" type="Node3D" parent="." unique_id=1432320216]
 script = ExtResource("3_interaction")
 data = ExtResource("4_data")
+
+[node name="Model" parent="." unique_id=1883920402 instance=ExtResource("4_1g0g1")]
+
+[node name="ModelAnimator" type="Node" parent="Model" unique_id=273351260]
+script = ExtResource("5_pxhpw")
+anim_attack = &"Left_Hook_from_Guard"

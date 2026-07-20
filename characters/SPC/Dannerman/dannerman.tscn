@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://d4nn3rm4nscn01"]
+[gd_scene load_steps=34 format=3 uid="uid://d4nn3rm4nscn01"]
 
 [ext_resource type="Script" uid="uid://d4nn3rm4ngd01" path="res://characters/SPC/Dannerman/dannerman.gd" id="1_hlb18"]
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://characters/SPC/Shalka/Sprites/shalka_sprite.png" id="2_ax5u6"]
@@ -14,6 +14,8 @@
 [ext_resource type="Script" uid="uid://kpu3sj2c3f8q" path="res://Systems/StateMachine/state_action_menu.gd" id="13_action"]
 [ext_resource type="PackedScene" path="res://Resources/Models/Schum_Merged_Animations.glb" id="14_dannerman_model"]
 [ext_resource type="Script" path="res://Systems/Character/character_model_animator.gd" id="15_model_anim"]
+[ext_resource type="PackedScene" uid="uid://binventoryui01" path="res://UI/Inventory/InventoryUI.tscn" id="16_inv"]
+[ext_resource type="PackedScene" uid="uid://bcharsheetui01" path="res://UI/CharacterSheet/character_sheet_ui.tscn" id="17_sheet"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hlb18"]
 radius = 0.35
@@ -439,3 +441,13 @@ script = ExtResource("10_5blqt")
 script = ExtResource("12_footstep")
 step_interval = 0.35
 sprint_step_interval = 0.25
+
+[node name="InventoryLayer" type="CanvasLayer" parent="."]
+layer = 25
+
+[node name="InventoryUI" parent="InventoryLayer" instance=ExtResource("16_inv")]
+
+[node name="CharacterSheetLayer" type="CanvasLayer" parent="."]
+layer = 27
+
+[node name="CharacterSheetUI" parent="CharacterSheetLayer" instance=ExtResource("17_sheet")]

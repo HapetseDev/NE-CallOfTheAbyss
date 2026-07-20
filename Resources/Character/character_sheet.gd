@@ -56,14 +56,65 @@ func get_konzentrationspunkte_basis() -> int:
 
 
 func get_effective_attribute(attr: CharacterEnums.Attribute) -> int:
-	var base := _get_base_attribute(attr)
+	var base := get_base_attribute(attr)
 	var from_skills := _get_skill_bonus_for_attribute(attr)
 	return maxi(0, base + from_skills)
+
+
+func get_base_attribute(attr: CharacterEnums.Attribute) -> int:
+	return _get_base_attribute(attr)
 
 
 func get_skill_level(skill_id: String) -> int:
 	var learned := _find_learned_skill(skill_id)
 	return learned.level if learned else 0
+
+
+func get_learned_skills_for_attribute(attr: CharacterEnums.Attribute) -> Array[LearnedSkill]:
+	var result: Array[LearnedSkill] = []
+	for learned in learned_skills:
+		if learned == null:
+			continue
+		var definition := SkillCatalog.get_definition(learned.skill_id)
+		if definition and definition.attribute == attr:
+			result.append(learned)
+	result.sort_custom(_sort_learned_by_name)
+	return result
+
+
+func get_attribute_skill_slots(attr: CharacterEnums.Attribute) -> Array:
+	var learned := get_learned_skills_for_attribute(attr)
+	var slots: Array = []
+	for i in CharacterEnums.FAEHIGKEITEN_PRO_ATTRIBUT:
+		if i < learned.size():
+			var entry := learned[i]
+			var definition := SkillCatalog.get_definition(entry.skill_id)
+			slots.append({
+				"skill_id": entry.skill_id,
+				"skill_name": definition.skill_name if definition else entry.skill_id,
+				"level": entry.level,
+			})
+		else:
+			slots.append(null)
+	return slots
+
+
+func get_available_talents_for_attribute(attr: CharacterEnums.Attribute) -> Array[SkillDefinition]:
+	return SkillCatalog.get_talent_catalog_for_attribute(attr)
+
+
+func get_attribute_sections() -> Array[Dictionary]:
+	var sections: Array[Dictionary] = []
+	for attr in CharacterEnums.ALL_ATTRIBUTES:
+		sections.append({
+			"attribute": attr,
+			"attribute_name": CharacterEnums.attribute_name(attr),
+			"attribute_value": get_effective_attribute(attr),
+			"influence": CharacterEnums.attribute_influence(attr),
+			"skill_slots": get_attribute_skill_slots(attr),
+			"available_talents": get_available_talents_for_attribute(attr),
+		})
+	return sections
 
 
 func get_skill_level_cap(_skill_id: String = "") -> int:
@@ -165,6 +216,66 @@ func add_begleiter(entry: CompanionEntry) -> void:
 	sheet_changed.emit()
 
 
+func debug_set_base_attribute(attr: CharacterEnums.Attribute, value: int) -> void:
+	value = maxi(0, value)
+	match attr:
+		CharacterEnums.Attribute.KOERPERKRAFT: koerperkraft = value
+		CharacterEnums.Attribute.GEWANDHEIT: gewandheit = value
+		CharacterEnums.Attribute.ROBUSTHEIT: robustheit = value
+		CharacterEnums.Attribute.WILLENSKRAFT: willenskraft = value
+		CharacterEnums.Attribute.VERSTAND: verstand = value
+		CharacterEnums.Attribute.BEWUSSTSEIN: bewusstsein = value
+		CharacterEnums.Attribute.PRAESENZ: praesenz = value
+	sheet_changed.emit()
+
+
+func debug_set_skill_level(skill_id: String, level: int) -> void:
+	if skill_id.is_empty():
+		return
+	var cap := get_skill_level_cap(skill_id)
+	level = clampi(level, 0, cap)
+	if level <= 0:
+		debug_remove_skill(skill_id)
+		return
+	var learned := learn_or_get_skill(skill_id)
+	learned.level = level
+	learned.xp = 0
+	sheet_changed.emit()
+
+
+func debug_remove_skill(skill_id: String) -> void:
+	var learned := _find_learned_skill(skill_id)
+	if learned == null:
+		return
+	learned_skills.erase(learned)
+	active_training_skill_ids.erase(skill_id)
+	sheet_changed.emit()
+
+
+func debug_add_skill(skill_id: String, level: int = 1) -> bool:
+	if skill_id.is_empty():
+		return false
+	var definition := SkillCatalog.get_definition(skill_id)
+	if definition == null:
+		return false
+	if _find_learned_skill(skill_id):
+		debug_set_skill_level(skill_id, level)
+		return true
+	var learned_count := get_learned_skills_for_attribute(definition.attribute).size()
+	if learned_count >= CharacterEnums.FAEHIGKEITEN_PRO_ATTRIBUT:
+		return false
+	debug_set_skill_level(skill_id, level)
+	return true
+
+
+func get_unlearned_talents_for_attribute(attr: CharacterEnums.Attribute) -> Array[SkillDefinition]:
+	var result: Array[SkillDefinition] = []
+	for definition in get_available_talents_for_attribute(attr):
+		if get_skill_level(definition.skill_id) <= 0:
+			result.append(definition)
+	return result
+
+
 func _get_base_attribute(attr: CharacterEnums.Attribute) -> int:
 	match attr:
 		CharacterEnums.Attribute.KOERPERKRAFT: return koerperkraft
@@ -193,3 +304,11 @@ func _find_learned_skill(skill_id: String) -> LearnedSkill:
 		if learned and learned.skill_id == skill_id:
 			return learned
 	return null
+
+
+func _sort_learned_by_name(a: LearnedSkill, b: LearnedSkill) -> bool:
+	var def_a := SkillCatalog.get_definition(a.skill_id)
+	var def_b := SkillCatalog.get_definition(b.skill_id)
+	var name_a := def_a.skill_name if def_a else a.skill_id
+	var name_b := def_b.skill_name if def_b else b.skill_id
+	return name_a.nocasecmp_to(name_b) < 0
