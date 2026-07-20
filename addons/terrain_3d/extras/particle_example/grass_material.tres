@@ -1,8 +1,11 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://ljo1wt61kbkq"]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://ljo1wt61kbkq"]
 
 [ext_resource type="Shader" uid="uid://dq3lfyp3u5oxt" path="res://addons/terrain_3d/extras/particle_example/grass.gdshader" id="1_nkru0"]
 
+[sub_resource type="FogMaterial" id="FogMaterial_dwn1t"]
+
 [resource]
 render_priority = 0
+next_pass = SubResource("FogMaterial_dwn1t")
 shader = ExtResource("1_nkru0")
 shader_parameter/wind_direction = Vector2(1, 1)

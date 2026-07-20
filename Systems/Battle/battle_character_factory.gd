@@ -1,8 +1,8 @@
 class_name BattleCharacterFactory
 
-const NORMAL_ATTACK := preload("res://Ressources/Battle/skills/normal_attack.tres")
-const RUN_SKILL := preload("res://Ressources/Battle/skills/run.tres")
-const HEAL_SKILL := preload("res://Ressources/Battle/skills/heal.tres")
+const NORMAL_ATTACK := preload("res://Resources/Battle/skills/normal_attack.tres")
+const RUN_SKILL := preload("res://Resources/Battle/skills/run.tres")
+const HEAL_SKILL := preload("res://Resources/Battle/skills/heal.tres")
 
 
 static func from_playable(playable: Playable) -> BattleCharacterResource:

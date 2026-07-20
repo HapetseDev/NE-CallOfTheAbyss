@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="NPCData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/NPC/npc_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+npc_id = "bandit_01"
+display_name = "Bandit"
+dialogue_file = "res://dialogues/enemy_bandit.dialogue"
+dialogue_start = "start"
+encounter_id = "bandit_01"
+can_trade = false
+can_fight = true
+defeated_flag = "defeated_bandit"

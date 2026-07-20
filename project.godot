@@ -23,13 +23,13 @@ config/icon="uid://b5ubgw6jktu33"
 
 [autoload]
 
-GlobalLevelManager="*res://Globals/GlobalLevelManager.gd"
-GameState="*res://Globals/GameState.gd"
+GlobalLevelManager="*res://autoload/global_level_manager.gd"
+GameState="*res://autoload/game_state.gd"
 GameDialogueBridge="*res://Systems/Dialogue/game_dialogue_bridge.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
-ShopManager="*res://Globals/ShopManager.gd"
-BattleManager="*res://Globals/BattleManager.gd"
-SkillCatalog="*res://Globals/SkillCatalog.gd"
+ShopManager="*res://autoload/shop_manager.gd"
+BattleManager="*res://autoload/battle_manager.gd"
+SkillCatalog="*res://autoload/skill_catalog.gd"
 
 [display]
 
@@ -49,12 +49,13 @@ enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg", "res://addons/di
 [file_customization]
 
 folder_colors={
-"res://Charaktere/": "green",
-"res://Generic/": "red",
 "res://Maps/": "blue",
-"res://Ressources/": "orange",
-"res://Scripts/": "gray",
-"res://UI/": "purple"
+"res://Resources/": "orange",
+"res://Systems/": "gray",
+"res://UI/": "purple",
+"res://autoload/": "yellow",
+"res://characters/": "green",
+"res://world/": "teal"
 }
 
 [input]

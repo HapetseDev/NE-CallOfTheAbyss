@@ -1,0 +1,94 @@
+extends Node
+
+const BATTLE_SCENE := preload("res://Scenes/Battle/battle_scene.tscn")
+
+var return_scene_path: String = ""
+var pending_encounter: EncounterData
+var party_battle_resources: Array[BattleCharacterResource] = []
+var pending_party_sync: Array[BattleCharacterResource] = []
+var pending_defeated_flag: String = ""
+var has_pending_sync: bool = false
+var last_victory: bool = false
+
+
+func start_encounter(encounter_id: String, player: Playable, source_npc: NPCInteraction = null) -> void:
+	var encounter := _load_encounter(encounter_id)
+	if encounter == null:
+		push_warning("BattleManager: Encounter '%s' nicht gefunden." % encounter_id)
+		return
+	var current := get_tree().current_scene
+	if current and current.scene_file_path:
+		return_scene_path = current.scene_file_path
+	pending_encounter = encounter
+	party_battle_resources.clear()
+	for playable in _collect_party(player):
+		party_battle_resources.append(BattleCharacterFactory.from_playable(playable))
+	pending_defeated_flag = ""
+	if source_npc and source_npc.data and not source_npc.data.defeated_flag.is_empty():
+		pending_defeated_flag = source_npc.data.defeated_flag
+	GameDialogueBridge.set_player_input_locked(true)
+	get_tree().change_scene_to_packed(BATTLE_SCENE)
+
+
+func finish_battle(victory: bool, synced_resources: Array[BattleCharacterResource]) -> void:
+	last_victory = victory
+	pending_party_sync.clear()
+	for res in synced_resources:
+		if res is BattleCharacterResource:
+			pending_party_sync.append(res.duplicate(true))
+	has_pending_sync = not pending_party_sync.is_empty()
+	if victory and not pending_defeated_flag.is_empty():
+		GameState.set_flag(pending_defeated_flag, true)
+	var path := return_scene_path if not return_scene_path.is_empty() else "res://Maps/Level1Ep1.tscn"
+	get_tree().change_scene_to_file(path)
+	GameDialogueBridge.set_player_input_locked(false)
+
+
+func apply_pending_party_state(party: Party) -> void:
+	if not has_pending_sync or party == null:
+		return
+	var members := party.get_all_members()
+	for i in mini(pending_party_sync.size(), members.size()):
+		var playable := members[i]
+		var res := pending_party_sync[i]
+		playable.health = res.currentHealth
+		playable.mana = res.currentMana
+	if last_victory:
+		_apply_rewards(members)
+	has_pending_sync = false
+	pending_party_sync.clear()
+	party_battle_resources.clear()
+	pending_encounter = null
+	pending_defeated_flag = ""
+
+
+func _load_encounter(encounter_id: String) -> EncounterData:
+	var path := "res://Resources/Battle/encounters/%s.tres" % encounter_id
+	if ResourceLoader.exists(path):
+		return load(path) as EncounterData
+	return null
+
+
+func _collect_party(player: Playable) -> Array[Playable]:
+	var node: Node = player
+	while node:
+		if node is Party:
+			return (node as Party).get_all_members()
+		node = node.get_parent()
+	return [player]
+
+
+func _apply_rewards(members: Array[Playable]) -> void:
+	if pending_encounter == null or members.is_empty():
+		return
+	var leader := members[0]
+	if pending_encounter.reward_gold > 0:
+		leader.gold += pending_encounter.reward_gold
+	for i in pending_encounter.reward_items.size():
+		var item := pending_encounter.reward_items[i]
+		if item == null:
+			continue
+		var count := 1
+		if i < pending_encounter.reward_item_counts.size():
+			count = pending_encounter.reward_item_counts[i]
+		leader.add_item(item.duplicate_item(), count)

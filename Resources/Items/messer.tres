@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Resources/Items/item.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = "Messer"
+item_name = "Messer"
+beschreibung = "Zum Schneiden von Pflanzen und anderem."
+max_stapel = 1
+ausrüstungs_slot = "waffe"

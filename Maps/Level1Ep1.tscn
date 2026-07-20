@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://xeyawcaoed1b"]
 
-[ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://Charaktere/Party/party.tscn" id="1_party"]
-[ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://Charaktere/Props/Fauna/Plant.tscn" id="4_iaeds"]
-[ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://Charaktere/Props/Items/basic_item.tscn" id="6_basicitem"]
-[ext_resource type="PackedScene" uid="uid://b330mlkpk17qq" path="res://Charaktere/NPC/MerchantNPC.tscn" id="7_merchant"]
-[ext_resource type="PackedScene" uid="uid://npcenemy0001" path="res://Charaktere/NPC/EnemyNPC.tscn" id="8_enemy"]
-[ext_resource type="PackedScene" uid="uid://npcquest0001" path="res://Charaktere/NPC/QuestNPC.tscn" id="9_quest"]
+[ext_resource type="Material" uid="uid://ljo1wt61kbkq" path="res://addons/terrain_3d/extras/particle_example/grass_material.tres" id="1_7gau7"]
+[ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://characters/Party/party.tscn" id="1_party"]
+[ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://world/props/Fauna/Plant.tscn" id="4_iaeds"]
+[ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://world/props/Items/basic_item.tscn" id="6_basicitem"]
+[ext_resource type="PackedScene" uid="uid://b330mlkpk17qq" path="res://characters/NPC/MerchantNPC.tscn" id="7_merchant"]
+[ext_resource type="PackedScene" uid="uid://npcenemy0001" path="res://characters/NPC/EnemyNPC.tscn" id="8_enemy"]
+[ext_resource type="PackedScene" uid="uid://npcquest0001" path="res://characters/NPC/QuestNPC.tscn" id="9_quest"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.4, 0.6, 0.9, 1)
@@ -26,9 +27,6 @@ ambient_light_energy = 0.5
 [sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
 size = Vector2(20, 20)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grass"]
-albedo_color = Color(0.3, 0.6, 0.2, 1)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(20, 0.1, 20)
 
@@ -44,8 +42,9 @@ shadow_enabled = true
 [node name="Ground" type="Node3D" parent="." unique_id=685506587]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=473599357]
+transform = Transform3D(192.50586, 0, 0, 0, 60.71741, 0, 0, 0, 217.78177, 0, 0, 0)
 mesh = SubResource("PlaneMesh_ground")
-surface_material_override/0 = SubResource("StandardMaterial3D_grass")
+surface_material_override/0 = ExtResource("1_7gau7")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Ground" unique_id=1249870240]
 metadata/surface_type = "grass"
