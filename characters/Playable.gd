@@ -2,6 +2,11 @@ class_name Playable extends CharacterBody3D
 
 const _SheetFactory = preload("res://Systems/Character/character_sheet_factory.gd")
 
+@onready var inventory_component: InventoryComponent = $InventoryComponent
+
+func add_item(item: Item, count: int = 1) -> void:
+	inventory_component.add_item(item, count)
+
 # --- Bewegung ---
 var cardinal_direction: Vector3 = Vector3(0, 0, 1)  # Nächste Kardinalrichtung (Legacy / Sprites)
 var facing_direction: Vector3 = Vector3(0, 0, 1)  # Normalisierte Blickrichtung (XZ)
@@ -73,19 +78,6 @@ var skills: Array[String] = []
 
 # --- Talente (Name -> Stufe) ---
 var talente: Dictionary[String, int] = {}
-
-# --- Inventar ---
-var inventory: Array = []
-
-# --- Ausrüstung ---
-var equipment: Dictionary = {
-	"kopf":    null,
-	"rumpf":   null,
-	"waffe":   null,
-	"nebenhand": null,
-	"beine":   null,
-	"füße":    null,
-}
 
 
 func get_display_name() -> String:
@@ -329,64 +321,13 @@ func _level_up() -> void:
 	level += 1
 
 
-# --- Inventar ---
 
-func add_item(item: Variant, anzahl: int = 1) -> void:
-	if item is Item:
-		for slot in inventory:
-			if slot is Dictionary and slot.get("item") is Item \
-					and (slot["item"] as Item).item_id == (item as Item).item_id:
-				slot["count"] = mini(slot["count"] + anzahl, (item as Item).max_stapel)
-				inventar_geaendert.emit()
-				return
-		inventory.append({"item": item, "count": anzahl})
-	else:
-		inventory.append(item)
-	inventar_geaendert.emit()
-
-
-func remove_item(item: Variant, anzahl: int = 1) -> bool:
-	if item is Item:
-		for i in inventory.size():
-			var slot = inventory[i]
-			if slot is Dictionary and slot.get("item") is Item \
-					and (slot["item"] as Item).item_id == (item as Item).item_id:
-				slot["count"] -= anzahl
-				if slot["count"] <= 0:
-					inventory.remove_at(i)
-				inventar_geaendert.emit()
-				return true
-		return false
-	var idx := inventory.find(item)
-	if idx >= 0:
-		inventory.remove_at(idx)
-		inventar_geaendert.emit()
-		return true
-	return false
-
-
-func has_item(item: Variant) -> bool:
-	if item is String:
-		for slot in inventory:
-			if slot is String and slot == item:
-				return true
-			if slot is Dictionary and slot.get("item") is Item \
-					and (slot["item"] as Item).item_id == item:
-				return true
-		return false
-	if item is Item:
-		for slot in inventory:
-			if slot is Dictionary and slot.get("item") is Item \
-					and (slot["item"] as Item).item_id == (item as Item).item_id:
-				return true
-		return false
-	return inventory.has(item)
 
 
 func consume_item(item: Item) -> bool:
 	if item == null or not item.verbrauchbar:
 		return false
-	if not remove_item(item, 1):
+	if not inventory_component.remove_item(item, 1):
 		return false
 	item.apply_effects(self)
 	return true
@@ -396,7 +337,7 @@ const _BASIC_ITEM_SCENE: PackedScene = preload("res://world/props/Items/basic_it
 
 
 func drop_item_to_world(item: Item) -> bool:
-	if item == null or not remove_item(item, 1):
+	if item == null or not inventory_component.remove_item(item, 1):
 		return false
 	_spawn_world_item(item.duplicate_item())
 	return true
@@ -421,25 +362,6 @@ func _spawn_world_item(item: Item) -> void:
 	var toss := Vector3(facing_direction.x, 1.2, facing_direction.z).normalized() * 1.8
 	inst.apply_central_impulse(toss)
 
-
-# --- Ausrüstung ---
-
-func equip(slot: String, item: Variant) -> void:
-	if not equipment.has(slot):
-		push_warning("Playable: Unbekannter Ausrüstungsslot '%s'" % slot)
-		return
-	equipment[slot] = item
-	inventar_geaendert.emit()
-
-
-func unequip(slot: String) -> Variant:
-	if not equipment.has(slot):
-		push_warning("Playable: Unbekannter Ausrüstungsslot '%s'" % slot)
-		return null
-	var item: Variant = equipment[slot]
-	equipment[slot] = null
-	inventar_geaendert.emit()
-	return item
 
 
 # --- Skills ---

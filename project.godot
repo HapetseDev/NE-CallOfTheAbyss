@@ -30,7 +30,7 @@ DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 ShopManager="*res://autoload/shop_manager.gd"
 BattleManager="*res://autoload/battle_manager.gd"
 SkillCatalog="*res://autoload/skill_catalog.gd"
-DebugMenu="*res://Globals/DebugMenu.gd"
+DebugMenu="*res://autoload/DebugMenu.gd"
 
 [display]
 

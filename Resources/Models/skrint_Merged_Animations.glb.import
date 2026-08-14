@@ -4,12 +4,12 @@ importer="MeshLibrary"
 importer_version=1
 type="MeshLibrary"
 uid="uid://cxh3p5ka10drx"
-path="res://.godot/imported/skrint_Merged_Animations.glb-d889dffa222fbd58f8a4d78d0b64e7e9.res"
+path="res://.godot/imported/skrint_Merged_Animations.glb-e3280e0edbcd6d7992d0a390226699fd.res"
 
 [deps]
 
-source_file="res://Ressources/Models/skrint_Merged_Animations.glb"
-dest_files=["res://.godot/imported/skrint_Merged_Animations.glb-d889dffa222fbd58f8a4d78d0b64e7e9.res"]
+source_file="res://Resources/Models/skrint_Merged_Animations.glb"
+dest_files=["res://.godot/imported/skrint_Merged_Animations.glb-e3280e0edbcd6d7992d0a390226699fd.res"]
 
 [params]
 

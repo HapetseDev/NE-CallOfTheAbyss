@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://b8dtaqi5quir3"
-path="res://.godot/imported/Thalbach_Merged_Animations.glb-ae2bdcd4a5972b52062ecff8877809c4.scn"
+path="res://.godot/imported/Thalbach_Merged_Animations.glb-50e7172f03509286b40ed24f1d7f5d93.scn"
 
 [deps]
 
-source_file="res://Ressources/Models/Thalbach_Merged_Animations.glb"
-dest_files=["res://.godot/imported/Thalbach_Merged_Animations.glb-ae2bdcd4a5972b52062ecff8877809c4.scn"]
+source_file="res://Resources/Models/Thalbach_Merged_Animations.glb"
+dest_files=["res://.godot/imported/Thalbach_Merged_Animations.glb-50e7172f03509286b40ed24f1d7f5d93.scn"]
 
 [params]
 

@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="NPCData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="NPCData" format=3 uid="uid://nymefrkj7yrv"]
 
-[ext_resource type="Script" path="res://Resources/NPC/npc_data.gd" id="1"]
-[ext_resource type="Resource" path="res://Resources/Character/sheets/merchant_01.tres" id="2_sheet"]
+[ext_resource type="Script" uid="uid://diaivhiqjywxb" path="res://Resources/NPC/npc_data.gd" id="1"]
+[ext_resource type="Resource" uid="uid://b6u12i3gn0c74" path="res://Resources/Character/sheets/merchant_01.tres" id="2_sheet"]
 
 [resource]
 script = ExtResource("1")
@@ -9,7 +9,5 @@ npc_id = "merchant_01"
 display_name = "Händler"
 character_sheet = ExtResource("2_sheet")
 dialogue_file = "res://dialogues/merchant_01.dialogue"
-dialogue_start = "start"
 shop_id = "haendler_01"
 can_trade = true
-can_fight = false

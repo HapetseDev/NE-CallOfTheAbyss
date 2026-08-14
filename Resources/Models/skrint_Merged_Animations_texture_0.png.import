@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cs7m1vcjx22um"
-path.s3tc="res://.godot/imported/skrint_Merged_Animations_texture_0.png-6b9a74079944d7ce908c7ac53ff7445b.s3tc.ctex"
+path.s3tc="res://.godot/imported/skrint_Merged_Animations_texture_0.png-fc03e4d0d1148b9352f751df2750369d.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Ressources/Models/skrint_Merged_Animations_texture_0.png"
-dest_files=["res://.godot/imported/skrint_Merged_Animations_texture_0.png-6b9a74079944d7ce908c7ac53ff7445b.s3tc.ctex"]
+source_file="res://Resources/Models/skrint_Merged_Animations_texture_0.png"
+dest_files=["res://.godot/imported/skrint_Merged_Animations_texture_0.png-fc03e4d0d1148b9352f751df2750369d.s3tc.ctex"]
 
 [params]
 

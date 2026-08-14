@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://ouq4tqjfh8n8"
-path="res://.godot/imported/Tharta_Merged_Animations.glb-0bb2c34ad638a062c6f9ffa932a392c7.scn"
+path="res://.godot/imported/Tharta_Merged_Animations.glb-e46c8d71d652d6b0e74a56582b2035d1.scn"
 
 [deps]
 
-source_file="res://Ressources/Models/Tharta_Merged_Animations.glb"
-dest_files=["res://.godot/imported/Tharta_Merged_Animations.glb-0bb2c34ad638a062c6f9ffa932a392c7.scn"]
+source_file="res://Resources/Models/Tharta_Merged_Animations.glb"
+dest_files=["res://.godot/imported/Tharta_Merged_Animations.glb-e46c8d71d652d6b0e74a56582b2035d1.scn"]
 
 [params]
 

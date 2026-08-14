@@ -1,9 +1,9 @@
 class_name CharacterSheetFactory
 
-## Lädt Charakterbögen aus Ressources/Character/sheets/{character_id}.tres
+## Lädt Charakterbögen aus Resources/Character/sheets/{character_id}.tres
 ## oder erzeugt einen minimalen Standardbogen.
 
-const SHEETS_DIR := "res://Ressources/Character/sheets/"
+const SHEETS_DIR := "res://Resources/Character/sheets/"
 
 
 static func load_sheet(character_id: String) -> CharacterSheet:

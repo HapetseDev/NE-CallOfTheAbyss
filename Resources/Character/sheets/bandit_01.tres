@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="CharacterSheet" format=3 uid="uid://daxgumgpkjthv"]
 
-[ext_resource type="Script" uid="uid://b00j3lcjo3wq5" path="res://Ressources/Character/character_sheet.gd" id="1"]
-[ext_resource type="Script" uid="uid://bwosmotj8yrat" path="res://Ressources/Character/companion_entry.gd" id="1_5mv63"]
-[ext_resource type="Script" uid="uid://dvaktft3p8jrl" path="res://Ressources/Character/learned_skill.gd" id="2"]
-[ext_resource type="Script" uid="uid://byjd75n0v2o8b" path="res://Ressources/Character/relationship_entry.gd" id="2_16kkk"]
+[ext_resource type="Script" uid="uid://b00j3lcjo3wq5" path="res://Resources/Character/character_sheet.gd" id="1"]
+[ext_resource type="Script" uid="uid://bwosmotj8yrat" path="res://Resources/Character/companion_entry.gd" id="1_5mv63"]
+[ext_resource type="Script" uid="uid://dvaktft3p8jrl" path="res://Resources/Character/learned_skill.gd" id="2"]
+[ext_resource type="Script" uid="uid://byjd75n0v2o8b" path="res://Resources/Character/relationship_entry.gd" id="2_16kkk"]
 
 [sub_resource type="Resource" id="LearnedSkill_nahkampf"]
 script = ExtResource("2")
