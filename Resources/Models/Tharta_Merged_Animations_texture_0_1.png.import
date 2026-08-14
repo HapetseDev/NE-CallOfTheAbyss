@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dfca4tkglsc24"
-path.s3tc="res://.godot/imported/Tharta_Merged_Animations_texture_0_1.png-40b38ac73b416739326232246e90967e.s3tc.ctex"
+path.s3tc="res://.godot/imported/Tharta_Merged_Animations_texture_0_1.png-e8b4ad78df3ba291a1c6b4c84cfcb6de.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Ressources/Models/Tharta_Merged_Animations_texture_0_1.png"
-dest_files=["res://.godot/imported/Tharta_Merged_Animations_texture_0_1.png-40b38ac73b416739326232246e90967e.s3tc.ctex"]
+source_file="res://Resources/Models/Tharta_Merged_Animations_texture_0_1.png"
+dest_files=["res://.godot/imported/Tharta_Merged_Animations_texture_0_1.png-e8b4ad78df3ba291a1c6b4c84cfcb6de.s3tc.ctex"]
 
 [params]
 

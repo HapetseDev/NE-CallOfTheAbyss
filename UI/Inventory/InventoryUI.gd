@@ -7,8 +7,10 @@ var _menu_hud: PartyHud
 var _inv_slots: Array[Button] = []
 var _equip_buttons: Dictionary = {}
 
+var _inv: InventoryComponent  # neu hinzufügen
+
 @onready var _overlay: ColorRect = %Overlay
-@onready var _close_button: Button = %CloseButton
+@onready var _window: Window = %Window
 @onready var _equip_grid: GridContainer = %EquipGrid
 @onready var _inv_grid: GridContainer = %InvGrid
 
@@ -16,9 +18,10 @@ var _equip_buttons: Dictionary = {}
 func _ready() -> void:
 	_menu_hud = %MenuHud as PartyHud
 	_overlay.inventory_ui = self
-	_close_button.pressed.connect(_on_close_pressed)
+	_window.close_requested.connect(_on_close_requested)
 	_wire_equip_buttons()
 	_wire_inventory_slots()
+	visibility_changed.connect(_on_visibility_changed)
 
 
 func bind_player(playable_ref: Playable, party_ref: Party) -> void:
@@ -27,8 +30,19 @@ func bind_player(playable_ref: Playable, party_ref: Party) -> void:
 	if party:
 		_menu_hud.setup(party)
 	if playable:
-		playable.inventar_geaendert.connect(_refresh)
+		_inv = playable.inventory_component
+		_inv.changed.connect(_refresh)
 		_refresh()
+
+
+func _on_visibility_changed() -> void:
+	if not is_node_ready():
+		return
+	if is_visible_in_tree():
+		_window.visible = true
+		_window.grab_focus()
+	else:
+		_window.visible = false
 
 
 func _wire_equip_buttons() -> void:
@@ -61,7 +75,7 @@ func drop_item_from_slot(index: int) -> void:
 	playable.drop_item_to_world(slot["item"] as Item)
 
 
-func _on_close_pressed() -> void:
+func _on_close_requested() -> void:
 	var layer := get_parent()
 	if layer is CanvasLayer:
 		layer.visible = false

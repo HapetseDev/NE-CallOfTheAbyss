@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://uqd0e0iyox1p"
-path="res://.godot/imported/Snnpter_Merged_Animations.glb-a52ec5691a9a998f25923aa716b7ecb1.scn"
+path="res://.godot/imported/Snnpter_Merged_Animations.glb-250b9349e23b7aae1105e15473bac42d.scn"
 
 [deps]
 
-source_file="res://Ressources/Models/Snnpter_Merged_Animations.glb"
-dest_files=["res://.godot/imported/Snnpter_Merged_Animations.glb-a52ec5691a9a998f25923aa716b7ecb1.scn"]
+source_file="res://Resources/Models/Snnpter_Merged_Animations.glb"
+dest_files=["res://.godot/imported/Snnpter_Merged_Animations.glb-250b9349e23b7aae1105e15473bac42d.scn"]
 
 [params]
 

@@ -1,6 +1,6 @@
 extends Node
 
-const _TALENT_CATALOG := preload("res://Ressources/Character/attribute_talent_catalog.gd")
+const _TALENT_CATALOG := preload("res://Resources/Character/attribute_talent_catalog.gd")
 
 var _definitions: Dictionary = {}
 
@@ -39,7 +39,7 @@ func _sort_definitions_by_name(a: SkillDefinition, b: SkillDefinition) -> bool:
 
 
 func _load_definitions() -> void:
-_load_skill_resources()
+	_load_skill_resources()
 	_load_attribute_talent_catalog()
 
 func _load_skill_resources() -> void:

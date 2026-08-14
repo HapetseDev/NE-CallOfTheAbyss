@@ -25,9 +25,11 @@ func enter() -> void:
 	_highlight_actionable_targets(actions)
 	_build_menu(actions)
 	_has_shown_menu = true
+	set_process_input(true)
 
 
 func exit() -> void:
+	set_process_input(false)
 	_clear_highlights()
 	_hide_range_indicator()
 	_destroy_menu()
@@ -43,9 +45,22 @@ func process(_delta: float) -> State:
 
 
 func handle_input(_event: InputEvent) -> State:
-	if _event.is_action_pressed("ui_cancel"):
+	if _wants_close_menu(_event):
 		return idle
 	return null
+
+
+func _input(event: InputEvent) -> void:
+	# Vor der GUI: zweiter Rechtsklick/E schließt auch über dem Menü-Panel.
+	if not _has_shown_menu or _action_done:
+		return
+	if _wants_close_menu(event):
+		_action_done = true
+		get_viewport().set_input_as_handled()
+
+
+func _wants_close_menu(event: InputEvent) -> bool:
+	return event.is_action_pressed("ui_cancel") or event.is_action_pressed("Interact")
 
 
 # --- Interne Hilfsmethoden ---

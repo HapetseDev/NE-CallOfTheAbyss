@@ -2,14 +2,15 @@ class_name CharacterSheetUI extends Control
 
 var playable: Playable
 
+@onready var _window: Window = %Window
 @onready var _title_label: Label = %TitleLabel
 @onready var _summary_label: Label = %SummaryLabel
-@onready var _close_button: Button = %CloseButton
 @onready var _attributes_box: VBoxContainer = %AttributesBox
 
 
 func _ready() -> void:
-	_close_button.pressed.connect(_on_close_pressed)
+	_window.close_requested.connect(_on_close_requested)
+	visibility_changed.connect(_on_visibility_changed)
 
 
 func bind_player(playable_ref: Playable) -> void:
@@ -17,15 +18,31 @@ func bind_player(playable_ref: Playable) -> void:
 	refresh()
 
 
+func _on_visibility_changed() -> void:
+	if not is_node_ready():
+		return
+	if is_visible_in_tree():
+		_window.visible = true
+		_window.grab_focus()
+		refresh()
+	else:
+		_window.visible = false
+
+
 func refresh() -> void:
+	if not is_node_ready():
+		return
 	if playable == null or playable.character_sheet == null:
 		_title_label.text = "Charakterbogen"
+		_window.title = "Charakterbogen"
 		_summary_label.text = "Kein Charakterbogen vorhanden."
 		_clear_attributes()
 		return
 
 	var sheet := playable.character_sheet
-	_title_label.text = sheet.character_name if not sheet.character_name.is_empty() else playable.get_display_name()
+	var display_name := sheet.character_name if not sheet.character_name.is_empty() else playable.get_display_name()
+	_title_label.text = display_name
+	_window.title = "Charakterbogen — %s" % display_name
 	_summary_label.text = "SP %d / %d  ·  KP %d / %d  ·  EP %d" % [
 		sheet.staerkepunkte,
 		sheet.get_staerkepunkte_basis(),
@@ -111,7 +128,7 @@ func _clear_attributes() -> void:
 		child.queue_free()
 
 
-func _on_close_pressed() -> void:
+func _on_close_requested() -> void:
 	var layer := get_parent()
 	if layer is CanvasLayer:
 		layer.visible = false

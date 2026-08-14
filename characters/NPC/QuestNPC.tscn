@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://characters/NPC/npc_interaction.gd" id="3_interaction"]
 [ext_resource type="Resource" path="res://Resources/NPC/quest_giver_01_data.tres" id="4_data"]
 [ext_resource type="PackedScene" path="res://Resources/Models/Quichel_Merged_Animations.glb" id="5_model"]
-[ext_resource type="Script" path="res://Systems/Character/character_model_animator.gd" id="6_model_anim"]
+[ext_resource type="Script" uid="uid://ou4q3lgfn1xf" path="res://Systems/Character/character_model_animator.gd" id="6_model_anim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35

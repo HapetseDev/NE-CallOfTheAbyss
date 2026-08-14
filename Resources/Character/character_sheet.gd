@@ -75,7 +75,7 @@ func get_learned_skills_for_attribute(attr: CharacterEnums.Attribute) -> Array[L
 	for learned in learned_skills:
 		if learned == null:
 			continue
-		var definition := SkillCatalog.get_definition(learned.skill_id)
+		var definition: SkillDefinition = SkillCatalog.get_definition(learned.skill_id)
 		if definition and definition.attribute == attr:
 			result.append(learned)
 	result.sort_custom(_sort_learned_by_name)
@@ -88,7 +88,7 @@ func get_attribute_skill_slots(attr: CharacterEnums.Attribute) -> Array:
 	for i in CharacterEnums.FAEHIGKEITEN_PRO_ATTRIBUT:
 		if i < learned.size():
 			var entry := learned[i]
-			var definition := SkillCatalog.get_definition(entry.skill_id)
+			var definition: SkillDefinition = SkillCatalog.get_definition(entry.skill_id)
 			slots.append({
 				"skill_id": entry.skill_id,
 				"skill_name": definition.skill_name if definition else entry.skill_id,
@@ -255,7 +255,7 @@ func debug_remove_skill(skill_id: String) -> void:
 func debug_add_skill(skill_id: String, level: int = 1) -> bool:
 	if skill_id.is_empty():
 		return false
-	var definition := SkillCatalog.get_definition(skill_id)
+	var definition: SkillDefinition = SkillCatalog.get_definition(skill_id)
 	if definition == null:
 		return false
 	if _find_learned_skill(skill_id):
@@ -293,7 +293,7 @@ func _get_skill_bonus_for_attribute(attr: CharacterEnums.Attribute) -> int:
 	for learned in learned_skills:
 		if learned == null:
 			continue
-		var definition := SkillCatalog.get_definition(learned.skill_id)
+		var definition: SkillDefinition = SkillCatalog.get_definition(learned.skill_id)
 		if definition and definition.attribute == attr:
 			total += learned.level
 	return total
@@ -307,8 +307,8 @@ func _find_learned_skill(skill_id: String) -> LearnedSkill:
 
 
 func _sort_learned_by_name(a: LearnedSkill, b: LearnedSkill) -> bool:
-	var def_a := SkillCatalog.get_definition(a.skill_id)
-	var def_b := SkillCatalog.get_definition(b.skill_id)
-	var name_a := def_a.skill_name if def_a else a.skill_id
-	var name_b := def_b.skill_name if def_b else b.skill_id
+	var def_a: SkillDefinition = SkillCatalog.get_definition(a.skill_id)
+	var def_b: SkillDefinition = SkillCatalog.get_definition(b.skill_id)
+	var name_a: String = def_a.skill_name if def_a else a.skill_id
+	var name_b: String = def_b.skill_name if def_b else b.skill_id
 	return name_a.nocasecmp_to(name_b) < 0

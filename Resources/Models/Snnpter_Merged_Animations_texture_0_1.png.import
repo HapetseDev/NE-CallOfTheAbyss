@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dq7blwwuwyov3"
-path.s3tc="res://.godot/imported/Snnpter_Merged_Animations_texture_0_1.png-2d2190fce9ce07985e23d055cfa6c5b3.s3tc.ctex"
+path.s3tc="res://.godot/imported/Snnpter_Merged_Animations_texture_0_1.png-0dbb1c5c43e0273ad5a6514f1641dfd2.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Ressources/Models/Snnpter_Merged_Animations_texture_0_1.png"
-dest_files=["res://.godot/imported/Snnpter_Merged_Animations_texture_0_1.png-2d2190fce9ce07985e23d055cfa6c5b3.s3tc.ctex"]
+source_file="res://Resources/Models/Snnpter_Merged_Animations_texture_0_1.png"
+dest_files=["res://.godot/imported/Snnpter_Merged_Animations_texture_0_1.png-0dbb1c5c43e0273ad5a6514f1641dfd2.s3tc.ctex"]
 
 [params]
 
