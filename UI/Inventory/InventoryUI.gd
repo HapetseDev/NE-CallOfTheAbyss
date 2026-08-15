@@ -2,6 +2,7 @@ class_name InventoryUI extends Control
 
 var playable: Playable
 var party: Party
+var _inventory: Inventory
 
 var _menu_hud: PartyHud
 var _inv_slots: Array[Button] = []
@@ -27,7 +28,8 @@ func bind_player(playable_ref: Playable, party_ref: Party) -> void:
 	if party:
 		_menu_hud.setup(party)
 	if playable:
-		playable.inventar_geaendert.connect(_refresh)
+		_inventory = playable.inventory
+		_inventory.changed.connect(_refresh)
 		_refresh()
 
 
@@ -53,12 +55,12 @@ func _wire_inventory_slots() -> void:
 
 
 func drop_item_from_slot(index: int) -> void:
-	if playable == null or index < 0 or index >= playable.inventory.size():
+	if _inventory == null or playable == null:
 		return
-	var slot = playable.inventory[index]
-	if not (slot is Dictionary and slot.get("item") is Item):
+	var slot := _inventory.get_slot(index)
+	if slot == null or slot.is_empty():
 		return
-	playable.drop_item_to_world(slot["item"] as Item)
+	playable.drop_item_to_world(slot.item)
 
 
 func _on_close_pressed() -> void:
@@ -68,44 +70,44 @@ func _on_close_pressed() -> void:
 
 
 func _refresh() -> void:
-	if not playable:
+	if _inventory == null:
 		return
-
+	var slots := _inventory.get_slots()
 	for i in _inv_slots.size():
-		var btn := _inv_slots[i]
-		if i < playable.inventory.size():
-			var slot = playable.inventory[i]
-			if slot is Dictionary and slot.get("item") is Item:
-				var item: Item = slot["item"]
-				btn.text = "%s\nx%d" % [item.item_name, slot["count"]] if item.max_stapel > 1 else item.item_name
-				btn.icon = item.icon
-				var hint := item.beschreibung
-				hint += "\n(Ziehen auf dunklen Bereich: Ablegen)"
-				if item.verbrauchbar:
-					hint += "\n(Klicken: Verwenden)"
-				elif not item.ausrüstungs_slot.is_empty():
-					hint += "\n(Klicken: Ausrüsten)"
-				btn.tooltip_text = hint
-			else:
-				btn.text = str(slot)
-				btn.icon = null
-				btn.tooltip_text = ""
-		else:
-			btn.text = ""
-			btn.icon = null
-			btn.tooltip_text = ""
+		_update_slot_button(_inv_slots[i], slots[i] if i < slots.size() else null)
+	_refresh_equip()
 
+
+func _update_slot_button(btn: Button, slot: InventorySlot) -> void:
+	if slot == null or slot.is_empty():
+		btn.text = ""
+		btn.icon = null
+		btn.tooltip_text = ""
+		return
+	var item := slot.item
+	btn.text = item.item_name if slot.count <= 1 else "%s\nx%d" % [item.item_name, slot.count]
+	btn.icon = item.icon
+	var hint := item.beschreibung
+	hint += "\n(Ziehen auf dunklen Bereich: Ablegen)"
+	match item.type:
+		Item.ItemType.VERBRAUCHBAR:
+			hint += "\n(Klicken: Verwenden)"
+		Item.ItemType.WAFFE, Item.ItemType.RÜSTUNG, Item.ItemType.ACCESSOIRE:
+			if not item.ausrüstungs_slot.is_empty():
+				hint += "\n(Klicken: Ausrüsten)"
+	btn.tooltip_text = hint
+
+
+func _refresh_equip() -> void:
+	if playable == null:
+		return
 	for slot_key in _equip_buttons:
 		var btn: Button = _equip_buttons[slot_key]
-		var equipped = playable.equipment.get(slot_key)
+		var equipped: Variant = playable.equipment.get(slot_key)
 		if equipped is Item:
-			btn.text = equipped.item_name
-			btn.icon = equipped.icon
-			btn.tooltip_text = equipped.beschreibung
-		elif equipped is String:
-			btn.text = equipped
-			btn.icon = null
-			btn.tooltip_text = ""
+			btn.text = (equipped as Item).item_name
+			btn.icon = (equipped as Item).icon
+			btn.tooltip_text = (equipped as Item).beschreibung
 		else:
 			btn.text = "—"
 			btn.icon = null
@@ -113,27 +115,28 @@ func _refresh() -> void:
 
 
 func _on_inv_slot_pressed(index: int) -> void:
-	if not playable or index >= playable.inventory.size():
+	if _inventory == null:
 		return
-	var slot = playable.inventory[index]
-	if not (slot is Dictionary and slot.get("item") is Item):
+	var slot := _inventory.get_slot(index)
+	if slot == null or slot.is_empty():
 		return
-	var item: Item = slot["item"]
-	if item.verbrauchbar:
-		playable.consume_item(item)
-		return
-	if item.ausrüstungs_slot.is_empty():
-		return
-	playable.remove_item(item)
-	var old = playable.unequip(item.ausrüstungs_slot)
-	if old != null:
-		playable.add_item(old)
-	playable.equip(item.ausrüstungs_slot, item)
+	var item := slot.item
+	match item.type:
+		Item.ItemType.VERBRAUCHBAR:
+			if _inventory.remove_item(item.item_id):
+				item.apply_effects(playable)
+		Item.ItemType.WAFFE, Item.ItemType.RÜSTUNG, Item.ItemType.ACCESSOIRE:
+			if playable and not item.ausrüstungs_slot.is_empty():
+				_inventory.remove_item(item.item_id)
+				var old: Variant = playable.unequip(item.ausrüstungs_slot)
+				if old is Item:
+					_inventory.add_item(old as Item)
+				playable.equip(item.ausrüstungs_slot, item)
 
 
 func _on_equip_pressed(slot_key: String) -> void:
-	if not playable:
+	if playable == null or _inventory == null:
 		return
-	var item = playable.unequip(slot_key)
-	if item != null:
-		playable.add_item(item)
+	var item: Variant = playable.unequip(slot_key)
+	if item is Item:
+		_inventory.add_item(item as Item)

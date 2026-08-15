@@ -1,8 +1,21 @@
 class_name Item extends Resource
 
+enum ItemType {
+	SONSTIGES   = 0,
+	WAFFE       = 1,
+	RÜSTUNG     = 2,
+	ACCESSOIRE  = 3,
+	VERBRAUCHBAR = 4,
+	QUEST       = 5,
+	SCHLÜSSEL   = 6,
+	MATERIAL    = 7,
+	MUNITION    = 8,
+}
+
 @export var item_id: String = ""
 @export var item_name: String = ""
 @export_multiline var beschreibung: String = ""
+@export var type: ItemType = ItemType.SONSTIGES
 @export var icon: Texture2D
 @export var world_texture: Texture2D
 @export var max_stapel: int = 99

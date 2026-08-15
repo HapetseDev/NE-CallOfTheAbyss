@@ -37,4 +37,8 @@ func handle_input(_event: InputEvent) -> State:
 		return null
 	if _event.is_action_pressed("Interact"):
 		return action_menu
+	if _event.is_action_pressed("Inventar"):
+		var inv_state := get_node_or_null("../Inventory") as State
+		if inv_state:
+			return inv_state
 	return null

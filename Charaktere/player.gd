@@ -46,15 +46,23 @@ func _ready() -> void:
 	(_character_sheet_ui as CharacterSheetUI).bind_player(self)
 	if character_sheet and not character_sheet.sheet_changed.is_connected(_on_character_sheet_changed):
 		character_sheet.sheet_changed.connect(_on_character_sheet_changed)
-	if inventory.is_empty():
-		add_item(load("res://Ressources/Items/messer.tres") as Item)
+	var messer := load("res://Ressources/Items/messer.tres") as Item
+	if messer and not inventory.has_item(messer.item_id):
+		add_item(messer)
+
+
+func open_inventory() -> void:
+	_inventory_layer.visible = true
+	_sync_hud_with_overlays()
+
+
+func close_inventory() -> void:
+	_inventory_layer.visible = false
+	_sync_hud_with_overlays()
 
 
 func _process(delta: float) -> void:
 	super._process(delta)
-	if Input.is_action_just_pressed("Inventar"):
-		_inventory_layer.visible = not _inventory_layer.visible
-		_sync_hud_with_inventory()
 	if Input.is_action_just_pressed("Charakterbogen"):
 		_character_sheet_layer.visible = not _character_sheet_layer.visible
 		if _character_sheet_layer.visible:

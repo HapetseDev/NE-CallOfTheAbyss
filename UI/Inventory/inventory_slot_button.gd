@@ -5,17 +5,14 @@ var inventory_ui: InventoryUI
 
 
 func _get_drag_data(_at_position: Vector2) -> Variant:
-	if inventory_ui == null or inventory_ui.playable == null:
+	if inventory_ui == null or inventory_ui._inventory == null:
 		return null
-	if slot_index < 0 or slot_index >= inventory_ui.playable.inventory.size():
+	var slot := inventory_ui._inventory.get_slot(slot_index)
+	if slot == null or slot.is_empty():
 		return null
-	var slot = inventory_ui.playable.inventory[slot_index]
-	if not (slot is Dictionary and slot.get("item") is Item):
-		return null
-	var item: Item = slot["item"]
 	var preview := Label.new()
-	preview.text = item.item_name
-	if slot["count"] > 1:
-		preview.text += " x%d" % slot["count"]
+	preview.text = slot.item.item_name
+	if slot.count > 1:
+		preview.text += " x%d" % slot.count
 	set_drag_preview(preview)
 	return {"type": "inventory_item", "index": slot_index}
