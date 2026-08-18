@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://d4nn3rm4nscn01"]
+[gd_scene format=3 uid="uid://d37ebrsc5nr0s"]
 
 [ext_resource type="Script" uid="uid://d4nn3rm4ngd01" path="res://Charaktere/SPC/Dannerman/dannerman.gd" id="1_hlb18"]
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://Charaktere/SPC/Shalka/Sprites/shalka_sprite.png" id="2_ax5u6"]
@@ -10,12 +10,14 @@
 [ext_resource type="Script" uid="uid://dyehe27ouladm" path="res://Charaktere/SPC/Shalka/playerInteractonHost.gd" id="10_5blqt"]
 [ext_resource type="PackedScene" uid="uid://bp8w5eihw3am5" path="res://Generic/Hurtbox/HurtBox.tscn" id="10_8lehy"]
 [ext_resource type="Script" uid="uid://chbae5ysale58" path="res://Scripts/PlayerCamera.gd" id="11_i8yr6"]
-[ext_resource type="Script" path="res://Systems/Footsteps/FootstepPlayer.gd" id="12_footstep"]
+[ext_resource type="Script" uid="uid://c8jsvjiepvydi" path="res://Systems/Footsteps/FootstepPlayer.gd" id="12_footstep"]
+[ext_resource type="Script" uid="uid://c3asi25egvi4w" path="res://Scripts/state_inventory.gd" id="12_gxe1y"]
 [ext_resource type="Script" uid="uid://kpu3sj2c3f8q" path="res://Scripts/stateActionMenu.gd" id="13_action"]
-[ext_resource type="PackedScene" path="res://Ressources/Models/Schum_Merged_Animations.glb" id="14_dannerman_model"]
-[ext_resource type="Script" path="res://Scripts/character_model_animator.gd" id="15_model_anim"]
-[ext_resource type="PackedScene" uid="uid://binventoryui01" path="res://UI/Inventory/InventoryUI.tscn" id="16_inv"]
-[ext_resource type="PackedScene" uid="uid://bcharsheetui01" path="res://UI/CharacterSheet/character_sheet_ui.tscn" id="17_sheet"]
+[ext_resource type="PackedScene" uid="uid://cm4hk2eh7iqyw" path="res://Ressources/Models/Schum_Merged_Animations.glb" id="14_dannerman_model"]
+[ext_resource type="Script" uid="uid://b2pawue8yff4i" path="res://Scripts/character_model_animator.gd" id="15_model_anim"]
+[ext_resource type="PackedScene" uid="uid://d0soraiactrge" path="res://UI/Inventory/InventoryUI.tscn" id="16_inv"]
+[ext_resource type="PackedScene" uid="uid://bolxhx34q1m65" path="res://UI/CharacterSheet/character_sheet_ui.tscn" id="17_sheet"]
+[ext_resource type="Script" uid="uid://dgjl4xyqav8lp" path="res://Systems/Inventory/inventory.gd" id="18_8uyyn"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hlb18"]
 radius = 0.35
@@ -162,7 +164,7 @@ _data = {
 }
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_5blqt"]
-radius = 0.76537575
+radius = 0.76537573
 
 [sub_resource type="Animation" id="Animation_plxar"]
 length = 0.001
@@ -343,35 +345,31 @@ _data = {
 &"walk_up": SubResource("Animation_3fsuu")
 }
 
-[node name="Dannerman" type="CharacterBody3D"]
+[node name="Dannerman" type="CharacterBody3D" unique_id=807551405]
 collision_mask = 16
 script = ExtResource("1_hlb18")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1489000501]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("CapsuleShape3D_hlb18")
 
-[node name="Model" parent="." instance=ExtResource("14_dannerman_model")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="Model" parent="." unique_id=824149696 instance=ExtResource("14_dannerman_model")]
 
-[node name="ModelAnimator" type="Node" parent="Model"]
+[node name="ModelAnimator" type="Node" parent="Model" unique_id=1734258396]
 script = ExtResource("15_model_anim")
 anim_attack = &"Jump_with_Arms_Open"
 
-[node name="E-Effect" type="Sprite3D" parent="Model"]
+[node name="E-Effect" type="Sprite3D" parent="Model" unique_id=1786998103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, -0.31, 0)
 visible = false
 billboard = 1
 texture_filter = 0
-pixel_size = 0.01
-position = Vector3(0.75, 0.94, 0)
 texture = ExtResource("3_7qxdf")
 
-[node name="E-EffecctAnimPlayer" type="AnimationPlayer" parent="Model/E-Effect"]
-libraries = {
-&"": SubResource("AnimationLibrary_w64td")
-}
+[node name="E-EffecctAnimPlayer" type="AnimationPlayer" parent="Model/E-Effect" unique_id=1584548617]
+libraries/ = SubResource("AnimationLibrary_w64td")
 
-[node name="AttackHurtBox" parent="Model" instance=ExtResource("10_8lehy")]
+[node name="AttackHurtBox" parent="Model" unique_id=1488346515 instance=ExtResource("10_8lehy")]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 collision_layer = 2
@@ -379,75 +377,71 @@ collision_mask = 256
 monitoring = false
 damage = 1
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Model/AttackHurtBox"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Model/AttackHurtBox" unique_id=154307813]
 shape = SubResource("SphereShape3D_5blqt")
 
-[node name="Sprite3D" type="Sprite3D" parent="."]
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1933853854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.03, 0.94, 0)
 visible = false
 billboard = 1
 texture_filter = 0
-pixel_size = 0.01
-position = Vector3(0.03, 0.94, 0)
 texture = ExtResource("2_ax5u6")
 hframes = 6
 vframes = 4
 
-[node name="Shadow" type="Sprite3D" parent="Sprite3D"]
+[node name="Shadow" type="Sprite3D" parent="Sprite3D" unique_id=302343091]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, -0.07, -1, 0.01)
 visible = false
 modulate = Color(0, 0, 0, 0.70980394)
 billboard = 1
 texture_filter = 0
-pixel_size = 0.01
-position = Vector3(-0.07, -1.0, 0.01)
-scale = Vector3(2, 2, 2)
 texture = ExtResource("4_rr3s5")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_oxkgk")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=366271095]
+libraries/ = SubResource("AnimationLibrary_oxkgk")
 
-[node name="StateMachine" type="Node" parent="."]
+[node name="StateMachine" type="Node" parent="." unique_id=1453121725]
 script = ExtResource("3_plxar")
 
-[node name="Idle" type="Node" parent="StateMachine"]
+[node name="Idle" type="Node" parent="StateMachine" unique_id=1996581276]
 script = ExtResource("4_ax5u6")
 
-[node name="Walk" type="Node" parent="StateMachine"]
+[node name="Walk" type="Node" parent="StateMachine" unique_id=1930656384]
 script = ExtResource("5_3fsuu")
 
-[node name="ActionMenu" type="Node" parent="StateMachine"]
+[node name="ActionMenu" type="Node" parent="StateMachine" unique_id=635927957]
 script = ExtResource("13_action")
-action_range = 1.5
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="StateInventory" type="Node" parent="StateMachine" unique_id=720519926]
+script = ExtResource("12_gxe1y")
+metadata/_custom_type_script = "uid://c3asi25egvi4w"
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=824278195]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 6, 8)
 fov = 50.0
 script = ExtResource("11_i8yr6")
-follow_distance = 8.0
-camera_height = 6.0
-pitch_angle = -45.0
-look_ahead_distance = 3.0
 
-[node name="Audio" type="Node3D" parent="."]
+[node name="Audio" type="Node3D" parent="." unique_id=1981920782]
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Audio"]
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Audio" unique_id=131981189]
 max_polyphony = 4
 
-[node name="Interactions" type="Node3D" parent="."]
+[node name="Interactions" type="Node3D" parent="." unique_id=1995960851]
 script = ExtResource("10_5blqt")
 
-[node name="FootstepPlayer" type="Node3D" parent="."]
+[node name="FootstepPlayer" type="Node3D" parent="." unique_id=940688171]
 script = ExtResource("12_footstep")
-step_interval = 0.35
-sprint_step_interval = 0.25
 
-[node name="InventoryLayer" type="CanvasLayer" parent="."]
+[node name="InventoryLayer" type="CanvasLayer" parent="." unique_id=1718936872]
 layer = 25
 
-[node name="InventoryUI" parent="InventoryLayer" instance=ExtResource("16_inv")]
+[node name="InventoryUI" parent="InventoryLayer" unique_id=316512219 instance=ExtResource("16_inv")]
 
-[node name="CharacterSheetLayer" type="CanvasLayer" parent="."]
+[node name="CharacterSheetLayer" type="CanvasLayer" parent="." unique_id=487741408]
 layer = 27
 
-[node name="CharacterSheetUI" parent="CharacterSheetLayer" instance=ExtResource("17_sheet")]
+[node name="CharacterSheetUI" parent="CharacterSheetLayer" unique_id=863270754 instance=ExtResource("17_sheet")]
+
+[node name="Inventory" type="Node" parent="." unique_id=897414768]
+script = ExtResource("18_8uyyn")
+metadata/_custom_type_script = "uid://dgjl4xyqav8lp"
