@@ -20,33 +20,22 @@ Diese Dokumentation beschreibt die implementierten Systeme und deren Verwendung.
 
 ```
 NECOTA2D/
-├── Charaktere/
-│   ├── player.gd                 # Basis-Spielerklasse
-│   ├── Props/Fauna/
-│   │   ├── Plant.tscn            # Zerstörbare Pflanze
-│   │   └── plant.gd
-│   └── SPC/Shalka/
-│       ├── shalka.tscn           # Hauptcharakter-Szene
-│       ├── shalka.gd             # Shalka-spezifische Logik
-│       └── playerInteractonHost.gd
-├── Generic/
-│   ├── Hitbox/                   # Schadens-Empfänger
-│   └── Hurtbox/                  # Schadens-Verursacher
-├── Scripts/
-│   ├── PlayerCamera.gd           # Kamera mit Mode7-Effekt
-│   ├── playerStateMachine.gd     # State Machine Controller
-│   ├── stateIdle.gd              # Idle State
-│   ├── stateWalk.gd              # Walk State mit Sprint
-│   ├── stateActionMenu.gd        # Kontextmenü (Objekte, später Dialoge)
-│   └── stateAttack.gd            # (Archiv) Echtzeit-Schlag — nicht an Shalka-FSM angebunden
-├── Systems/
-│   └── Footsteps/                # Schrittgeräusche-System
-├── UI/
-│   └── MainMenu/                 # Hauptmenü (FF-Stil)
-├── Maps/
-│   └── Level1Ep1.tscn            # Haupt-Level
-└── Globals/
-    └── GlobalLevelManager.gd     # Globaler Level-Manager
+├── src/                          # Verhalten: Scripts, Szenen, Spieldaten
+│   ├── core/                     # Autoloads, Manager, Spiel-Root
+│   ├── gameplay/                 # Character, Combat, Interaction, Inventory, …
+│   ├── world/                    # Levels und Welt-Objekte
+│   ├── resources/                # Spieldaten (.tres, Resource-Scripts)
+│   ├── ui/                       # HUD, Menüs, Inventar-UI
+│   └── debug/
+├── assets/                       # Visuelle und Audio-Assets
+│   ├── characters/
+│   ├── tilesets/
+│   ├── environments/
+│   ├── items/
+│   ├── audio/
+│   └── fonts/
+├── addons/
+└── project.godot
 ```
 
 ---
@@ -61,11 +50,11 @@ Das System erkennt automatisch die Oberfläche unter dem Charakter und spielt pa
 
 | Datei | Beschreibung |
 |-------|--------------|
-| `Systems/Footsteps/SurfaceType.gd` | Enum für Oberflächentypen |
-| `Systems/Footsteps/FootstepSounds.gd` | Resource für Sound-Bibliotheken |
-| `Systems/Footsteps/FootstepPlayer.gd` | Hauptkomponente |
-| `Systems/Footsteps/SurfaceDefinition.gd` | Helper für Oberflächen |
-| `Systems/Footsteps/DefaultFootsteps.tres` | Beispiel-Resource |
+| `src/gameplay/character/footsteps/SurfaceType.gd` | Enum für Oberflächentypen |
+| `src/gameplay/character/footsteps/FootstepSounds.gd` | Resource für Sound-Bibliotheken |
+| `src/gameplay/character/footsteps/FootstepPlayer.gd` | Hauptkomponente |
+| `src/gameplay/character/footsteps/SurfaceDefinition.gd` | Helper für Oberflächen |
+| `src/resources/characters/footsteps/DefaultFootsteps.tres` | Beispiel-Resource |
 
 ### Oberflächentypen
 
@@ -421,8 +410,8 @@ Das Hauptmenü ist im Final Fantasy-Stil mit:
 
 | Datei | Beschreibung |
 |-------|--------------|
-| `UI/MainMenu/MainMenu.tscn` | Hauptszene |
-| `UI/MainMenu/MainMenu.gd` | Steuerungslogik |
+| `src/ui/menus/MainMenu.tscn` | Hauptszene |
+| `src/ui/menus/MainMenu.gd` | Steuerungslogik |
 
 ### Parameter (MainMenu.gd)
 
@@ -431,7 +420,7 @@ Das Hauptmenü ist im Final Fantasy-Stil mit:
 | `logo_display_time` | float | 2.0 | Anzeigedauer pro Logo |
 | `logo_fade_time` | float | 1.0 | Ein-/Ausblendzeit |
 | `intro_scroll_speed` | float | 30.0 | Scroll-Geschwindigkeit |
-| `game_scene_path` | String | "res://Maps/Level1Ep1.tscn" | Spielszene |
+| `game_scene_path` | String | "res://src/core/main_game/main_game.tscn" | Spielszene |
 
 ### Anpassen
 

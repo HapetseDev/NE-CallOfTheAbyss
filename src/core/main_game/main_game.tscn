@@ -1,0 +1,77 @@
+[gd_scene load_steps=8 format=3 uid="uid://cmaingameroot01"]
+
+[ext_resource type="Script" path="res://src/core/main_game/main_game.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://src/gameplay/character/party/party.tscn" id="2_party"]
+[ext_resource type="Script" path="res://src/core/managers/level_manager.gd" id="3_level_manager"]
+[ext_resource type="Script" path="res://src/core/systems/camera_system.gd" id="4_camera"]
+[ext_resource type="Script" path="res://src/core/managers/battle_manager.gd" id="5_battle"]
+[ext_resource type="Script" path="res://src/core/managers/shop_manager.gd" id="6_shop"]
+[ext_resource type="Script" path="res://src/core/systems/dialogue_system.gd" id="7_dialogue"]
+[ext_resource type="Script" path="res://src/debug/debug_menu.gd" id="8_debug"]
+
+[node name="MainGame" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="LevelRoot" type="Node3D" parent="World"]
+
+[node name="EntityRoot" type="Node3D" parent="World"]
+
+[node name="Party" parent="World/EntityRoot" instance=ExtResource("2_party")]
+
+[node name="EffectRoot" type="Node3D" parent="World"]
+
+[node name="BattleRoot" type="Node3D" parent="."]
+
+[node name="Systems" type="Node" parent="."]
+
+[node name="LevelManager" type="Node" parent="Systems"]
+script = ExtResource("3_level_manager")
+
+[node name="CameraSystem" type="Node" parent="Systems"]
+script = ExtResource("4_camera")
+
+[node name="Camera3D" type="Camera3D" parent="Systems/CameraSystem"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 6, 8)
+fov = 50.0
+current = true
+
+[node name="BattleManager" type="Node" parent="Systems"]
+script = ExtResource("5_battle")
+
+[node name="ShopManager" type="Node" parent="Systems"]
+script = ExtResource("6_shop")
+
+[node name="DialogueSystem" type="Node" parent="Systems"]
+script = ExtResource("7_dialogue")
+
+[node name="DebugMenu" type="Node" parent="Systems"]
+script = ExtResource("8_debug")
+
+[node name="UI" type="Node" parent="."]
+
+[node name="HudRoot" type="CanvasLayer" parent="UI"]
+layer = 10
+
+[node name="MenuRoot" type="CanvasLayer" parent="UI"]
+layer = 20
+
+[node name="DialogueRoot" type="CanvasLayer" parent="UI"]
+layer = 30
+
+[node name="PauseRoot" type="CanvasLayer" parent="UI"]
+layer = 40
+
+[node name="TransitionRoot" type="CanvasLayer" parent="UI"]
+layer = 100
+
+[node name="FadeRect" type="ColorRect" parent="UI/TransitionRoot"]
+visible = false
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)

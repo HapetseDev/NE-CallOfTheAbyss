@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="CharacterResource" format=3 uid="uid://b6u12i3gn0c74"]
+
+[ext_resource type="Script" uid="uid://b00j3lcjo3wq5" path="res://src/resources/characters/character_sheet.gd" id="1"]
+[ext_resource type="Script" uid="uid://bwosmotj8yrat" path="res://src/resources/characters/companion_entry.gd" id="1_7b00n"]
+[ext_resource type="Script" uid="uid://dvaktft3p8jrl" path="res://src/resources/characters/learned_skill.gd" id="2"]
+[ext_resource type="Script" uid="uid://byjd75n0v2o8b" path="res://src/resources/characters/relationship_entry.gd" id="2_snwxj"]
+
+[sub_resource type="Resource" id="LearnedSkill_rhetorik"]
+script = ExtResource("2")
+skill_id = "rhetorik_ueberzeugen"
+level = 2
+
+[sub_resource type="Resource" id="LearnedSkill_wissen"]
+script = ExtResource("2")
+skill_id = "wissen"
+level = 1
+
+[resource]
+script = ExtResource("1")
+character_name = "Händler"
+ausbildung = 3
+herkunft = 3
+ziel = "Ein florierendes Geschäft führen"
+besonderheiten = Array[int]([3])
+willenskraft = 2
+verstand = 3
+bewusstsein = 2
+praesenz = 3
+learned_skills = Array[ExtResource("2")]([SubResource("LearnedSkill_rhetorik"), SubResource("LearnedSkill_wissen")])
+active_training_skill_ids = Array[String](["rhetorik_ueberzeugen", "wissen"])

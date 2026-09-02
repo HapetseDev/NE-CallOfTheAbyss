@@ -16,21 +16,15 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="NE- Call of the Abyss"
 config/version="0.1"
-run/main_scene="res://UI/MainMenu/MainMenu.tscn"
+run/main_scene="res://src/ui/menus/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/image="uid://b5ubgw6jktu33"
 config/icon="uid://b5ubgw6jktu33"
 
 [autoload]
 
-GlobalLevelManager="*res://autoload/global_level_manager.gd"
-GameState="*res://autoload/game_state.gd"
-GameDialogueBridge="*res://Systems/Dialogue/game_dialogue_bridge.gd"
+GameState="*res://src/core/autoload/game_state.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
-ShopManager="*res://autoload/shop_manager.gd"
-BattleManager="*res://autoload/battle_manager.gd"
-SkillCatalog="*res://autoload/skill_catalog.gd"
-DebugMenu="*res://autoload/DebugMenu.gd"
 
 [display]
 
@@ -50,13 +44,14 @@ enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg", "res://addons/di
 [file_customization]
 
 folder_colors={
-"res://Maps/": "blue",
-"res://Resources/": "orange",
-"res://Systems/": "gray",
-"res://UI/": "purple",
-"res://autoload/": "yellow",
-"res://characters/": "green",
-"res://world/": "teal"
+"res://assets/": "blue",
+"res://src/": "gray",
+"res://src/core/": "yellow",
+"res://src/debug/": "red",
+"res://src/gameplay/": "green",
+"res://src/resources/": "orange",
+"res://src/ui/": "purple",
+"res://src/world/": "teal"
 }
 
 [input]
@@ -110,7 +105,7 @@ Jump={
 
 [internationalization]
 
-locale/translations_pot_files=PackedStringArray("res://dialogues/merchant_01.dialogue", "res://dialogues/test_npc.dialogue", "res://dialogues/enemy_bandit.dialogue", "res://dialogues/quest_giver.dialogue")
+locale/translations_pot_files=PackedStringArray("res://src/resources/dialogue/merchant_01.dialogue", "res://src/resources/dialogue/test_npc.dialogue", "res://src/resources/dialogue/enemy_bandit.dialogue", "res://src/resources/dialogue/quest_giver.dialogue")
 
 [layer_names]
 

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NPCData" format=3 uid="uid://ba5ogc2jj7la2"]
+
+[ext_resource type="Script" uid="uid://diaivhiqjywxb" path="res://src/resources/characters/npc/npc_data.gd" id="1"]
+[ext_resource type="Resource" uid="uid://csfnwra8aadkw" path="res://src/resources/characters/sheets/quest_giver_01.tres" id="2_sheet"]
+
+[resource]
+script = ExtResource("1")
+npc_id = "quest_giver_01"
+display_name = "Elara"
+character = ExtResource("2_sheet")
+dialogue_file = "res://src/resources/dialogue/quest_giver.dialogue"

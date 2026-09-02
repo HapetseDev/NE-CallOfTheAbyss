@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://cievfbu1ewn2o"]
+
+[ext_resource type="Script" uid="uid://c1cdnktb8w48p" path="res://src/world/objects/fauna/plant.gd" id="1_afvgy"]
+[ext_resource type="Texture2D" uid="uid://ckapqueagnjh3" path="res://assets/environments/props/fauna/gen_plant.png" id="1_j4ejm"]
+[ext_resource type="PackedScene" uid="uid://d0yfn5b3keu55" path="res://src/gameplay/combat/hitbox/Hitbox.tscn" id="2_afvgy"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_j4ejm"]
+radius = 0.32
+height = 0.64
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_afvgy"]
+radius = 0.29
+height = 0.58
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_afvgy"]
+radius = 0.1
+
+[node name="Plant" type="Node3D" unique_id=250169792]
+script = ExtResource("1_afvgy")
+
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1460764644]
+billboard = 1
+texture_filter = 0
+texture = ExtResource("1_j4ejm")
+
+[node name="HItbox" parent="." unique_id=65624825 instance=ExtResource("2_afvgy")]
+collision_layer = 256
+collision_mask = 3
+
+[node name="HitBoxCollision" type="CollisionShape3D" parent="HItbox" unique_id=1659550724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.01, 0, 0.2)
+shape = SubResource("CapsuleShape3D_j4ejm")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1040253264]
+collision_layer = 16
+
+[node name="StaticCollision" type="CollisionShape3D" parent="StaticBody3D" unique_id=873919135]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.2)
+shape = SubResource("CapsuleShape3D_afvgy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=111585893]
+shape = SubResource("SphereShape3D_afvgy")

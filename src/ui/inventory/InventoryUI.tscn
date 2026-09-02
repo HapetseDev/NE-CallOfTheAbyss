@@ -1,0 +1,240 @@
+[gd_scene format=3 uid="uid://d0soraiactrge"]
+
+[ext_resource type="Script" path="res://src/ui/inventory/InventoryUI.gd" id="1_ui"]
+[ext_resource type="Script" path="res://src/ui/inventory/inventory_drop_zone.gd" id="2_drop"]
+[ext_resource type="PackedScene" uid="uid://bpartyhudroot01" path="res://src/ui/hud/party_hud.tscn" id="3_hud"]
+[ext_resource type="PackedScene" uid="uid://binvslotbtn01" path="res://src/ui/inventory/inventory_slot_button.tscn" id="4_slot"]
+
+[node name="InventoryUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ui")
+
+[node name="Overlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.65)
+script = ExtResource("2_drop")
+
+[node name="Window" type="Window" parent="."]
+unique_name_in_owner = true
+visible = false
+oversampling_override = 1.0
+title = "Inventar"
+initial_position = 2
+size = Vector2i(640, 440)
+wrap_controls = true
+transient = true
+
+[node name="MarginContainer" type="MarginContainer" parent="Window"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Window/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MenuHud" parent="Window/MarginContainer/VBoxContainer" instance=ExtResource("3_hud")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HudSeparator" type="HSeparator" parent="Window/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="DropHint" type="Label" parent="Window/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.72, 0.76, 1)
+text = "Fenster per Titelleiste verschieben · Items auf den dunklen Hintergrund ziehen zum Ablegen"
+
+[node name="ContentHBox" type="HBoxContainer" parent="Window/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="EquipCol" type="VBoxContainer" parent="Window/MarginContainer/VBoxContainer/ContentHBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(190, 0)
+
+[node name="EquipTitle" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Ausrüstung"
+
+[node name="EquipGrid" type="GridContainer" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="ContentSeparator" type="VSeparator" parent="Window/MarginContainer/VBoxContainer/ContentHBox"]
+layout_mode = 2
+
+[node name="InvCol" type="VBoxContainer" parent="Window/MarginContainer/VBoxContainer/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="InvTitle" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Gegenstände"
+
+[node name="InvGrid" type="GridContainer" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+columns = 5
+
+[node name="KopfLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+layout_mode = 2
+text = "Kopf:"
+vertical_alignment = 1
+
+[node name="EquipKopf" type="Button" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+clip_text = true
+metadata/slot_key = "kopf"
+
+[node name="RumpfLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+layout_mode = 2
+text = "Rumpf:"
+vertical_alignment = 1
+
+[node name="EquipRumpf" type="Button" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+clip_text = true
+metadata/slot_key = "rumpf"
+
+[node name="WaffeLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+layout_mode = 2
+text = "Waffe:"
+vertical_alignment = 1
+
+[node name="EquipWaffe" type="Button" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+clip_text = true
+metadata/slot_key = "waffe"
+
+[node name="NebenhandLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+layout_mode = 2
+text = "Nebenhand:"
+vertical_alignment = 1
+
+[node name="EquipNebenhand" type="Button" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+clip_text = true
+metadata/slot_key = "nebenhand"
+
+[node name="BeineLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+layout_mode = 2
+text = "Beine:"
+vertical_alignment = 1
+
+[node name="EquipBeine" type="Button" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+clip_text = true
+metadata/slot_key = "beine"
+
+[node name="FüßeLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+layout_mode = 2
+text = "Fuesse:"
+vertical_alignment = 1
+
+[node name="EquipFüße" type="Button" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+clip_text = true
+metadata/slot_key = "füße"
+
+[node name="Slot0" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot1" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot2" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot3" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot4" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot5" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot6" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot7" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot8" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot9" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot10" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot11" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot12" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot13" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot14" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot15" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot16" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot17" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot18" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2
+
+[node name="Slot19" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
+layout_mode = 2

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BattleSkill" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/resources/abilities/battle_skill.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+name = "Heilen"
+manaCost = 8
+targetType = 1
+commandType = 1
+targetCount = 1
+damage = -20

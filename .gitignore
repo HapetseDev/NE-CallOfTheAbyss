@@ -14,8 +14,6 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
-<<<<<<< HEAD
+
 /.claude
-=======
 .DS_Store
->>>>>>> main

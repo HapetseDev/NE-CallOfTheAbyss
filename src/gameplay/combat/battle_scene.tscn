@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3 uid="uid://battlescene001"]
+
+[ext_resource type="Script" path="res://src/gameplay/combat/battle_scene.gd" id="1"]
+[ext_resource type="Script" path="res://addons/Turn_Based_System/nodes/turn_based_controller/turn_based_controller.gd" id="2"]
+[ext_resource type="PackedScene" path="res://addons/Turn_Based_System/scenes/classic/classic_command_menu/classic_command_menu.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://addons/Turn_Based_System/scenes/classic/classic_turn_order_bar/classic_turn_order_bar.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://addons/Turn_Based_System/scenes/classic/classic_status_container/classic_player_status_container.tscn" id="5"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_1"]
+size = Vector2(30, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.25, 0.45, 0.2, 1)
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+ambient_light_source = 2
+ambient_light_energy = 0.6
+
+[node name="BattleScene" type="Node3D"]
+script = ExtResource("1")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.433, 0.25, 0, 0.5, 0.866, -0.5, -0.75, 0.433, 0, 8, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, 0, 12, 14)
+current = true
+fov = 35.0
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_1")
+surface_material_override/0 = SubResource("StandardMaterial3D_1")
+
+[node name="TurnBasedController" type="Node" parent="."]
+process_mode = 3
+script = ExtResource("2")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CommandMenu" parent="CanvasLayer" instance=ExtResource("3")]
+offset_left = 20.0
+offset_top = 520.0
+offset_right = 320.0
+offset_bottom = 720.0
+mainCommandButtonNames = Array[String](["Angriff", "Fähigkeiten", "Fliehen"])
+mainCommandButtonReference = Array[String](["basicAttack", "skills", "run"])
+
+[node name="TurnOrderBar" parent="CanvasLayer" instance=ExtResource("4")]
+offset_left = 760.0
+offset_top = 20.0
+offset_right = 960.0
+offset_bottom = 420.0
+
+[node name="StatusContainer" parent="CanvasLayer" instance=ExtResource("5")]
