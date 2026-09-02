@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://bemml35u3o7lb"
+path="res://.godot/imported/quest_giver.dialogue-4dc36a5c52518884def4ff1ee68f0256.tres"
+
+[deps]
+
+source_file="res://src/resources/dialogue/quest_giver.dialogue"
+dest_files=["res://.godot/imported/quest_giver.dialogue-4dc36a5c52518884def4ff1ee68f0256.tres"]
+
+[params]
+
+defaults=true

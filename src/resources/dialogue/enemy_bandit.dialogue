@@ -1,0 +1,13 @@
+~ start
+Bandit: Halt! Dieses Gebiet gehört mir.
+- Ich will kämpfen!
+	Bandit: Dann bereite dich vor!
+	do start_encounter("bandit_01")
+	=> END
+- Lieber nicht...
+	Bandit: Kluger Entschluss. Verschwinde!
+	=> END
+
+~ defeated
+Bandit: Du hast gewonnen... nimm mein Gold und lass mich ziehen.
+=> END

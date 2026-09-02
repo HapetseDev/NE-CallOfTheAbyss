@@ -1,7 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://d0yfn5b3keu55"]
-
-[ext_resource type="Script" uid="uid://erqsg6hirods" path="res://world/combat/hitbox/Hitbox.gd" id="1_wjkp3"]
-
-[node name="Hitbox" type="Area3D"]
-monitoring = false
-script = ExtResource("1_wjkp3")

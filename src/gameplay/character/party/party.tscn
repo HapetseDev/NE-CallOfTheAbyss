@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8partyroot01"]
+
+[ext_resource type="Script" path="res://src/gameplay/character/party/party.gd" id="1_party"]
+[ext_resource type="PackedScene" uid="uid://d4nn3rm4nscn01" path="res://src/gameplay/character/player/dannerman/dannerman.tscn" id="2_dannerman"]
+[ext_resource type="PackedScene" uid="uid://bycnxispuqyfy" path="res://src/gameplay/character/player/shalka/shalka.tscn" id="3_shalka"]
+
+[node name="Party" type="Node3D"]
+script = ExtResource("1_party")
+
+[node name="Dannerman" parent="." instance=ExtResource("2_dannerman")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+collision_layer = 3
+collision_mask = 1
+
+[node name="Shalka" parent="." instance=ExtResource("3_shalka")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.25, 0, 1.1)
+collision_layer = 3
+collision_mask = 1

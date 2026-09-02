@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="FootstepSounds" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/gameplay/character/footsteps/FootstepSounds.gd" id="1_sounds"]
+
+[resource]
+script = ExtResource("1_sounds")
+grass_sounds = []
+stone_sounds = []
+wood_sounds = []
+sand_sounds = []
+water_sounds = []
+metal_sounds = []
+dirt_sounds = []
+snow_sounds = []
+default_sounds = []
+grass_volume_db = -5.0
+stone_volume_db = 0.0
+wood_volume_db = -2.0
+sand_volume_db = -8.0
+water_volume_db = 0.0
+metal_volume_db = 2.0
+dirt_volume_db = -3.0
+snow_volume_db = -6.0
+default_volume_db = 0.0

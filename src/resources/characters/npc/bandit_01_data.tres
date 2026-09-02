@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="NPCData" format=3 uid="uid://bg4sopwj55mkc"]
+
+[ext_resource type="Script" uid="uid://diaivhiqjywxb" path="res://src/resources/characters/npc/npc_data.gd" id="1"]
+[ext_resource type="Resource" uid="uid://daxgumgpkjthv" path="res://src/resources/characters/sheets/bandit_01.tres" id="2_sheet"]
+
+[resource]
+script = ExtResource("1")
+npc_id = "bandit_01"
+display_name = "Bandit"
+character = ExtResource("2_sheet")
+dialogue_file = "res://src/resources/dialogue/enemy_bandit.dialogue"
+encounter_id = "bandit_01"
+can_fight = true
+defeated_flag = "defeated_bandit"

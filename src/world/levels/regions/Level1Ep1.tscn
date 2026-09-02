@@ -1,0 +1,91 @@
+[gd_scene load_steps=10 format=3 uid="uid://xeyawcaoed1b"]
+
+[ext_resource type="Script" path="res://src/world/levels/regions/level_1_ep1.gd" id="1_level"]
+[ext_resource type="MeshLibrary" uid="uid://b1jw6da4qio7u" path="res://assets/tilesets/tilesfreedungeon.tres" id="1_dwn1t"]
+[ext_resource type="PackedScene" uid="uid://db3heicffpyr0" path="res://src/world/objects/Obelisk.tscn" id="2_dwn1t"]
+[ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://src/world/objects/fauna/Plant.tscn" id="4_iaeds"]
+[ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://src/world/objects/items/basic_item.tscn" id="6_basicitem"]
+[ext_resource type="PackedScene" uid="uid://b330mlkpk17qq" path="res://src/gameplay/character/npc/MerchantNPC.tscn" id="7_merchant"]
+[ext_resource type="PackedScene" uid="uid://npcenemy0001" path="res://src/gameplay/character/npc/EnemyNPC.tscn" id="8_enemy"]
+[ext_resource type="PackedScene" uid="uid://npcquest0001" path="res://src/gameplay/character/npc/QuestNPC.tscn" id="9_quest"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.4, 0.6, 0.9, 1)
+sky_horizon_color = Color(0.7, 0.8, 0.9, 1)
+ground_bottom_color = Color(0.2, 0.15, 0.1, 1)
+ground_horizon_color = Color(0.4, 0.35, 0.3, 1)
+
+[sub_resource type="Sky" id="Sky_env"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_env"]
+background_mode = 2
+sky = SubResource("Sky_env")
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.8, 0.8, 1)
+ambient_light_energy = 0.5
+
+[node name="Level1Ep1" type="Node3D" unique_id=1863077889]
+script = ExtResource("1_level")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2130785140]
+environment = SubResource("Environment_env")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1156210463]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Umgebung" type="Node3D" parent="." unique_id=685506587]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.016746521, 0)
+
+[node name="WandGridMap" type="GridMap" parent="Umgebung" unique_id=560490370]
+mesh_library = ExtResource("1_dwn1t")
+data = {
+"cells": PackedInt32Array(65532, 4, 1441853, -6, 7, 1048694, -4, 9, 1048730, -4, 11, 1048730, -4, 5, 1048730, -4, 3, 1048730, -4, 1, 1048730, -3, 12, 154, -1, 12, 154, -65535, 12, 154, -65534, 11, 1441946, -65534, 9, 1441946, -65533, 8, 655514, -65531, 8, 655514, -65530, 7, 1048730, -65530, 5, 1048730, -65530, 3, 1048730)
+}
+metadata/_editor_floor_ = Vector3(0, 0, 0)
+
+[node name="BodenGridMap" type="GridMap" parent="Umgebung" unique_id=700767776]
+mesh_library = ExtResource("1_dwn1t")
+data = {
+"cells": PackedInt32Array(-2, 7, 1441855, -2, 6, 1441855, -3, 6, 1441855, -4, 5, 1441849, -4, 4, 1441849, -3, 4, 1441856, -2, 4, 1441856, -2, 5, 1441856, -1, 5, 1441856, -1, 6, 1441856, -1, 7, 1048649, -65536, 7, 1441849, -65536, 6, 1441856, -65536, 5, 1441855, -65536, 4, 1441855, -1, 4, 1441855, -3, 5, 1441849, -4, 6, 1441855, -4, 7, 1441855, -3, 7, 1048649, -65535, 6, 1441856, -65534, 6, 1441856, -65534, 5, 1441849, -65534, 4, 1441849, -65534, 3, 1441849, -65534, 2, 1441849, -65535, 3, 1441849, -65535, 4, 1441849, -65534, 1, 1441849, -65534, 0, 1441849, -65535, 0, 1441849, -65535, 1, 1441849, -65535, 2, 1441849, -65535, 7, 1048649, -65534, 7, 1441849, -65535, 5, 1441849, -65535, 65535, 1441849, -65535, 65534, 1441849, -65536, 65534, 1441855, -1, 65534, 1441855, -1, 65535, 1441854, -1, 0, 1441849, -1, 1, 1441856, -1, 2, 1441856, -65536, 2, 1441849, -65536, 1, 1441856, -65536, 0, 1441856, -65536, 65535, 1441855, -65536, 65533, 1441855, -65536, 3, 1441849, -1, 3, 1441856, -2, 3, 1441856, -2, 2, 1441855, -3, 2, 1441855, -3, 3, 1441856, -4, 3, 1441849, -4, 2, 1441849, -5, 1, 1441849, -5, 0, 1441849, -5, 65535, 1441855, -5, 65534, 1441855, -5, 65533, 1441855, -5, 65532, 1441855, -4, 65532, 1441849, -3, 65533, 1441849, -2, 65533, 1441849, -2, 65532, 1441849, -3, 65532, 1441849, -1, 65532, 1441855, -65536, 65532, 1441855, -65535, 65532, 1441856, -65534, 65532, 1441856, -65534, 65533, 1441856, -65534, 65534, 1441856, -65534, 65535, 1441856, -65535, 65533, 1441849, -1, 65533, 1441855, -2, 65534, 1441849, -2, 65535, 1441849, -2, 0, 1441849, -2, 1, 1441855, -3, 65534, 1441849, -4, 65534, 1441849, -3, 65535, 1441849, -3, 0, 1441849, -4, 0, 1441849, -4, 65535, 1441849, -3, 1, 1441849, -4, 65533, 1441849, -4, 1, 1441849, -5, 2, 1441849, -5, 3, 1441849, -5, 4, 1441855, -5, 5, 1441855, -5, 7, 1441855, -5, 6, 1441855, -65536, 65531, 1441855, -5, 65531, 1441855, -4, 65531, 1441855, -3, 65531, 1441849, -2, 65531, 1441849, -1, 65531, 1441855, -65535, 65531, 1441856, -65534, 65531, 1441849, -65535, 65530, 1441856, -65535, 65529, 1441849, -65535, 65528, 1441853, -65535, 65527, 1441853, -65535, 65526, 1441853, -65535, 65525, 1441853, -65535, 65524, 1441853, -65535, 65523, 1441849, -65534, 65522, 1441849, -65534, 65521, 1441849, -65534, 65520, 1441849, -65534, 65519, 1441849, -65534, 65518, 1441849, -65533, 65518, 1441849, -65533, 65519, 1441849, -65533, 65520, 1441849, -65533, 65521, 1441849, -65533, 65522, 1441849, -65533, 65523, 1441849, -65533, 65524, 1441853, -65533, 65525, 1441853, -65533, 65526, 1441853, -65533, 65527, 1441853, -65533, 65528, 1441853, -65533, 65529, 1441853, -65533, 65530, 1441853, -65533, 65531, 1441853, -65533, 65532, 1441849, -65534, 65530, 1441849, -65536, 65529, 1441849, -1, 65530, 1441849, -2, 65530, 1441849, -2, 65529, 1441849, -2, 65528, 1441849, -2, 65527, 1441849, -3, 65528, 1441849, -3, 65529, 1441849, -3, 65530, 1441849, -65533, 5, 1441856, -65533, 4, 1441856, -65533, 3, 1441856, -65533, 2, 1441856, -65533, 1, 1441856, -65533, 0, 1441856, -65533, 65535, 1441856, -65534, 65529, 1441853, -65534, 65528, 1441853, -65534, 65523, 1441853, -65534, 65524, 1441853, -65534, 65525, 1441853, -65534, 65527, 1441853, -65534, 65526, 1441853, -65532, 65531, 1441853, -65532, 65530, 1441853, -65532, 65529, 1441853, -65532, 65528, 1441853, -65532, 65527, 1441853, -65532, 65526, 1441853, -65532, 65525, 1441853, -65531, 65529, 1441853, -65531, 65530, 1441853, -65531, 65531, 1441853, -65531, 65532, 1441853, -65532, 65532, 1441853, -65532, 65533, 1441853, -65532, 65534, 1441853, -65533, 65534, 1441853, -65533, 65533, 1441853, -65531, 65533, 1441853, -65531, 65534, 1441853, -65532, 65535, 1441853, -65532, 0, 1441853, -65532, 1, 1441853, -65532, 2, 1441853, -65531, 1, 1441853, -65531, 0, 1441853, -65531, 2, 1441853, -65532, 3, 1441853, -65532, 4, 1441853, -65530, 0, 1441853, -65530, 65535, 1441853, -65531, 65535, 1441853, -65531, 3, 1048649, -65532, 5, 1441853, -65532, 6, 1441853, -65532, 7, 1441853, -65533, 7, 1441853, -65533, 6, 1441853, -1, 9, 1048647, -3, 8, 1048649, -3, 10, 1048649, -1, 11, 1048649, -65535, 11, 1048649, -65535, 9, 1048649, -65531, 5, 1048649, -65531, 4, 1048649, -65531, 7, 1048649, -65531, 8, 1048649, -65532, 8, 1048649, 131067, 5, 1048648, 131067, 9, 1048648, 131065, 5, 1048649, 131065, 7, 1048649, 131065, 9, 1048649, 131067, 3, 1048649, 131065, 3, 1048649, 131067, 1, 1048649, 131065, 1, 1048649, 131063, 9, 1048649, 131063, 8, 1048649, 131063, 7, 1048649, 131063, 6, 1048649, 131063, 5, 1048649, 131063, 4, 1048649, 131063, 3, 1048649, 131063, 2, 1048649, 131063, 1, 1048649, 131067, 11, 1048649, 131065, 11, 1048649, 131063, 11, 1048649, -3, 11, 1048649, -6, 7, 1048694)
+}
+metadata/_editor_floor_ = Vector3(0, -1, 0)
+
+[node name="LevelObjekte" type="Node3D" parent="Umgebung" unique_id=831462296]
+
+[node name="Plant" parent="Umgebung/LevelObjekte" unique_id=2114659948 instance=ExtResource("4_iaeds")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.89, 0.49301267, 2.68)
+
+[node name="Plant2" parent="Umgebung/LevelObjekte" unique_id=805445862 instance=ExtResource("4_iaeds")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.1168356, 0.5010359, 1.9248135)
+
+[node name="Plant3" parent="Umgebung/LevelObjekte" unique_id=2109516733 instance=ExtResource("4_iaeds")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8144226, 0.47305822, 2.34)
+
+[node name="Heiltrank" parent="Umgebung/LevelObjekte" unique_id=851700656 instance=ExtResource("6_basicitem")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0.5167465, 1.2)
+
+[node name="Obelisk2" parent="Umgebung/LevelObjekte" unique_id=219936670 instance=ExtResource("2_dwn1t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.365471, 0.31498903, -0.5073929)
+
+[node name="ObjectsGridMap" type="GridMap" parent="Umgebung" unique_id=1581374772]
+mesh_library = ExtResource("1_dwn1t")
+data = {
+"cells": PackedInt32Array(-4, 5, 1048591, -4, 9, 1048591, -4, 11, 1048591, -4, 2, 1048591, -65532, 4, 1048620, -65531, 4, 1048620, -65531, 5, 1048620, -65532, 5, 1048620, -65531, 3, 1048621, -3, 4, 1048621, 131065, 8, 1048621, 131066, 10, 1048621)
+}
+metadata/_editor_floor_ = Vector3(0, 1, 0)
+
+[node name="Charaktere" type="Node3D" parent="." unique_id=1320203054]
+
+[node name="PlayerSpawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)
+
+[node name="MerchantNPC" parent="Charaktere" unique_id=1776268600 instance=ExtResource("7_merchant")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 2)
+
+[node name="EnemyNPC" parent="Charaktere" unique_id=1863488218 instance=ExtResource("8_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -2)
+
+[node name="QuestNPC" parent="Charaktere" unique_id=803841953 instance=ExtResource("9_quest")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)

@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://binvslotbtn01"]
+
+[ext_resource type="Script" path="res://src/ui/inventory/inventory_slot_button.gd" id="1_slot"]
+
+[node name="InventorySlotButton" type="Button"]
+custom_minimum_size = Vector2(64, 64)
+clip_text = true
+script = ExtResource("1_slot")
