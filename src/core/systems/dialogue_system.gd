@@ -3,15 +3,19 @@ extends Node
 
 ## Spiel-Dialog unter MainGame/Systems.
 ## Das Addon-Autoload DialogueManager bleibt, weil das Plugin es braucht.
+## Kamera-Wünsche gehen als Signal raus; CameraSystem bewegt die Kamera.
 
 static var instance: DialogueSystem
 
 signal dialogue_started
+signal dialogue_line_changed(subject: Node3D, shot: CameraShot.Kind, look_target: Node3D)
 signal dialogue_ended
 
 var _current_player: Playable
 var _active_balloon: Node
 var _active_npc: NPC
+var _session_active: bool = false
+var _has_applied_shot: bool = false
 
 
 func _enter_tree() -> void:
@@ -23,6 +27,11 @@ func _exit_tree() -> void:
 		instance = null
 
 
+func _ready() -> void:
+	if not DialogueManager.got_dialogue.is_connected(_on_got_dialogue):
+		DialogueManager.got_dialogue.connect(_on_got_dialogue)
+
+
 static func start_npc_dialogue(data: NPCData, player: Playable, source: NPCInteraction = null) -> void:
 	if instance == null:
 		push_error("DialogueSystem: MainGame ist nicht aktiv.")
@@ -32,6 +41,12 @@ static func start_npc_dialogue(data: NPCData, player: Playable, source: NPCInter
 
 func get_current_player() -> Playable:
 	return _current_player
+
+
+func get_active_npc() -> NPC:
+	if _active_npc and is_instance_valid(_active_npc):
+		return _active_npc
+	return null
 
 
 func open_shop(shop_id: String) -> void:
@@ -46,6 +61,16 @@ func start_encounter(encounter_id: String) -> void:
 	if player == null:
 		return
 	BattleManager.start_encounter(encounter_id, player)
+
+
+func request_shot(shot_name: String, subject_key: String = "") -> void:
+	if not _session_active:
+		return
+	var subject := _subject_from_key(subject_key)
+	if subject == null:
+		return
+	var kind := CameraShot.parse(shot_name)
+	_emit_shot(subject, kind)
 
 
 func _start_npc_dialogue(data: NPCData, player: Playable, source: NPCInteraction = null) -> void:
@@ -66,15 +91,112 @@ func _start_npc_dialogue(data: NPCData, player: Playable, source: NPCInteraction
 		return
 	if not DialogueManager.dialogue_ended.is_connected(_on_dialogue_ended):
 		DialogueManager.dialogue_ended.connect(_on_dialogue_ended)
+	_has_applied_shot = false
+	_session_active = true
 	_active_balloon = DialogueManager.show_dialogue_balloon(resource, start_cue, [self, player, GameState])
 	dialogue_started.emit()
 
 
 func _on_dialogue_ended(_resource: DialogueResource) -> void:
 	_active_balloon = null
+	_session_active = false
+	_has_applied_shot = false
 	_restore_dialogue_npc_facing()
 	GameState.release_input_lock()
 	dialogue_ended.emit()
+
+
+func _on_got_dialogue(line: DialogueLine) -> void:
+	if not _session_active or line == null:
+		return
+	if line.type != DMConstants.TYPE_DIALOGUE:
+		return
+	var shot_value: Variant = _shot_from_line(line)
+	var kind: CameraShot.Kind
+	if shot_value == null:
+		if _has_applied_shot:
+			return
+		kind = CameraShot.Kind.MEDIUM
+	else:
+		kind = CameraShot.coerce(shot_value)
+	var subject := _resolve_subject(line)
+	if subject == null:
+		return
+	_emit_shot(subject, kind)
+
+
+func _emit_shot(subject: Node3D, shot: CameraShot.Kind) -> void:
+	if subject == null or not is_instance_valid(subject):
+		return
+	var look_target := subject
+	if shot == CameraShot.Kind.OVER_SHOULDER or shot == CameraShot.Kind.RANDOM:
+		look_target = _conversation_partner(subject)
+	_has_applied_shot = true
+	dialogue_line_changed.emit(subject, shot, look_target)
+
+
+func _shot_from_line(line: DialogueLine) -> Variant:
+	var camera_value := line.get_tag_value("camera")
+	if not camera_value.is_empty():
+		return CameraShot.parse(camera_value)
+	for kind: CameraShot.Kind in CameraShot.CONCRETE:
+		if line.has_tag(CameraShot.tag_name(kind)):
+			return kind
+	if line.has_tag("random"):
+		return CameraShot.Kind.RANDOM
+	return null
+
+
+func _resolve_subject(line: DialogueLine) -> Node3D:
+	var subject_tag := line.get_tag_value("subject").strip_edges().to_lower()
+	if not subject_tag.is_empty():
+		return _subject_from_key(subject_tag)
+	var speaker := line.character.strip_edges()
+	if _matches_playable(_current_player, speaker):
+		return _current_player if is_instance_valid(_current_player) else null
+	var npc := get_active_npc()
+	if _matches_playable(npc, speaker):
+		return npc
+	if npc:
+		return npc
+	if _current_player and is_instance_valid(_current_player):
+		return _current_player
+	return null
+
+
+func _subject_from_key(subject_key: String) -> Node3D:
+	var key := subject_key.strip_edges().to_lower()
+	if key.is_empty() or key == "speaker" or key == "npc":
+		var npc := get_active_npc()
+		if npc:
+			return npc
+		return _current_player if is_instance_valid(_current_player) else null
+	if key == "player" or key == "spieler":
+		return _current_player if is_instance_valid(_current_player) else null
+	if _matches_playable(_current_player, subject_key):
+		return _current_player if is_instance_valid(_current_player) else null
+	var npc := get_active_npc()
+	if _matches_playable(npc, subject_key):
+		return npc
+	return npc if npc else (_current_player if is_instance_valid(_current_player) else null)
+
+
+func _conversation_partner(subject: Node3D) -> Node3D:
+	var npc := get_active_npc()
+	var player: Node3D = _current_player if is_instance_valid(_current_player) else null
+	if subject == npc and player:
+		return player
+	if subject == player and npc:
+		return npc
+	return subject
+
+
+func _matches_playable(who: Playable, speaker: String) -> bool:
+	if who == null or not is_instance_valid(who) or speaker.is_empty():
+		return false
+	if who.get_display_name().nocasecmp_to(speaker) == 0:
+		return true
+	return who.name.nocasecmp_to(speaker) == 0
 
 
 func _get_npc_from_interaction(source: NPCInteraction) -> NPC:

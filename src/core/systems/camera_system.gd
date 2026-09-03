@@ -2,7 +2,7 @@ class_name CameraSystem
 extends Node
 
 ## Weltkamera unter MainGame. Das Level liefert Grenzen/Infos,
-## dieses System entscheidet Target, Follow, Clamp und Cutscenes.
+## dieses System entscheidet Target, Follow, Clamp, Cutscenes und Dialog-Shots.
 
 static var instance: CameraSystem
 
@@ -17,7 +17,11 @@ static var instance: CameraSystem
 @export var zoom_distance_max := 18.0
 @export var zoom_step_scroll := 0.65
 
+@export_group("Dialogkamera")
+@export var dialogue_transition_sec: float = 0.35
+
 const GOLDEN_RATIO: float = 0.618
+const DEFAULT_LOOK_HEIGHT: float = 1.4
 
 @onready var camera: Camera3D = $Camera3D
 
@@ -32,12 +36,18 @@ var _explicit_bounds: bool = false
 var _cutscene_active: bool = false
 var _direction_connected_target: Node3D
 
+var _dialogue_active: bool = false
+var _camera_tween: Tween
+var _saved_gameplay_transform: Transform3D
+var _has_saved_gameplay_transform: bool = false
+
 
 func _enter_tree() -> void:
 	instance = self
 
 
 func _exit_tree() -> void:
+	_kill_camera_tween()
 	if instance == self:
 		instance = null
 
@@ -53,6 +63,7 @@ func _ready() -> void:
 			LevelManager.instance.level_loaded.connect(_on_level_loaded)
 		if not LevelManager.instance.tilemap_bounds_changed.is_connected(_on_tilemap_bounds_changed):
 			LevelManager.instance.tilemap_bounds_changed.connect(_on_tilemap_bounds_changed)
+	_connect_dialogue_signals()
 
 
 func get_camera() -> Camera3D:
@@ -63,7 +74,7 @@ func set_enabled(enabled: bool) -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT if enabled else Node.PROCESS_MODE_DISABLED
 	if camera:
 		camera.current = enabled
-	if enabled and target:
+	if enabled and target and not _dialogue_active:
 		_update_camera_position(1.0)
 
 
@@ -71,7 +82,7 @@ func set_target(new_target: Node3D, snap: bool = false) -> void:
 	_disconnect_target_direction()
 	target = new_target
 	_connect_target_direction()
-	if target and snap:
+	if target and snap and not _dialogue_active:
 		_update_camera_position(1.0)
 
 
@@ -100,8 +111,43 @@ func apply_level(level: BaseLevel) -> void:
 	elif LevelManager.instance:
 		_apply_tilemap_corners(LevelManager.instance.current_tilemap_bounds)
 	_apply_settings(level.get_camera_settings())
-	if target:
+	if target and not _dialogue_active:
 		_update_camera_position(1.0)
+
+
+func show_dialogue_shot(character: Node3D, shot: Variant, look_target: Node3D = null) -> void:
+	if camera == null:
+		return
+	if character == null or not is_instance_valid(character):
+		return
+	_ensure_dialogue_mode()
+	var kind := CameraShot.coerce(shot)
+	var points := DialogueCameraPoints.find_in(character)
+	var marker: Marker3D = null
+	if points:
+		marker = points.resolve_marker(kind)
+		if marker:
+			kind = points.marker_kind(marker)
+		elif kind == CameraShot.Kind.RANDOM:
+			kind = CameraShot.Kind.MEDIUM
+	elif kind == CameraShot.Kind.RANDOM:
+		kind = CameraShot.Kind.MEDIUM
+	var origin: Vector3
+	if marker != null and is_instance_valid(marker):
+		origin = marker.global_position
+	else:
+		origin = _computed_shot_origin(character, kind)
+	var look_node := _resolve_look_node(character, kind, look_target)
+	var look_pos := _focus_of(look_node, points)
+	_tween_camera_to(_shot_transform(origin, look_pos), dialogue_transition_sec)
+
+
+func restore_gameplay_camera() -> void:
+	if camera == null:
+		_leave_dialogue_mode()
+		return
+	var restore_xf := _saved_gameplay_transform if _has_saved_gameplay_transform else _gameplay_transform()
+	_tween_camera_to(restore_xf, dialogue_transition_sec, _leave_dialogue_mode)
 
 
 func _on_level_loaded(level: BaseLevel) -> void:
@@ -141,7 +187,7 @@ func _apply_settings(settings: Dictionary) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _cutscene_active:
+	if _cutscene_active or _dialogue_active:
 		return
 	if event is InputEventMouseButton and event.pressed:
 		match event.button_index:
@@ -162,6 +208,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	if _dialogue_active:
+		return
 	if target:
 		_update_camera_position(delta)
 
@@ -190,7 +238,7 @@ func _disconnect_target_direction() -> void:
 
 
 func _on_direction_changed(new_direction: Vector3) -> void:
-	if _cutscene_active:
+	if _cutscene_active or _dialogue_active:
 		return
 	target_look_offset = new_direction * look_ahead_distance * GOLDEN_RATIO
 
@@ -199,15 +247,24 @@ func _update_camera_position(delta: float) -> void:
 	if target == null or camera == null:
 		return
 	current_offset = current_offset.lerp(target_look_offset, smooth_speed * 0.5 * delta)
-	var focus := _clamp_focus(target.global_position)
-	var base_offset := Vector3(0, camera_height, follow_distance)
-	var look_offset_3d := Vector3(current_offset.x, 0, current_offset.z)
-	var target_position := focus + base_offset + look_offset_3d
+	var xf := _gameplay_transform()
 	if delta >= 1.0:
-		camera.global_position = target_position
+		camera.global_transform = xf
 	else:
-		camera.global_position = camera.global_position.lerp(target_position, smooth_speed * delta)
-	camera.rotation_degrees = Vector3(pitch_angle, 0, 0)
+		camera.global_position = camera.global_position.lerp(xf.origin, smooth_speed * delta)
+		camera.rotation_degrees = Vector3(pitch_angle, 0, 0)
+
+
+func _gameplay_transform() -> Transform3D:
+	var pos := camera.global_position if camera else Vector3.ZERO
+	if target and is_instance_valid(target):
+		var focus := _clamp_focus(target.global_position)
+		var look_offset_3d := Vector3(current_offset.x, 0, current_offset.z)
+		pos = focus + Vector3(0, camera_height, follow_distance) + look_offset_3d
+	var xf := Transform3D.IDENTITY
+	xf.origin = pos
+	xf.basis = Basis.from_euler(Vector3(deg_to_rad(pitch_angle), 0.0, 0.0))
+	return xf
 
 
 func _clamp_focus(focus: Vector3) -> Vector3:
@@ -216,3 +273,128 @@ func _clamp_focus(focus: Vector3) -> Vector3:
 	focus.x = clampf(focus.x, _bounds.position.x, _bounds.end.x)
 	focus.z = clampf(focus.z, _bounds.position.z, _bounds.end.z)
 	return focus
+
+
+func _connect_dialogue_signals() -> void:
+	var ds := DialogueSystem.instance
+	if ds == null:
+		return
+	if not ds.dialogue_started.is_connected(_on_dialogue_started):
+		ds.dialogue_started.connect(_on_dialogue_started)
+	if not ds.dialogue_line_changed.is_connected(_on_dialogue_line_changed):
+		ds.dialogue_line_changed.connect(_on_dialogue_line_changed)
+	if not ds.dialogue_ended.is_connected(_on_dialogue_ended):
+		ds.dialogue_ended.connect(_on_dialogue_ended)
+
+
+func _on_dialogue_started() -> void:
+	_ensure_dialogue_mode()
+
+
+func _on_dialogue_line_changed(subject: Node3D, shot: CameraShot.Kind, look_target: Node3D) -> void:
+	show_dialogue_shot(subject, shot, look_target)
+
+
+func _on_dialogue_ended() -> void:
+	restore_gameplay_camera()
+
+
+func _ensure_dialogue_mode() -> void:
+	if _dialogue_active:
+		return
+	_dialogue_active = true
+	begin_cutscene()
+	_saved_gameplay_transform = _gameplay_transform()
+	_has_saved_gameplay_transform = true
+
+
+func _leave_dialogue_mode() -> void:
+	_kill_camera_tween()
+	_dialogue_active = false
+	_has_saved_gameplay_transform = false
+	end_cutscene()
+	if target and camera:
+		_update_camera_position(1.0)
+
+
+func _resolve_look_node(character: Node3D, kind: CameraShot.Kind, look_target: Node3D) -> Node3D:
+	if kind != CameraShot.Kind.OVER_SHOULDER:
+		return character
+	if look_target != null and is_instance_valid(look_target) and look_target != character:
+		return look_target
+	var ds := DialogueSystem.instance
+	if ds == null:
+		return character
+	var npc := ds.get_active_npc()
+	var player: Node3D = ds.get_current_player()
+	if character == npc and player != null and is_instance_valid(player):
+		return player
+	if character == player and npc != null:
+		return npc
+	return character
+
+
+func _computed_shot_origin(subject: Node3D, kind: CameraShot.Kind) -> Vector3:
+	var focus := _focus_of(subject, null)
+	var facing := Vector3(0.0, 0.0, 1.0)
+	if subject != null and "facing_direction" in subject:
+		var facing_value: Variant = subject.get("facing_direction")
+		if facing_value is Vector3:
+			facing = facing_value
+	facing.y = 0.0
+	if facing.length_squared() < 0.0001:
+		facing = Vector3(0.0, 0.0, 1.0)
+	else:
+		facing = facing.normalized()
+	var right := Vector3.UP.cross(facing)
+	if right.length_squared() < 0.0001:
+		right = Vector3.RIGHT
+	else:
+		right = right.normalized()
+	match kind:
+		CameraShot.Kind.CLOSE:
+			return focus + facing * 1.2 + right * 0.28
+		CameraShot.Kind.WIDE:
+			return focus + facing * 4.5 + right * 0.85 + Vector3.UP * 0.6
+		CameraShot.Kind.PROFILE:
+			return focus + right * 1.9 + facing * 0.3
+		CameraShot.Kind.OVER_SHOULDER:
+			return focus - facing * 1.15 - right * 0.5 + Vector3.UP * 0.15
+		_:
+			return focus + facing * 2.4 + right * 0.5 + Vector3.UP * 0.15
+
+
+func _focus_of(subject: Node3D, points: DialogueCameraPoints) -> Vector3:
+	if subject == null or not is_instance_valid(subject):
+		return camera.global_position + camera.global_basis * Vector3(0, 0, -2.0) if camera else Vector3.ZERO
+	if points:
+		return points.get_look_position(subject)
+	return subject.global_position + Vector3.UP * DEFAULT_LOOK_HEIGHT
+
+
+func _shot_transform(origin: Vector3, look_pos: Vector3) -> Transform3D:
+	if origin.distance_squared_to(look_pos) < 0.0004:
+		origin += Vector3(0.0, 0.0, 0.25)
+	return Transform3D(Basis.IDENTITY, origin).looking_at(look_pos, Vector3.UP)
+
+
+func _tween_camera_to(xf: Transform3D, duration: float, on_finished: Callable = Callable()) -> void:
+	_kill_camera_tween()
+	if camera == null:
+		return
+	if duration <= 0.0:
+		camera.global_transform = xf
+		if on_finished.is_valid():
+			on_finished.call()
+		return
+	_camera_tween = create_tween()
+	_camera_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_camera_tween.tween_property(camera, "global_transform", xf, duration)
+	if on_finished.is_valid():
+		_camera_tween.finished.connect(on_finished, CONNECT_ONE_SHOT)
+
+
+func _kill_camera_tween() -> void:
+	if _camera_tween and is_instance_valid(_camera_tween):
+		_camera_tween.kill()
+	_camera_tween = null

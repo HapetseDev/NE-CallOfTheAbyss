@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://b330mlkpk17qq"]
+[gd_scene load_steps=7 format=3 uid="uid://b330mlkpk17qq"]
 
 [ext_resource type="Script" uid="uid://cjc84d3q4dvic" path="res://src/gameplay/character/npc/NPC.gd" id="1_npc"]
 [ext_resource type="Script" path="res://src/gameplay/character/npc/npc_interaction.gd" id="3_interaction"]
 [ext_resource type="Resource" path="res://src/resources/characters/npc/merchant_01_data.tres" id="4_data"]
 [ext_resource type="PackedScene" path="res://assets/characters/models/Kavenzer_Merged_Animations.glb" id="5_model"]
 [ext_resource type="Script" uid="uid://ou4q3lgfn1xf" path="res://src/gameplay/character/character_model_animator.gd" id="6_model_anim"]
+[ext_resource type="PackedScene" uid="uid://bdialogcampts01" path="res://src/gameplay/character/camera/dialogue_camera_points.tscn" id="7_cam_pts"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35
@@ -30,3 +31,5 @@ anim_run = &"Running"
 [node name="Interaction" type="Node3D" parent="."]
 script = ExtResource("3_interaction")
 data = ExtResource("4_data")
+
+[node name="DialogueCameraPoints" parent="." instance=ExtResource("7_cam_pts")]

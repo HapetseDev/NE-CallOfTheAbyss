@@ -1,5 +1,7 @@
 ~ start
-Händler: Willkommen in meinem Laden! Heiltränke und mehr.
+Händler: Willkommen in meinem Laden! [#camera=close]
+Händler: Heiltränke, Proviant und mehr. [#camera=medium]
+Händler: Was darf's sein? [#camera=profile]
 - Was hast du im Angebot?
 	Händler: Schau selbst — ich öffne mein Sortiment.
 	do open_shop("haendler_01")
