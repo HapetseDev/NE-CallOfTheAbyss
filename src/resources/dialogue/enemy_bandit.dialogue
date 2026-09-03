@@ -1,5 +1,5 @@
 ~ start
-Bandit: Halt! Dieses Gebiet gehört mir.
+Bandit: Halt! Dieses Gebiet gehört mir. [#camera=close]
 - Ich will kämpfen!
 	Bandit: Dann bereite dich vor!
 	do start_encounter("bandit_01")

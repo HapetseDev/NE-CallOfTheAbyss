@@ -1,7 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://xeyawcaoed1b"]
+[gd_scene format=3 uid="uid://xeyawcaoed1b"]
 
-[ext_resource type="Script" path="res://src/world/levels/regions/level_1_ep1.gd" id="1_level"]
 [ext_resource type="MeshLibrary" uid="uid://b1jw6da4qio7u" path="res://assets/tilesets/tilesfreedungeon.tres" id="1_dwn1t"]
+[ext_resource type="Script" uid="uid://3u3tdcfvxntn" path="res://src/world/levels/regions/level_1_ep1.gd" id="1_level"]
 [ext_resource type="PackedScene" uid="uid://db3heicffpyr0" path="res://src/world/objects/Obelisk.tscn" id="2_dwn1t"]
 [ext_resource type="PackedScene" uid="uid://cievfbu1ewn2o" path="res://src/world/objects/fauna/Plant.tscn" id="4_iaeds"]
 [ext_resource type="PackedScene" uid="uid://sjsfxw4c6k4a" path="res://src/world/objects/items/basic_item.tscn" id="6_basicitem"]
@@ -41,9 +41,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.016746521, 0)
 [node name="WandGridMap" type="GridMap" parent="Umgebung" unique_id=560490370]
 mesh_library = ExtResource("1_dwn1t")
 data = {
-"cells": PackedInt32Array(65532, 4, 1441853, -6, 7, 1048694, -4, 9, 1048730, -4, 11, 1048730, -4, 5, 1048730, -4, 3, 1048730, -4, 1, 1048730, -3, 12, 154, -1, 12, 154, -65535, 12, 154, -65534, 11, 1441946, -65534, 9, 1441946, -65533, 8, 655514, -65531, 8, 655514, -65530, 7, 1048730, -65530, 5, 1048730, -65530, 3, 1048730)
+"cells": PackedInt32Array(65532, 4, 1441853, -6, 7, 1048694, -4, 9, 1048730, -4, 11, 1048730, -4, 5, 1048730, -4, 3, 1048730, -4, 1, 1048730, -3, 12, 154, -1, 12, 154, -65535, 12, 154, -65534, 11, 1441946, -65534, 9, 1441946, -65533, 8, 655514, -65531, 8, 655514, -65530, 7, 1048730, -65530, 5, 1048730, -65530, 3, 1048730, -3, 3, 166, -1, 3, 166, -65535, 3, 166, -65533, 3, 166, -65531, 3, 166, -3, 6, 166, -1, 6, 166, -65535, 6, 166, -65533, 6, 166, -65531, 6, 166)
 }
-metadata/_editor_floor_ = Vector3(0, 0, 0)
+metadata/_editor_floor_ = Vector3(0, -1, 0)
 
 [node name="BodenGridMap" type="GridMap" parent="Umgebung" unique_id=700767776]
 mesh_library = ExtResource("1_dwn1t")
@@ -78,9 +78,6 @@ metadata/_editor_floor_ = Vector3(0, 1, 0)
 
 [node name="Charaktere" type="Node3D" parent="." unique_id=1320203054]
 
-[node name="PlayerSpawn" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)
-
 [node name="MerchantNPC" parent="Charaktere" unique_id=1776268600 instance=ExtResource("7_merchant")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 2)
 
@@ -89,3 +86,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -2)
 
 [node name="QuestNPC" parent="Charaktere" unique_id=803841953 instance=ExtResource("9_quest")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
+
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=40052300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.68, 0, 2.01)

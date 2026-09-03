@@ -1,8 +1,9 @@
 ~ start
-Elara: Endlich jemand! Die Kreaturen werden immer aggressiver.
+Elara: Endlich jemand! Die Kreaturen werden immer aggressiver. [#camera=close]
 Elara: Kannst du mir helfen, den Banditen zu besiegen?
 - Ich kümmere mich darum.
-	Elara: Viel Glück! Er hält sich westlich von hier auf.
+	Dannerman: Ich kümmere mich darum. [#camera=close]
+	Elara: Viel Glück! Er hält sich westlich von hier auf. [#camera=over_shoulder]
 	do GameState.set_flag("quest_bandit_started", true)
 	=> END
 - Vielleicht später.
@@ -10,7 +11,7 @@ Elara: Kannst du mir helfen, den Banditen zu besiegen?
 	=> END
 
 ~ quest_done
-Elara: Du hast den Bandit besiegt? Danke — hier, nimm etwas Gold.
+Elara: Du hast den Bandit besiegt? Danke — hier, nimm etwas Gold. [#camera=medium]
 do player.gold += 20
 do GameState.set_flag("quest_bandit_done", true)
 => END

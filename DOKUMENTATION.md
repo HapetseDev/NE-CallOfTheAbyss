@@ -223,9 +223,11 @@ Ende Sprint (Shift losgelassen):
 
 ### Übersicht
 
-Die Kamera hat einen Mode7-ähnlichen schrägen Blickwinkel und positioniert sich basierend auf der Blickrichtung des Spielers (Goldener Schnitt).
+`CameraSystem` unter `MainGame/Systems` besitzt die einzige Welt-`Camera3D`. Im Gameplay folgt sie dem Party-Leader mit Mode-7-Blickwinkel und Look-Ahead (Goldener Schnitt). Level liefern optional Grenzen und Kamera-Settings; das System entscheidet Follow, Clamp, Zoom und Dialog-Shots.
 
-### Parameter (PlayerCamera.gd)
+Es gibt **keine** zweite Kamera auf NPCs oder dem Player. Charaktere stellen nur `Marker3D`-Referenzpunkte bereit.
+
+### Parameter
 
 | Parameter | Typ | Standard | Beschreibung |
 |-----------|-----|----------|--------------|
@@ -234,6 +236,7 @@ Die Kamera hat einen Mode7-ähnlichen schrägen Blickwinkel und positioniert sic
 | `pitch_angle` | float | -45.0 | Neigungswinkel (Mode7: -30 bis -60) |
 | `smooth_speed` | float | 5.0 | Glättung der Bewegung |
 | `look_ahead_distance` | float | 3.0 | Vorausschau in Blickrichtung |
+| `dialogue_transition_sec` | float | 0.35 | Dauer der Dialog-Kamera-Tweens |
 
 ### Goldener Schnitt
 
@@ -265,6 +268,94 @@ pitch_angle = -60.0
 camera_height = 8.0
 follow_distance = 6.0
 ```
+
+### Dialogkamera
+
+Während eines Dialogs hält `CameraSystem` das Follow an und bewegt dieselbe `Camera3D` per Tween zu Shot-Markern. `DialogueSystem` entscheidet nur **wen** und **welchen Shot**; es kennt keine NodePaths zur Kamera.
+
+```
+DialogueSystem
+  dialogue_started / dialogue_line_changed / dialogue_ended
+        ↓
+CameraSystem.show_dialogue_shot(character, shot)
+        ↓
+Marker unter Character/DialogueCameraPoints
+```
+
+#### Was ist ein DialogueCameraPoint?
+
+Ein `Marker3D` unter `DialogueCameraPoints` (bevorzugt mit Script `DialogueCameraMarker`). Der Node-Name legt den Shot fest (`Close`, `Medium`, `Wide`, `Profile`, `OverShoulder`). Optional: `shot`-Enum und `weight` für `RANDOM`.
+
+Die Marker sind **Kamerastandpunkte**, keine Kameras. +Z zeigt nach vorne (Blickrichtung des Charakters). `DialogueCameraPoints` dreht sich zur `Playable.facing_direction`, damit die Marker mit dem Modell mitdrehen.
+
+#### Kamera-Punkte an einem NPC oder Player hinzufügen
+
+1. Charakter-Szene öffnen (NPC oder Player).
+2. Instanz von `src/gameplay/character/camera/dialogue_camera_points.tscn` als Kind des Charakters einfügen (nicht unter `Model`).
+3. Marker im Editor verschieben. Unnötige Shots können unsichtbar geschaltet werden — unsichtbare Marker werden ignoriert.
+4. Eigene Marker reichen: `Marker3D` anlegen und `Close` / `Medium` / … nennen. Das Marker-Script ist nur für Gewichtungen nötig.
+
+`EnemyNPC` hat absichtlich keine Punkte: Dialoge funktionieren trotzdem über eine berechnete Standardposition.
+
+#### Shot in einem Dialog setzen
+
+Bestehende Dialogue-Manager-Tags, keine neue Datenstruktur:
+
+```
+Elara: Endlich jemand! [#camera=close]
+Dannerman: Ich kümmere mich darum. [#camera=close]
+Elara: Viel Glück! [#camera=over_shoulder]
+```
+
+Kurzform: `[#close]`, `[#medium]`, `[#wide]`, `[#profile]`, `[#over_shoulder]`, `[#random]`.
+
+Sprecher wird über den Dialognamen dem Player (`Dannerman`) oder dem aktiven NPC zugeordnet. Abweichend: `[#camera=close,subject=player]`.
+
+Aus einer Mutation: `do request_shot("close", "player")`.
+
+API für andere Systeme:
+
+```gdscript
+camera_system.show_dialogue_shot(npc, CameraShot.Kind.CLOSE)
+camera_system.show_dialogue_shot(npc, "medium")
+```
+
+#### RANDOM
+
+`[#camera=random]` wählt unter den **vorhandenen, sichtbaren** Markern des Charakters. Die aktuelle Auswahl nutzt `DialogueCameraMarker.weight` (Close 3, Medium 5, Profile 1, …) und vermeidet denselben Shot direkt hintereinander, wenn mehrere existieren. Später können Tags/Gewichtungen erweitert werden, ohne die API zu ändern.
+
+#### Fehlende Kamera-Punkte
+
+| Situation | Verhalten |
+|-----------|-----------|
+| Gewünschter Shot fehlt (z. B. `CLOSE`) | Fallback `MEDIUM`, dann `WIDE` / `PROFILE` / `OVER_SHOULDER`, dann erster Marker |
+| Character hat `DialogueCameraPoints` ohne Marker | Berechnete Position vor dem Charakter |
+| Character hat gar keine Punkte | Dialog läuft; berechnete Position |
+| NPC wird während des Dialogs entfernt | Keine Null-Zugriffe; Kamera bleibt bzw. stellt Gameplay wieder her |
+| Dialog endet während eines Tweens | Laufender Tween wird beendet, Gameplay-Kamera fährt zurück |
+
+#### Rückkehr zur Gameplay-Kamera
+
+Bei `dialogue_ended` ruft `CameraSystem.restore_gameplay_camera()` auf: der Dialog-Tween wird abgebrochen, die Kamera fährt zur gespeicherten Follow-Position und Follow/Zoom greifen wieder.
+
+### Player-Occlusion (X-Ray)
+
+Die Mode-7-Kamera dreht nicht. Steht Dannerman hinter einer Wand (`GridMap` / Level-Mesh), bleibt die normale Modelldarstellung unverändert; ein zweiter transparenter Shader-Pass zeichnet nur **verdeckte** Pixel (Depth-Vergleich).
+
+`OcclusionVisual` sitzt als Kind am Player, nicht in `Player.gd`.
+
+| Parameter | Bedeutung |
+|-----------|-----------|
+| `xray_color` | Silhouettenfarbe |
+| `xray_alpha` | Transparenz der Silhouette |
+| `outline_strength` | Rim-/Konturstärke |
+| `glow_strength` | dezentes Emission-Leuchten |
+| `transition_sec` | Fade zwischen normal und X-Ray |
+| `use_raycast_gate` | An: wenige Rays Kamera→Körper steuern den Fade (Hysterese). Aus: nur Depth-Shader |
+| `occlusion_mask` | Physics-Layer der Rays |
+| `debug_show_player_occlusion` | Label3D mit Zustand und letztem Collider |
+
+Shader: `src/gameplay/character/player/occlusion/player_xray.gdshader`.
 
 ---
 
@@ -513,6 +604,8 @@ print(state_machine.current_state.name)
 
 ### Nach 0.1 Alpha
 
+- Player-X-Ray hinter Wänden: `OcclusionVisual` + Depth-Zweitpass, ohne z_index-Tricks
+- Dialogkamera: `CameraSystem` fährt Shots über `DialogueCameraPoints` / `Marker3D`; Dialogue-Manager-Tags `[#camera=…]`
 - Input-Aktion `Attack` → `Interact` (Semantik: Umwelt & Objekte, kein Echtzeit-Schlag)
 - Shalka-State-Machine: Echtzeit-`Attack`-State entfernt; Fokus auf Exploration + Kontextmenü
 
