@@ -8,7 +8,7 @@ extends Node
 static var instance: DialogueSystem
 
 signal dialogue_started
-signal dialogue_line_changed(subject: Node3D, shot: CameraShot.Kind, look_target: Node3D)
+signal dialogue_line_changed(subject: Node3D, shot: CameraShot.Kind, look_target: Node3D, look: CameraShot.Look, shot_tags: PackedStringArray)
 signal dialogue_ended
 
 var _current_player: Playable
@@ -68,14 +68,19 @@ func start_encounter(_encounter_id: String) -> void:
 	CombatManager.trigger_attack(player, npc)
 
 
-func request_shot(shot_name: String, subject_key: String = "") -> void:
+func request_shot(
+	shot_name: String,
+	subject_key: String = "",
+	look_name: String = "",
+	tags_text: String = ""
+) -> void:
 	if not _session_active:
 		return
 	var subject := _subject_from_key(subject_key)
 	if subject == null:
 		return
 	var kind := CameraShot.parse(shot_name)
-	_emit_shot(subject, kind)
+	_emit_shot(subject, kind, CameraShot.parse_look(look_name), CameraShot.split_tags(tags_text))
 
 
 func _start_npc_dialogue(data: NPCData, player: Playable, source: NPCInteraction = null) -> void:
@@ -127,17 +132,22 @@ func _on_got_dialogue(line: DialogueLine) -> void:
 	var subject := _resolve_subject(line)
 	if subject == null:
 		return
-	_emit_shot(subject, kind)
+	_emit_shot(subject, kind, _look_from_line(line), _shot_tags_from_line(line))
 
 
-func _emit_shot(subject: Node3D, shot: CameraShot.Kind) -> void:
+func _emit_shot(
+	subject: Node3D,
+	shot: CameraShot.Kind,
+	look: CameraShot.Look = CameraShot.Look.AUTO,
+	shot_tags: PackedStringArray = PackedStringArray()
+) -> void:
 	if subject == null or not is_instance_valid(subject):
 		return
 	var look_target := subject
 	if shot == CameraShot.Kind.OVER_SHOULDER or shot == CameraShot.Kind.RANDOM:
 		look_target = _conversation_partner(subject)
 	_has_applied_shot = true
-	dialogue_line_changed.emit(subject, shot, look_target)
+	dialogue_line_changed.emit(subject, shot, look_target, look, shot_tags)
 
 
 func _shot_from_line(line: DialogueLine) -> Variant:
@@ -150,6 +160,46 @@ func _shot_from_line(line: DialogueLine) -> Variant:
 	if line.has_tag("random"):
 		return CameraShot.Kind.RANDOM
 	return null
+
+
+func _look_from_line(line: DialogueLine) -> CameraShot.Look:
+	var look_value := line.get_tag_value("look")
+	if look_value.is_empty():
+		look_value = line.get_tag_value("target")
+	if not look_value.is_empty():
+		return CameraShot.parse_look(look_value)
+	var named_looks: Array[CameraShot.Look] = [
+		CameraShot.Look.EYES,
+		CameraShot.Look.HEAD,
+		CameraShot.Look.MOUTH,
+		CameraShot.Look.NONE,
+	]
+	for look: CameraShot.Look in named_looks:
+		if line.has_tag(CameraShot.look_tag_name(look)):
+			return look
+	return CameraShot.Look.AUTO
+
+
+func _shot_tags_from_line(line: DialogueLine) -> PackedStringArray:
+	var result: PackedStringArray = []
+	var keys: PackedStringArray = ["shots", "shot", "camtags", "camtag", "tags"]
+	for key in keys:
+		result = _merged_shot_tags(result, line.get_tag_value(key))
+	for raw in line.tags:
+		var tag := String(raw)
+		var prefix := tag.get_slice("=", 0)
+		if keys.has(prefix):
+			result = _merged_shot_tags(result, tag.get_slice("=", 1))
+	return result
+
+
+func _merged_shot_tags(existing: PackedStringArray, text: String) -> PackedStringArray:
+	if text.is_empty():
+		return existing
+	for part in CameraShot.split_tags(text):
+		if not existing.has(part):
+			existing.append(part)
+	return existing
 
 
 func _resolve_subject(line: DialogueLine) -> Node3D:

@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdialoglooktg01"]
+
+[ext_resource type="Script" path="res://src/gameplay/character/camera/dialogue_look_targets.gd" id="1_looks"]
+
+[node name="DialogueLookTargets" type="Node3D"]
+script = ExtResource("1_looks")
+
+[node name="Eyes" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.56, 0.08)
+gizmo_extents = 0.12
+
+[node name="Head" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+gizmo_extents = 0.14
+
+[node name="Mouth" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42, 0.1)
+gizmo_extents = 0.1

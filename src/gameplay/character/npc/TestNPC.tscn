@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://cnpctest0001a"]
+[gd_scene load_steps=7 format=3 uid="uid://cnpctest0001a"]
 
 [ext_resource type="Script" uid="uid://cjc84d3q4dvic" path="res://src/gameplay/character/npc/NPC.gd" id="1_npc"]
 [ext_resource type="Texture2D" uid="uid://ctmg08x4p1pe6" path="res://assets/characters/7f063f70-aeaa-4ab2-bcf1-69c627e0f406.png" id="2_tex"]
 [ext_resource type="Script" path="res://src/gameplay/character/npc/npc_interaction.gd" id="3_interaction"]
 [ext_resource type="Resource" path="res://src/resources/characters/npc/test_npc_data.tres" id="4_data"]
 [ext_resource type="PackedScene" uid="uid://bdialogcampts01" path="res://src/gameplay/character/camera/dialogue_camera_points.tscn" id="5_cam_pts"]
+[ext_resource type="PackedScene" uid="uid://bdialoglooktg01" path="res://src/gameplay/character/camera/dialogue_look_targets.tscn" id="6_looks"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35
@@ -34,4 +35,9 @@ data = ExtResource("4_data")
 visible = false
 
 [node name="OverShoulder" parent="DialogueCameraPoints" index="4"]
+visible = false
+
+[node name="DialogueLookTargets" parent="." instance=ExtResource("6_looks")]
+
+[node name="Mouth" parent="DialogueLookTargets" index="2"]
 visible = false

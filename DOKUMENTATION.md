@@ -278,52 +278,98 @@ Während eines Dialogs hält `CameraSystem` das Follow an und bewegt dieselbe `C
 DialogueSystem
   dialogue_started / dialogue_line_changed / dialogue_ended
         ↓
-CameraSystem.show_dialogue_shot(character, shot)
+CameraSystem.show_dialogue_shot(character, shot, look_character, look, shot_tags)
         ↓
-Marker unter Character/DialogueCameraPoints
+CameraSystem.events.shot_changed / transition_finished / control_returned
+        ↓
+Position: Character/DialogueCameraPoints/<Shot>
+Blick:    Character/DialogueLookTargets/<Eyes|Head|Mouth>
+FOV:      DialogueCameraMarker.fov (optional, parallel zum Transform-Tween)
 ```
+
+Nur das `CameraSystem` bewegt die Kamera und sendet die Events. Andere Systeme hören, sie setzen keine `Camera3D`-Properties.
 
 #### Was ist ein DialogueCameraPoint?
 
-Ein `Marker3D` unter `DialogueCameraPoints` (bevorzugt mit Script `DialogueCameraMarker`). Der Node-Name legt den Shot fest (`Close`, `Medium`, `Wide`, `Profile`, `OverShoulder`). Optional: `shot`-Enum und `weight` für `RANDOM`.
+Ein `Marker3D` unter `DialogueCameraPoints` (bevorzugt mit Script `DialogueCameraMarker`). Der Node-Name legt den Shot fest (`Close`, `Medium`, `Wide`, `Profile`, `OverShoulder`). Optional: `shot`-Enum, `weight`, `tags`, `fov`, `transition_sec` und `transition_ease`.
 
 Die Marker sind **Kamerastandpunkte**, keine Kameras. +Z zeigt nach vorne (Blickrichtung des Charakters). `DialogueCameraPoints` dreht sich zur `Playable.facing_direction`, damit die Marker mit dem Modell mitdrehen.
+
+Standard-Tags, Gewichte und Kamera der Vorlage (Gameplay-FOV ist 50):
+
+| Shot | Tags | Weight | FOV | Duration | Ease |
+|------|------|--------|-----|----------|------|
+| Close | emotional, intimate | 5 | 62 | 0.35 | Out |
+| Medium | neutral, conversation | 2 | 50 | 0.35 | InOut |
+| Wide | neutral, conversation | 2 | 40 | 0.50 | InOut |
+| Profile | dramatic | 1 | 48 | 0.40 | InOut |
+| OverShoulder | conversation | 2 | 52 | 0.35 | InOut |
+
+`fov = 0` oder ein Marker ohne Script behält den aktuellen Kamera-FOV. `transition_sec < 0` nutzt `CameraSystem.dialogue_transition_sec`. Leere Marker-Tags fallen auf die Defaults zurück. Nur **sichtbare** Marker zählen.
 
 #### Kamera-Punkte an einem NPC oder Player hinzufügen
 
 1. Charakter-Szene öffnen (NPC oder Player).
 2. Instanz von `src/gameplay/character/camera/dialogue_camera_points.tscn` als Kind des Charakters einfügen (nicht unter `Model`).
 3. Marker im Editor verschieben. Unnötige Shots können unsichtbar geschaltet werden — unsichtbare Marker werden ignoriert.
-4. Eigene Marker reichen: `Marker3D` anlegen und `Close` / `Medium` / … nennen. Das Marker-Script ist nur für Gewichtungen nötig.
+4. Eigene Marker reichen: `Marker3D` anlegen und `Close` / `Medium` / … nennen. Das Marker-Script ist für Gewichtungen, Tags und FOV nötig.
 
 `EnemyNPC` hat absichtlich keine Punkte: Dialoge funktionieren trotzdem über eine berechnete Standardposition.
+
+#### Was ist ein DialogueLookTarget?
+
+Ein `Marker3D` unter `DialogueLookTargets`. Der Name legt das Blickziel fest (`Eyes`, `Head`, `Mouth`). Die Kamera steht am Shot-Marker und **schaut** auf dieses Ziel. Ohne Look-Targets gilt weiter `look_height` (Brusthöhe).
+
+#### Look-Targets hinzufügen
+
+1. Charakter-Szene öffnen.
+2. Instanz von `src/gameplay/character/camera/dialogue_look_targets.tscn` als Geschwister von `DialogueCameraPoints` einfügen (nicht unter `Model`).
+3. Marker an Augen, Kopf oder Mund schieben. Unnötige Ziele unsichtbar schalten.
 
 #### Shot in einem Dialog setzen
 
 Bestehende Dialogue-Manager-Tags, keine neue Datenstruktur:
 
 ```
-Elara: Endlich jemand! [#camera=close]
-Dannerman: Ich kümmere mich darum. [#camera=close]
-Elara: Viel Glück! [#camera=over_shoulder]
+Elara: Endlich jemand! [#camera=close,look=eyes]
+Dannerman: Ich kümmere mich darum. [#camera=close,look=eyes]
+Elara: Viel Glück! [#camera=over_shoulder,look=eyes]
+Test-NPC: Ich habe dich vermisst. [#camera=random,shots=emotional+intimate]
 ```
 
-Kurzform: `[#close]`, `[#medium]`, `[#wide]`, `[#profile]`, `[#over_shoulder]`, `[#random]`.
+Kurzform: `[#close]`, `[#look=head]`, `[#target=mouth]`. Ohne `look`-Tag: Close/Profile/OTS → Eyes, Medium/Wide → Head, falls Marker existieren.
+
+`[#look=none]` erzwingt die alte `look_height`-Ausrichtung.
+
+Komma trennt Dialogue-Manager-Tags. Mehrere Shot-Tags deshalb mit `+`: `shots=emotional+intimate`. Aliase: `shot`, `camtags`, `camtag`, `tags`.
 
 Sprecher wird über den Dialognamen dem Player (`Dannerman`) oder dem aktiven NPC zugeordnet. Abweichend: `[#camera=close,subject=player]`.
 
-Aus einer Mutation: `do request_shot("close", "player")`.
+Aus einer Mutation: `do request_shot("close", "player", "eyes")` oder `do request_shot("random", "", "", "emotional+intimate")`.
 
 API für andere Systeme:
 
 ```gdscript
 camera_system.show_dialogue_shot(npc, CameraShot.Kind.CLOSE)
-camera_system.show_dialogue_shot(npc, "medium")
+camera_system.show_dialogue_shot(npc, "medium", null, CameraShot.Look.HEAD)
+camera_system.show_dialogue_shot(npc, "random", null, CameraShot.Look.AUTO, PackedStringArray(["emotional"]))
 ```
 
-#### RANDOM
+#### RANDOM, Tags und Gewichte
 
-`[#camera=random]` wählt unter den **vorhandenen, sichtbaren** Markern des Charakters. Die aktuelle Auswahl nutzt `DialogueCameraMarker.weight` (Close 3, Medium 5, Profile 1, …) und vermeidet denselben Shot direkt hintereinander, wenn mehrere existieren. Später können Tags/Gewichtungen erweitert werden, ohne die API zu ändern.
+Auswahlreihenfolge:
+
+1. Expliziter Shot (`[#camera=close]`) — Tags werden ignoriert
+2. `RANDOM` + passende Marker-Tags (OR: ein gemeinsamer Tag reicht)
+3. Gewichtete Zufallsauswahl unter den Treffern
+4. Kein Tag-Treffer → gewichtet unter allen sichtbaren Markern
+5. Kein Marker → berechnete Position (`MEDIUM`)
+
+`[#camera=random]` ohne `shots=` nutzt nur Schritt 3–5. Ein Shot wird nur gewählt, wenn der Charakter einen sichtbaren Point dafür hat. Der zuletzt verwendete Shot wird übersprungen, sofern ein anderer verfügbar ist.
+
+#### FOV-Übergänge
+
+Dieselbe Welt-`Camera3D` ändert Position und `fov` in **einem** parallelen Tween (`TRANS_SINE`). Ein neuer Shot bricht den laufenden Tween ab und startet vom aktuellen Zustand. Beim Dialogende werden gespeicherte Gameplay-Position **und** Gameplay-FOV wiederhergestellt (Scroll-Zoom über `follow_distance` bleibt unberührt).
 
 #### Fehlende Kamera-Punkte
 
@@ -334,10 +380,39 @@ camera_system.show_dialogue_shot(npc, "medium")
 | Character hat gar keine Punkte | Dialog läuft; berechnete Position |
 | NPC wird während des Dialogs entfernt | Keine Null-Zugriffe; Kamera bleibt bzw. stellt Gameplay wieder her |
 | Dialog endet während eines Tweens | Laufender Tween wird beendet, Gameplay-Kamera fährt zurück |
+| `Eyes` fehlt | Fallback `Head`, dann `Mouth`, dann `look_height` |
+| Character hat keine Look-Targets | Blick bleibt auf `look_height` (wie zuvor) |
 
 #### Rückkehr zur Gameplay-Kamera
 
-Bei `dialogue_ended` ruft `CameraSystem.restore_gameplay_camera()` auf: der Dialog-Tween wird abgebrochen, die Kamera fährt zur gespeicherten Follow-Position und Follow/Zoom greifen wieder.
+Bei `dialogue_ended` ruft `CameraSystem.restore_gameplay_camera()` auf: der Dialog-Tween wird abgebrochen, die Kamera fährt zur gespeicherten Follow-Position, der Gameplay-FOV wird zurückgesetzt, danach greifen Follow und Scroll-Zoom wieder. Anschließend: `events.control_returned`.
+
+#### Camera Events
+
+Kein globaler Event-Bus. Listener hängen am bestehenden `CameraSystem`:
+
+```gdscript
+var hub := CameraSystem.instance.events
+hub.listen_shot_changed(_on_shot_changed)
+
+func _on_shot_changed(event: CameraShotEvent) -> void:
+	# event.character, event.shot, event.look_target, event.duration, event.fov, event.source
+	pass
+
+func _exit_tree() -> void:
+	if CameraSystem.instance:
+		CameraSystem.instance.events.unlisten_shot_changed(_on_shot_changed)
+```
+
+| Signal | Wann | Payload |
+|--------|------|---------|
+| `shot_changed` | aufgelöster Shot startet (inkl. Transition) | `CameraShotEvent` |
+| `transition_finished` | Tween fertig oder Duration 0; nicht bei Abbruch | `CameraShotEvent` |
+| `control_returned` | Gameplay-Kamera wieder aktiv (Dialogende, Levelwechsel, `set_enabled(false)`) | — |
+
+`source`: `dialogue` (jetzt), `restore` (Rückfahrt), `cinematic` (reserviert). Ein späteres CinematicSystem würde `show_dialogue_shot(..., source=&"cinematic")` aufrufen und dieselben Events für Animation/Licht/Audio nutzen — ohne die Kamera selbst zu bewegen.
+
+Levelwechsel und `set_enabled(false)` brechen einen Dialog-Shot ab und senden `control_returned`, ohne `transition_finished`.
 
 ### Player-Occlusion (X-Ray)
 
@@ -668,6 +743,10 @@ print(state_machine.current_state.name)
 ### Nach 0.1 Alpha
 
 - Player-X-Ray hinter Wänden: `OcclusionVisual` + Depth-Zweitpass, ohne z_index-Tricks
+- Dialogkamera: Events `shot_changed` / `transition_finished` / `control_returned` am `CameraSystem.events`
+- Dialogkamera: Shot-FOV und Transition (`DialogueCameraMarker.fov` / `transition_sec` / `transition_ease`), parallel zum Position-Tween
+- Dialogkamera: Shot-Tags und Gewichte für `RANDOM` (`shots=emotional`, `DialogueCameraMarker.weight`/`tags`)
+- Dialogkamera: Look-Targets (`Eyes`/`Head`/`Mouth`) getrennt von Shot-Position; Tags `[#look=eyes]`
 - Dialogkamera: `CameraSystem` fährt Shots über `DialogueCameraPoints` / `Marker3D`; Dialogue-Manager-Tags `[#camera=…]`
 - Input-Aktion `Attack` → `Interact` (Semantik: Umwelt & Objekte, kein Echtzeit-Schlag)
 - Shalka-State-Machine: Echtzeit-`Attack`-State entfernt; Fokus auf Exploration + Kontextmenü

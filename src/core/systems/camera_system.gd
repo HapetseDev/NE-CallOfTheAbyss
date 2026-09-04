@@ -3,6 +3,7 @@ extends Node
 
 ## Weltkamera unter MainGame. Das Level liefert Grenzen/Infos,
 ## dieses System entscheidet Target, Follow, Clamp, Cutscenes und Dialog-Shots.
+## Listener: CameraSystem.instance.events.shot_changed.connect(...)
 
 static var instance: CameraSystem
 
@@ -39,7 +40,11 @@ var _direction_connected_target: Node3D
 var _dialogue_active: bool = false
 var _camera_tween: Tween
 var _saved_gameplay_transform: Transform3D
+var _saved_gameplay_fov: float = 50.0
 var _has_saved_gameplay_transform: bool = false
+var _pending_event: CameraShotEvent
+
+var events: CameraEventHub = CameraEventHub.new()
 
 
 func _enter_tree() -> void:
@@ -61,6 +66,8 @@ func _ready() -> void:
 	if LevelManager.instance:
 		if not LevelManager.instance.level_loaded.is_connected(_on_level_loaded):
 			LevelManager.instance.level_loaded.connect(_on_level_loaded)
+		if not LevelManager.instance.level_unloaded.is_connected(_on_level_unloaded):
+			LevelManager.instance.level_unloaded.connect(_on_level_unloaded)
 		if not LevelManager.instance.tilemap_bounds_changed.is_connected(_on_tilemap_bounds_changed):
 			LevelManager.instance.tilemap_bounds_changed.connect(_on_tilemap_bounds_changed)
 	_connect_dialogue_signals()
@@ -71,6 +78,8 @@ func get_camera() -> Camera3D:
 
 
 func set_enabled(enabled: bool) -> void:
+	if not enabled:
+		_release_dialogue_camera(true)
 	process_mode = Node.PROCESS_MODE_INHERIT if enabled else Node.PROCESS_MODE_DISABLED
 	if camera:
 		camera.current = enabled
@@ -99,6 +108,7 @@ func is_in_cutscene() -> bool:
 
 
 func apply_level(level: BaseLevel) -> void:
+	_release_dialogue_camera(true)
 	_explicit_bounds = false
 	_has_bounds = false
 	if level == null:
@@ -115,7 +125,14 @@ func apply_level(level: BaseLevel) -> void:
 		_update_camera_position(1.0)
 
 
-func show_dialogue_shot(character: Node3D, shot: Variant, look_target: Node3D = null) -> void:
+func show_dialogue_shot(
+	character: Node3D,
+	shot: Variant,
+	look_target: Node3D = null,
+	look: Variant = CameraShot.Look.AUTO,
+	shot_tags: PackedStringArray = PackedStringArray(),
+	source: StringName = CameraShotEvent.SOURCE_DIALOGUE
+) -> void:
 	if camera == null:
 		return
 	if character == null or not is_instance_valid(character):
@@ -125,7 +142,10 @@ func show_dialogue_shot(character: Node3D, shot: Variant, look_target: Node3D = 
 	var points := DialogueCameraPoints.find_in(character)
 	var marker: Marker3D = null
 	if points:
-		marker = points.resolve_marker(kind)
+		if CameraShot.is_concrete(kind):
+			marker = points.resolve_marker(kind)
+		else:
+			marker = points.resolve_marker(CameraShot.Kind.RANDOM, shot_tags)
 		if marker:
 			kind = points.marker_kind(marker)
 		elif kind == CameraShot.Kind.RANDOM:
@@ -137,21 +157,59 @@ func show_dialogue_shot(character: Node3D, shot: Variant, look_target: Node3D = 
 		origin = marker.global_position
 	else:
 		origin = _computed_shot_origin(character, kind)
+	var look_kind := CameraShot.coerce_look(look)
+	if look_kind == CameraShot.Look.AUTO:
+		look_kind = CameraShot.default_look(kind)
 	var look_node := _resolve_look_node(character, kind, look_target)
-	var look_pos := _focus_of(look_node, points)
-	_tween_camera_to(_shot_transform(origin, look_pos), dialogue_transition_sec)
+	var look_pos := _resolve_look_position(look_node, look_kind, points)
+	var requested_fov := CameraShot.INHERIT_FOV
+	var requested_duration := CameraShot.DEFAULT_TRANSITION_SEC
+	var requested_ease: CameraShot.TransitionEase = CameraShot.TransitionEase.DEFAULT
+	if marker is DialogueCameraMarker:
+		var shot_marker := marker as DialogueCameraMarker
+		requested_fov = shot_marker.fov
+		requested_duration = shot_marker.transition_sec
+		requested_ease = shot_marker.transition_ease
+	var duration := CameraShot.resolve_duration(requested_duration, dialogue_transition_sec)
+	var target_fov := CameraShot.resolve_fov(requested_fov, camera.fov)
+	var event: CameraShotEvent = CameraShotEvent.make(character, kind, look_node, duration, look_kind, source) as CameraShotEvent
+	event.shot_tags = shot_tags
+	event.fov = target_fov
+	_pending_event = event
+	events.notify_shot_changed(event)
+	_tween_camera_to(
+		_shot_transform(origin, look_pos),
+		duration,
+		target_fov,
+		requested_ease,
+		_on_shot_transition_finished
+	)
 
 
 func restore_gameplay_camera() -> void:
+	if not _dialogue_active:
+		return
 	if camera == null:
 		_leave_dialogue_mode()
 		return
 	var restore_xf := _saved_gameplay_transform if _has_saved_gameplay_transform else _gameplay_transform()
-	_tween_camera_to(restore_xf, dialogue_transition_sec, _leave_dialogue_mode)
+	var restore_fov := _saved_gameplay_fov if _has_saved_gameplay_transform else camera.fov
+	_pending_event = CameraShotEvent.make_restore(dialogue_transition_sec, restore_fov) as CameraShotEvent
+	_tween_camera_to(
+		restore_xf,
+		dialogue_transition_sec,
+		restore_fov,
+		CameraShot.TransitionEase.DEFAULT,
+		_on_restore_transition_finished
+	)
 
 
 func _on_level_loaded(level: BaseLevel) -> void:
 	apply_level(level)
+
+
+func _on_level_unloaded(_path: String) -> void:
+	_release_dialogue_camera(true)
 
 
 func _on_tilemap_bounds_changed(corners: Array[Vector3]) -> void:
@@ -291,8 +349,14 @@ func _on_dialogue_started() -> void:
 	_ensure_dialogue_mode()
 
 
-func _on_dialogue_line_changed(subject: Node3D, shot: CameraShot.Kind, look_target: Node3D) -> void:
-	show_dialogue_shot(subject, shot, look_target)
+func _on_dialogue_line_changed(
+	subject: Node3D,
+	shot: CameraShot.Kind,
+	look_target: Node3D,
+	look: CameraShot.Look = CameraShot.Look.AUTO,
+	shot_tags: PackedStringArray = PackedStringArray()
+) -> void:
+	show_dialogue_shot(subject, shot, look_target, look, shot_tags)
 
 
 func _on_dialogue_ended() -> void:
@@ -305,16 +369,44 @@ func _ensure_dialogue_mode() -> void:
 	_dialogue_active = true
 	begin_cutscene()
 	_saved_gameplay_transform = _gameplay_transform()
+	_saved_gameplay_fov = camera.fov if camera else 50.0
 	_has_saved_gameplay_transform = true
+
+
+func _on_shot_transition_finished() -> void:
+	if _pending_event and not _pending_event.is_restore():
+		events.notify_transition_finished(_pending_event)
+
+
+func _on_restore_transition_finished() -> void:
+	if _pending_event:
+		events.notify_transition_finished(_pending_event)
+	_leave_dialogue_mode()
+
+
+func _release_dialogue_camera(snap: bool) -> void:
+	if not _dialogue_active:
+		return
+	_kill_camera_tween()
+	if snap and camera and _has_saved_gameplay_transform:
+		camera.global_transform = _saved_gameplay_transform
+		camera.fov = _saved_gameplay_fov
+	_leave_dialogue_mode()
 
 
 func _leave_dialogue_mode() -> void:
 	_kill_camera_tween()
+	if camera and _has_saved_gameplay_transform:
+		camera.fov = _saved_gameplay_fov
+	var was_active := _dialogue_active
 	_dialogue_active = false
 	_has_saved_gameplay_transform = false
+	_pending_event = null
 	end_cutscene()
 	if target and camera:
 		_update_camera_position(1.0)
+	if was_active:
+		events.notify_control_returned()
 
 
 func _resolve_look_node(character: Node3D, kind: CameraShot.Kind, look_target: Node3D) -> Node3D:
@@ -364,12 +456,29 @@ func _computed_shot_origin(subject: Node3D, kind: CameraShot.Kind) -> Vector3:
 			return focus + facing * 2.4 + right * 0.5 + Vector3.UP * 0.15
 
 
-func _focus_of(subject: Node3D, points: DialogueCameraPoints) -> Vector3:
+func _resolve_look_position(
+	subject: Node3D,
+	look: CameraShot.Look,
+	fallback_points: DialogueCameraPoints
+) -> Vector3:
 	if subject == null or not is_instance_valid(subject):
 		return camera.global_position + camera.global_basis * Vector3(0, 0, -2.0) if camera else Vector3.ZERO
-	if points:
-		return points.get_look_position(subject)
+	if look != CameraShot.Look.NONE:
+		var looks := DialogueLookTargets.find_in(subject)
+		if looks:
+			var look_marker := looks.resolve_marker(look)
+			if look_marker != null and is_instance_valid(look_marker):
+				return look_marker.global_position
+	var own_points := DialogueCameraPoints.find_in(subject)
+	if own_points:
+		return own_points.get_look_position(subject)
+	if fallback_points:
+		return fallback_points.get_look_position(subject)
 	return subject.global_position + Vector3.UP * DEFAULT_LOOK_HEIGHT
+
+
+func _focus_of(subject: Node3D, points: DialogueCameraPoints) -> Vector3:
+	return _resolve_look_position(subject, CameraShot.Look.NONE, points)
 
 
 func _shot_transform(origin: Vector3, look_pos: Vector3) -> Transform3D:
@@ -378,23 +487,25 @@ func _shot_transform(origin: Vector3, look_pos: Vector3) -> Transform3D:
 	return Transform3D(Basis.IDENTITY, origin).looking_at(look_pos, Vector3.UP)
 
 
-func _tween_camera_to(xf: Transform3D, duration: float, on_finished: Callable = Callable()) -> void:
-	_kill_camera_tween()
-	if camera == null:
-		return
-	if duration <= 0.0:
-		camera.global_transform = xf
-		if on_finished.is_valid():
-			on_finished.call()
-		return
-	_camera_tween = create_tween()
-	_camera_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_camera_tween.tween_property(camera, "global_transform", xf, duration)
-	if on_finished.is_valid():
-		_camera_tween.finished.connect(on_finished, CONNECT_ONE_SHOT)
+func _tween_camera_to(
+	xf: Transform3D,
+	duration: float,
+	target_fov: float = -1.0,
+	ease: CameraShot.TransitionEase = CameraShot.TransitionEase.DEFAULT,
+	on_finished: Callable = Callable()
+) -> void:
+	_camera_tween = CameraShot.tween_camera(
+		self,
+		camera,
+		xf,
+		duration,
+		target_fov,
+		ease,
+		_camera_tween,
+		on_finished
+	)
 
 
 func _kill_camera_tween() -> void:
-	if _camera_tween and is_instance_valid(_camera_tween):
-		_camera_tween.kill()
+	CameraShot.kill_tween(_camera_tween)
 	_camera_tween = null

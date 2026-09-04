@@ -1,7 +1,7 @@
 ~ start
 Test-NPC: Hallo, Reisender! Willkommen in Level 1. [#camera=random]
-Test-NPC: Ich bin nur ein Test-NPC. [#camera=random]
-Test-NPC: Probiere die anderen Charaktere aus! [#camera=wide]
+Test-NPC: Ich bin nur ein Test-NPC. [#camera=random,shots=emotional]
+Test-NPC: Probiere die anderen Charaktere aus! [#camera=wide,look=mouth]
 => END
 
 ~ defeated
