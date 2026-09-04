@@ -24,6 +24,12 @@ const FLEE_SPEED_FACTOR := 0.02
 const FLEE_CHANCE_MIN := 0.1
 const FLEE_CHANCE_MAX := 0.9
 
-## "Bewegen"-Kampfzug: fester Schritt in eine der vier Richtungen, keine
-## Animation/Kollisionsprüfung (Detailmechanik laut Plan noch offen).
-const MOVE_STEP_DISTANCE := 2.0
+## "Bewegen"-Kampfzug: freie Positionierung in einem Kreis um die
+## Ausgangsposition. Radius = effektive Gewandheit * STANDARD_LENGTH (später
+## ggf. durch Perks modifizierbar). Ein Attributspunkt Gewandheit entspricht
+## also genau einer Standardlänge (~1 Meter in der Spielwelt); da Attribute
+## nie unter 1 starten, ist das gleichzeitig der praktische Mindestradius.
+const STANDARD_LENGTH := 1.0
+## Bewegungstempo während der freien Positionierung (kein Sprint), entspricht
+## StateWalk.base_speed.
+const COMBAT_MOVE_SPEED := 1.0

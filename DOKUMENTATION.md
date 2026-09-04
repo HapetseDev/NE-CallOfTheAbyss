@@ -512,18 +512,20 @@ StateMachine (Node)
 ├── ActionMenu (Node)   → state_action_menu.gd
 ├── CombatWait (Node)   → state_combat_wait.gd     (Kampfsystem)
 ├── CombatTurn (Node)   → state_combat_turn.gd     (Kampfsystem)
+├── CombatMove (Node)   → state_combat_move.gd     (Kampfsystem, "Bewegen"-Positionierung)
 └── PartySkills (Node)  → state_party_skills.gd    (Party-Fähigkeiten, neu)
 ```
 
 ### Struktur (Party-Follower, z.B. Shalka)
 
-Follower werden nie durch WASD/Interact gesteuert (Bewegung läuft komplett über `PartyFollower._update_follow`) – ihre StateMachine bleibt deshalb außerhalb des Kampfes deaktiviert (`process_mode = PROCESS_MODE_DISABLED`) und hat bewusst kein `Walk`/`ActionMenu`:
+Follower werden außerhalb des Kampfes nie durch WASD/Interact gesteuert (Bewegung läuft komplett über `PartyFollower._update_follow`) – ihre StateMachine bleibt deshalb außerhalb des Kampfes deaktiviert (`process_mode = PROCESS_MODE_DISABLED`) und hat bewusst kein `Walk`/`ActionMenu`. Während des eigenen Kampfzugs liest `CombatMove` WASD-Eingaben direkt selbst (`Input.get_axis`, siehe Kampfsystem) – `PartyFollower.get_move_direction()` liefert weiterhin hart `Vector3.ZERO` und bleibt dafür unangetastet:
 
 ```
 StateMachine (Node)
 ├── Idle (Node)       → state_follower_idle.gd   (kein Input-Handling)
 ├── CombatWait (Node) → state_combat_wait.gd      (identisch zum Leader)
-└── CombatTurn (Node) → state_combat_turn.gd      (identisch zum Leader)
+├── CombatTurn (Node) → state_combat_turn.gd      (identisch zum Leader)
+└── CombatMove (Node) → state_combat_move.gd      (identisch zum Leader)
 ```
 
 `Playable.enter_combat_mode()`/`exit_combat_mode()` schalten `process_mode` gezielt für die Dauer der eigenen Kampfteilnahme ein/aus – dadurch sind inzwischen **alle** Partymitglieder im Kampf manuell steuerbar (gleiches Kampfmenü wie der Leader), nicht mehr nur er. `NPCCombatBrain` steuert nur noch echte NPCs/Gegner ohne eigene `CombatTurn`-State (siehe Kampfsystem). Das alte, nie eingebundene `state_attack.gd` (Echtzeit-Overworld-Angriff) bleibt unangetastet im Projekt, wird aber von nichts referenziert.
@@ -596,6 +598,7 @@ Kämpfe finden **in der normalen Spielwelt** statt (Chrono-Trigger/Ultima-6-Stil
 | Sichtlinie | `src/gameplay/combat/engine/combat_line_of_sight.gd` |
 | Einfache Gegner-KI | `src/gameplay/combat/engine/npc_combat_brain.gd` |
 | Spieler-Kampfmenü | `src/gameplay/character/state_machine/state_combat_wait.gd`, `state_combat_turn.gd` |
+| Bewegen (freie Positionierung im Kreis) | `src/gameplay/character/state_machine/state_combat_move.gd` |
 | Balancing-Konstanten | `src/resources/combat/combat_balance.gd` |
 | Fähigkeiten (Magie, Gesang, …) | `src/resources/abilities/ability_definition.gd` + `src/resources/abilities/definitions/*.tres` |
 | Item-Nutzungsarten (stechen/schlagen/werfen) | `src/resources/items/item_usage_mode.gd` |
@@ -624,9 +627,18 @@ Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 
 - **Gegenstand**: nur was in der Hand oder am Gürtel getragen wird (`Inventory.get_combat_usable_items()`, Slots `primaer_hand`/`nebenhand`/`waffe`/`guertel_1-3`), mit den am Gegenstand definierten Nutzungsarten (`ItemData.usage_modes`, z.B. Messer: stechen/werfen; Stein: schlagen/werfen).
 - **Fähigkeit**: `AbilityCatalog.get_available_for(character)` filtert `AbilityDefinition`-Ressourcen danach, ob das zugehörige RPG-Talent (`source_skill_id`, z.B. `magiekunde`, `bardenkunst`) gelernt und hoch genug ist – die Brücke zwischen dem bestehenden Talentsystem und nutzbaren Kampf-Fähigkeiten. Nur `DAMAGE`/`HEAL` sind implementiert; `BUFF`/`DEBUFF`/`UTILITY` melden ehrlich `"effect_not_implemented"` (kein Status-Effekt-System vorhanden).
-- **Bewegen**: fester Schritt relativ zur Blickrichtung (`CombatBalance.MOVE_STEP_DISTANCE`), keine Kollisionsprüfung – Detailmechanik bewusst einfach gehalten.
+- **Bewegen**: wechselt in einen eigenen State (`state_combat_move.gd`) statt sofort aufzulösen – siehe eigener Abschnitt unten.
 - **Reden**: öffnet den vorhandenen Dialog des Ziels (`NPCInteraction.perform_action("talk", …)`), falls vorhanden.
 - **Fliehen**: Erfolgschance aus der Differenz der eigenen Gewandheit zur durchschnittlichen Gewandheit der Gegenseite (`CombatBalance.FLEE_*`).
+
+### Bewegen: freie Positionierung im Kreis
+
+„Bewegen" wechselt vom Kampfmenü (`CombatTurn`) in einen eigenen State `StateCombatMove` (`state_combat_move.gd`), statt sofort einen festen Schritt aufzulösen. Beim Eintritt erscheint ein weltraumfester Kreis (`ActionRangeIndicator`, an der Ausgangsposition verankert statt am Spieler befestigt) mit Radius `effektive Gewandheit × CombatBalance.STANDARD_LENGTH` – ein Attributspunkt Gewandheit entspricht also genau einer Standardlänge (`STANDARD_LENGTH = 1.0`, ~1 Meter in der Spielwelt). Da Attribute nie unter 1 starten, ist das zugleich der praktische Mindestradius; künftige Perks könnten den Radius zusätzlich modifizieren.
+
+Solange `StateCombatMove` aktiv ist, läuft die Runde nicht weiter – wie bei jeder anderen Zugwahl auch bleibt die Initiative-Uhr für alle anderen Teilnehmer bedeutungslos, bis der Zug endet. Der Spieler hat also beliebig Zeit, sich mit WASD frei innerhalb des Kreises zu positionieren (`Input.get_axis` direkt statt `Playable.get_move_direction()`, damit Leader **und** Follower im eigenen Kampfzug gleich funktionieren – `PartyFollower.get_move_direction()` liefert sonst hart `Vector3.ZERO`); `physics()` klemmt die Position nach jedem `move_and_slide()` auf den Kreisrand zurück, falls der Spieler ihn verlässt. Zwei Optionen beenden die Positionierung:
+
+- **Bewegung ausführen**: löst die aktuelle Position regulär als `CombatAction.ActionType.MOVE` über `CombatResolver`/`CombatSession.announce_action()` auf (gleicher Pfad wie zuvor) und beendet den Zug (`end_turn`).
+- **Abbrechen**: setzt die Position auf die Ausgangsposition zurück und kehrt ohne Zugverbrauch ins Kampfmenü (`CombatTurn`) zurück.
 
 ### Sichtlinie
 
