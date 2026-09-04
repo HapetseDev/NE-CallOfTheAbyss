@@ -10,7 +10,6 @@ const SIDE_ATTACKER := &"attacker_side"
 const SIDE_VICTIM := &"victim_side"
 const SIDE_NEUTRAL := &"neutral"
 
-const DEFAULT_AWARENESS_RADIUS := 8.0
 const COMBAT_REACTIVE_GROUP := "combat_reactive"
 
 
@@ -42,7 +41,7 @@ static func classify(candidate: Playable, attacker: Playable, victim: Playable) 
 
 ## Sammelt kampffähige Kandidaten (Gruppe "combat_reactive") im Radius um origin,
 ## origin selbst ausgenommen.
-static func scan_candidates(origin: Node3D, radius: float = DEFAULT_AWARENESS_RADIUS) -> Array[Playable]:
+static func scan_candidates(origin: Node3D, radius: float = CombatBalance.AWARENESS_RADIUS) -> Array[Playable]:
 	var result: Array[Playable] = []
 	if origin == null or not is_instance_valid(origin):
 		return result

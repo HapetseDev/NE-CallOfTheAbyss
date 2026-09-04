@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://cmaingameroot01"]
+[gd_scene load_steps=9 format=3 uid="uid://cmaingameroot01"]
 
 [ext_resource type="Script" path="res://src/core/main_game/main_game.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://src/gameplay/character/party/party.tscn" id="2_party"]
 [ext_resource type="Script" path="res://src/core/managers/level_manager.gd" id="3_level_manager"]
 [ext_resource type="Script" path="res://src/core/systems/camera_system.gd" id="4_camera"]
 [ext_resource type="Script" path="res://src/core/managers/battle_manager.gd" id="5_battle"]
+[ext_resource type="Script" path="res://src/core/managers/combat_manager.gd" id="5b_combat"]
 [ext_resource type="Script" path="res://src/core/managers/shop_manager.gd" id="6_shop"]
 [ext_resource type="Script" path="res://src/core/systems/dialogue_system.gd" id="7_dialogue"]
 [ext_resource type="Script" path="res://src/debug/debug_menu.gd" id="8_debug"]
@@ -39,6 +40,9 @@ current = true
 
 [node name="BattleManager" type="Node" parent="Systems"]
 script = ExtResource("5_battle")
+
+[node name="CombatManager" type="Node" parent="Systems"]
+script = ExtResource("5b_combat")
 
 [node name="ShopManager" type="Node" parent="Systems"]
 script = ExtResource("6_shop")
