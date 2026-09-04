@@ -3,8 +3,10 @@ extends Node
 
 ## Kampfsystem unter MainGame/Systems. Kein Autoload. Löst BattleManager ab:
 ## keine separate Kampfszene, Kämpfe laufen in der normalen Spielwelt (Chrono
-## Trigger/Ultima-6-Stil). Wer sich beteiligt, entscheidet ausschließlich
-## RelationshipService/CombatParticipantResolver – nicht Party-Zugehörigkeit.
+## Trigger/Ultima-6-Stil). Wer sich beteiligt, entscheidet primär
+## RelationshipService/CombatParticipantResolver; Party-Zugehörigkeit ist der
+## Fallback für Kandidaten ohne gepflegte Beziehungsdaten (siehe
+## _default_party_side) – eine echte Beziehung kann das weiterhin übersteuern.
 
 static var instance: CombatManager
 
@@ -63,11 +65,12 @@ func _start_session() -> void:
 	combat_started.emit(active_session)
 
 
-## Teilnehmer mit eigenem CombatTurn-State (aktuell nur der menschlich
-## gesteuerte Player) reagieren selbst auf turn_started (state_combat_wait.gd).
-## Alle anderen – NPCs, Party-Begleiter ohne State Machine – bekommen ihren
-## Zug automatisch von NPCCombatBrain abgenommen, sonst würde die
-## Initiative-Uhr auf ihrem Zug hängen bleiben.
+## Teilnehmer mit eigenem CombatTurn-State (Player und Party-Follower – jedes
+## Partymitglied bekommt eine eigene StateMachine mit CombatWait/CombatTurn,
+## siehe PartyFollower._ready) reagieren selbst auf turn_started
+## (state_combat_wait.gd). Alle anderen – echte NPCs/Gegner ohne eigene
+## CombatTurn-State – bekommen ihren Zug automatisch von NPCCombatBrain
+## abgenommen, sonst würde die Initiative-Uhr auf ihrem Zug hängen bleiben.
 ##
 ## NPCCombatBrain.take_turn() wird deferred aufgerufen statt direkt hier:
 ## Löst der KI-Zug den Kampf aus (z.B. Sieg -> side_wiped -> exit_combat_mode
@@ -103,8 +106,37 @@ func _evaluate_bystanders(attacker: Playable, victim: Playable) -> void:
 		if active_session.get_participant(candidate) != null:
 			continue
 		var side := CombatParticipantResolver.classify(candidate, attacker, victim)
+		if side == CombatParticipantResolver.SIDE_NEUTRAL:
+			side = _default_party_side(candidate, attacker, victim)
 		if side != CombatParticipantResolver.SIDE_NEUTRAL:
 			active_session.admit(candidate, side)
+
+
+## Fällt ein Kandidat mangels Beziehungsdaten auf "neutral", greift die eigene
+## Party trotzdem füreinander ein – Party-Zugehörigkeit ist selbst ohne
+## gepflegten RelationshipEntry ein starkes "wir gehören zusammen"-Signal.
+## Eine tatsächliche Beziehung (siehe classify()) hat weiterhin Vorrang und
+## kann ein Mitglied auch gegen die eigene Party stellen.
+func _default_party_side(candidate: Playable, attacker: Playable, victim: Playable) -> StringName:
+	if _same_party(candidate, attacker):
+		return CombatParticipantResolver.SIDE_ATTACKER
+	if _same_party(candidate, victim):
+		return CombatParticipantResolver.SIDE_VICTIM
+	return CombatParticipantResolver.SIDE_NEUTRAL
+
+
+func _same_party(a: Playable, b: Playable) -> bool:
+	var party := _find_party(a)
+	return party != null and party.get_all_members().has(b)
+
+
+func _find_party(playable: Playable) -> Party:
+	var node: Node = playable
+	while node:
+		if node is Party:
+			return node as Party
+		node = node.get_parent()
+	return null
 
 
 func _on_side_wiped(losing_side: StringName, session: CombatSession) -> void:

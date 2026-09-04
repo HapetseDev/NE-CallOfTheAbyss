@@ -503,18 +503,32 @@ func on_damaged(damage: int):
 
 Erkundung nutzt die State Machine für **Bewegung** und **Interaktion** (Kontextmenü). **Kampf** ist rundenbasiert und läuft direkt in der Erkundungs-Welt (kein Szenenwechsel) – siehe [Kampfsystem](#kampfsystem). Für Kampfteilnehmer übersteuern `CombatWait`/`CombatTurn` die normale Idle/Walk/ActionMenu-Steuerung, solange sie an einer Kampfsitzung beteiligt sind.
 
-### Struktur (Dannerman, spielbarer Charakter)
+### Struktur (Dannerman, Leader/spielbarer Charakter)
 
 ```
 StateMachine (Node)
-├── Idle (Node)       → state_idle.gd
-├── Walk (Node)        → state_walk.gd
-├── ActionMenu (Node)  → state_action_menu.gd
-├── CombatWait (Node)  → state_combat_wait.gd   (neu, Kampfsystem)
-└── CombatTurn (Node)  → state_combat_turn.gd   (neu, Kampfsystem)
+├── Idle (Node)        → state_idle.gd
+├── Walk (Node)         → state_walk.gd
+├── ActionMenu (Node)   → state_action_menu.gd
+├── CombatWait (Node)   → state_combat_wait.gd     (Kampfsystem)
+├── CombatTurn (Node)   → state_combat_turn.gd     (Kampfsystem)
+├── CombatMove (Node)   → state_combat_move.gd     (Kampfsystem, "Bewegen"-Positionierung)
+└── PartySkills (Node)  → state_party_skills.gd    (Party-Fähigkeiten, neu)
 ```
 
-Das alte, nie eingebundene `state_attack.gd` (Echtzeit-Overworld-Angriff) bleibt unangetastet im Projekt, wird aber von nichts referenziert. NPCs und Party-Begleiter (z.B. Shalka) haben aktuell keine eigene StateMachine-Node und werden im Kampf automatisch von `NPCCombatBrain` gesteuert (siehe Kampfsystem).
+### Struktur (Party-Follower, z.B. Shalka)
+
+Follower werden außerhalb des Kampfes nie durch WASD/Interact gesteuert (Bewegung läuft komplett über `PartyFollower._update_follow`) – ihre StateMachine bleibt deshalb außerhalb des Kampfes deaktiviert (`process_mode = PROCESS_MODE_DISABLED`) und hat bewusst kein `Walk`/`ActionMenu`. Während des eigenen Kampfzugs liest `CombatMove` WASD-Eingaben direkt selbst (`Input.get_axis`, siehe Kampfsystem) – `PartyFollower.get_move_direction()` liefert weiterhin hart `Vector3.ZERO` und bleibt dafür unangetastet:
+
+```
+StateMachine (Node)
+├── Idle (Node)       → state_follower_idle.gd   (kein Input-Handling)
+├── CombatWait (Node) → state_combat_wait.gd      (identisch zum Leader)
+├── CombatTurn (Node) → state_combat_turn.gd      (identisch zum Leader)
+└── CombatMove (Node) → state_combat_move.gd      (identisch zum Leader)
+```
+
+`Playable.enter_combat_mode()`/`exit_combat_mode()` schalten `process_mode` gezielt für die Dauer der eigenen Kampfteilnahme ein/aus – dadurch sind inzwischen **alle** Partymitglieder im Kampf manuell steuerbar (gleiches Kampfmenü wie der Leader), nicht mehr nur er. `NPCCombatBrain` steuert nur noch echte NPCs/Gegner ohne eigene `CombatTurn`-State (siehe Kampfsystem). Das alte, nie eingebundene `state_attack.gd` (Echtzeit-Overworld-Angriff) bleibt unangetastet im Projekt, wird aber von nichts referenziert.
 
 ### State-Basis (state.gd)
 
@@ -584,15 +598,20 @@ Kämpfe finden **in der normalen Spielwelt** statt (Chrono-Trigger/Ultima-6-Stil
 | Sichtlinie | `src/gameplay/combat/engine/combat_line_of_sight.gd` |
 | Einfache Gegner-KI | `src/gameplay/combat/engine/npc_combat_brain.gd` |
 | Spieler-Kampfmenü | `src/gameplay/character/state_machine/state_combat_wait.gd`, `state_combat_turn.gd` |
+| Bewegen (freie Positionierung im Kreis) | `src/gameplay/character/state_machine/state_combat_move.gd` |
 | Balancing-Konstanten | `src/resources/combat/combat_balance.gd` |
 | Fähigkeiten (Magie, Gesang, …) | `src/resources/abilities/ability_definition.gd` + `src/resources/abilities/definitions/*.tres` |
 | Item-Nutzungsarten (stechen/schlagen/werfen) | `src/resources/items/item_usage_mode.gd` |
+| Party-Fähigkeiten-Menü außerhalb des Kampfes | `src/gameplay/character/state_machine/state_party_skills.gd`, `src/gameplay/combat/engine/party_ability_resolver.gd` |
+| Kampfreihenfolge-HUD | `src/ui/hud/combat_order_hud.gd`/`.tscn`, `combat_order_entry.gd`/`.tscn` |
+| Aktions-Feedback ("wer tut was") | `src/gameplay/combat/engine/combat_action_outcome.gd`, `combat_narrator.gd` |
+| Ereignis-Log (Kampf, Items, Dialog) | `src/core/autoload/event_log.gd` (Autoload), `src/ui/hud/event_log_hud.gd`/`.tscn` |
 
 ### Beziehungen entscheiden über Kampfseiten
 
 `CharacterResource.beziehungen: Array[RelationshipEntry]` verweist per `target_id` auf einen anderen Charakter (`character_id`) oder eine Fraktion (`Faction.faction_id`, `CharacterResource.faction_ids`), mit einer Wertung von **-10 (feindlich) bis +10 (absolut intim)** (`CharacterEnums.BEZIEHUNG_MIN/MAX`). `RelationshipService.get_disposition(A, B)` liest das gerichtet aus `A`s eigenem `beziehungen`-Array (nicht symmetrisch) – ein Individual-Eintrag hat Vorrang vor Fraktions-Einträgen.
 
-Bricht ein Kampf aus, sammelt `CombatParticipantResolver.scan_candidates()` alle Charaktere aus der Gruppe `"combat_reactive"` im Wahrnehmungsradius (`CombatBalance.AWARENESS_RADIUS`) und ordnet jeden per `classify()` einer Seite zu: positive Beziehung zum Opfer → steht ihm bei; positive Beziehung zum Angreifer → unterstützt ihn; sonst neutral (schaut zu, wird kein Kampfteilnehmer). Das gilt uneingeschränkt auch für die eigene Party – ein Party-Mitglied mit hoher Beziehung zum Angegriffenen wechselt automatisch die Seite.
+Bricht ein Kampf aus, sammelt `CombatParticipantResolver.scan_candidates()` alle Charaktere aus der Gruppe `"combat_reactive"` im Wahrnehmungsradius (`CombatBalance.AWARENESS_RADIUS`) und ordnet jeden per `classify()` einer Seite zu: positive Beziehung zum Opfer → steht ihm bei; positive Beziehung zum Angreifer → unterstützt ihn; sonst neutral (schaut zu, wird kein Kampfteilnehmer). Das gilt uneingeschränkt auch für die eigene Party – ein Party-Mitglied mit hoher Beziehung zum Angegriffenen wechselt automatisch die Seite. Fällt ein Kandidat mangels gepflegter `beziehungen`-Einträge auf neutral zurück, greift `CombatManager._default_party_side()`: eigene Party-Mitglieder stehen sich trotzdem automatisch bei (Party-Zugehörigkeit als starkes Vorgabe-Signal), eine echte Beziehung kann das weiterhin übersteuern.
 
 ### Initiative statt fester Rundenreihenfolge
 
@@ -600,7 +619,7 @@ Bricht ein Kampf aus, sammelt `CombatParticipantResolver.scan_candidates()` alle
 
 ### Kampfmodus statt Szenenwechsel
 
-`Playable.enter_combat_mode(session)`/`exit_combat_mode()` übersteuern nur für tatsächliche Teilnehmer die eigene State Machine (Wechsel zu `CombatWait`/`CombatTurn`) – **kein** globaler `GameState`-Input-Lock. Unbeteiligte Charaktere laufen währenddessen normal weiter. Nur der spielbare Charakter (Dannerman) hat einen `CombatTurn`-State mit Menü; alle anderen Teilnehmer (NPCs, Party-Begleiter ohne eigene State Machine) werden automatisch von `NPCCombatBrain` gesteuert, sobald sie an der Reihe sind – sonst bliebe die Initiative-Uhr auf ihrem Zug hängen.
+`Playable.enter_combat_mode(session)`/`exit_combat_mode()` übersteuern nur für tatsächliche Teilnehmer die eigene State Machine (Wechsel zu `CombatWait`/`CombatTurn`) – **kein** globaler `GameState`-Input-Lock. Unbeteiligte Charaktere laufen währenddessen normal weiter. **Alle** Partymitglieder (Leader und Follower, siehe [State Machine](#state-machine)) haben einen `CombatTurn`-State mit demselben Kampfmenü und werden dadurch automatisch manuell erkannt (`CombatManager._has_manual_control()`); nur echte NPCs/Gegner ohne eigene `CombatTurn`-State werden von `NPCCombatBrain` gesteuert, sobald sie an der Reihe sind – sonst bliebe die Initiative-Uhr auf ihrem Zug hängen.
 
 ### Zug-Optionen
 
@@ -608,9 +627,18 @@ Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 
 - **Gegenstand**: nur was in der Hand oder am Gürtel getragen wird (`Inventory.get_combat_usable_items()`, Slots `primaer_hand`/`nebenhand`/`waffe`/`guertel_1-3`), mit den am Gegenstand definierten Nutzungsarten (`ItemData.usage_modes`, z.B. Messer: stechen/werfen; Stein: schlagen/werfen).
 - **Fähigkeit**: `AbilityCatalog.get_available_for(character)` filtert `AbilityDefinition`-Ressourcen danach, ob das zugehörige RPG-Talent (`source_skill_id`, z.B. `magiekunde`, `bardenkunst`) gelernt und hoch genug ist – die Brücke zwischen dem bestehenden Talentsystem und nutzbaren Kampf-Fähigkeiten. Nur `DAMAGE`/`HEAL` sind implementiert; `BUFF`/`DEBUFF`/`UTILITY` melden ehrlich `"effect_not_implemented"` (kein Status-Effekt-System vorhanden).
-- **Bewegen**: fester Schritt relativ zur Blickrichtung (`CombatBalance.MOVE_STEP_DISTANCE`), keine Kollisionsprüfung – Detailmechanik bewusst einfach gehalten.
+- **Bewegen**: wechselt in einen eigenen State (`state_combat_move.gd`) statt sofort aufzulösen – siehe eigener Abschnitt unten.
 - **Reden**: öffnet den vorhandenen Dialog des Ziels (`NPCInteraction.perform_action("talk", …)`), falls vorhanden.
 - **Fliehen**: Erfolgschance aus der Differenz der eigenen Gewandheit zur durchschnittlichen Gewandheit der Gegenseite (`CombatBalance.FLEE_*`).
+
+### Bewegen: freie Positionierung im Kreis
+
+„Bewegen" wechselt vom Kampfmenü (`CombatTurn`) in einen eigenen State `StateCombatMove` (`state_combat_move.gd`), statt sofort einen festen Schritt aufzulösen. Beim Eintritt erscheint ein weltraumfester Kreis (`ActionRangeIndicator`, an der Ausgangsposition verankert statt am Spieler befestigt) mit Radius `effektive Gewandheit × CombatBalance.STANDARD_LENGTH` – ein Attributspunkt Gewandheit entspricht also genau einer Standardlänge (`STANDARD_LENGTH = 1.0`, ~1 Meter in der Spielwelt). Da Attribute nie unter 1 starten, ist das zugleich der praktische Mindestradius; künftige Perks könnten den Radius zusätzlich modifizieren.
+
+Solange `StateCombatMove` aktiv ist, läuft die Runde nicht weiter – wie bei jeder anderen Zugwahl auch bleibt die Initiative-Uhr für alle anderen Teilnehmer bedeutungslos, bis der Zug endet. Der Spieler hat also beliebig Zeit, sich mit WASD frei innerhalb des Kreises zu positionieren (`Input.get_axis` direkt statt `Playable.get_move_direction()`, damit Leader **und** Follower im eigenen Kampfzug gleich funktionieren – `PartyFollower.get_move_direction()` liefert sonst hart `Vector3.ZERO`); `physics()` klemmt die Position nach jedem `move_and_slide()` auf den Kreisrand zurück, falls der Spieler ihn verlässt. Zwei Optionen beenden die Positionierung:
+
+- **Bewegung ausführen**: löst die aktuelle Position regulär als `CombatAction.ActionType.MOVE` über `CombatResolver`/`CombatSession.announce_action()` auf (gleicher Pfad wie zuvor) und beendet den Zug (`end_turn`).
+- **Abbrechen**: setzt die Position auf die Ausgangsposition zurück und kehrt ohne Zugverbrauch ins Kampfmenü (`CombatTurn`) zurück.
 
 ### Sichtlinie
 
@@ -620,9 +648,31 @@ Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 
 Kein manueller "Verteidigen"-Zug: `CombatResolver.resolve_damage()` würfelt bei jedem Treffer automatisch Ausweichen (aus der Gewandheit des Ziels) und mindert den Schaden über die Robustheit des Ziels – für jeden Charakter, jederzeit.
 
+### Kampfreihenfolge-HUD
+
+`CombatOrderHud` (oben rechts) zeigt während eines Kampfes die Zugreihenfolge: aktiver Teilnehmer zuerst (hervorgehoben), danach `turn_queue` (bereits bereit), danach der Rest nach `initiative_meter` absteigend sortiert (Schätzung, da sich die Geschwindigkeit laufend ändert). Grün/Rot markiert eigene Party (`Player`/`PartyFollower`) vs. alles andere, unabhängig davon, wer den Kampf ausgelöst hat. Bindet an `CombatManager.combat_started`/`combat_ended` zum Ein-/Ausblenden; `CombatSession.get_active_participant()` ist der öffentliche Getter für den aktuell aktiven Teilnehmer.
+
+### Aktions-Feedback ("wer tut was")
+
+`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `announce_action()` an das projektweite `EventLog` weiterreicht (siehe unten). Reden/Fliehen laufen nicht über `CombatResolver` und erscheinen aktuell nicht im Log.
+
+### Ereignis-Log (EventLog)
+
+`EventLog` (Autoload, `src/core/autoload/event_log.gd`) ist ein reiner Signal-Bus (`signal event_logged(text: String)`, Methoden `add(text)`/`add_lines(lines)` – bewusst nicht `log()`, das kollidiert mit GDScripts eingebauter globaler Math-Funktion `log(x: float)`) im Fallout-1/2-Stil: eine laufende Textzeile für alles, was im Spiel passiert, statt eines auf den Kampf beschränkten Logs. `EventLogHud` (`src/ui/hud/event_log_hud.gd`/`.tscn`, unten links, immer sichtbar) hört direkt auf `event_logged` – kein Binding an `CombatManager` mehr nötig (ehemals `CombatLogHud`). Jede neue Zeile wird oben eingefügt und drängt ältere nach unten (`VBoxContainer.move_child(label, 0)`); Zeilen bleiben stehen statt nach einigen Sekunden auszublenden, bis zu `MAX_ENTRIES = 100` (älteste fällt dann unten raus). Der `ScrollContainer` blendet bei Bedarf automatisch eine vertikale Scrollbar ein; solange oben gescrollt ist, hält eine neue Zeile die Ansicht oben – wer selbst nach unten gescrollt hat, um ältere Einträge zu lesen, wird nicht weggerissen. Aktuell angebundene Quellen:
+
+- **Kampf**: `CombatSession.announce_action()` (siehe oben).
+- **Gegenstände aufnehmen**: `BasicItem._pickup()`.
+- **Dialog**: `DialogueSystem._log_dialogue_line()` (BBCode wird aus `DialogueLine.text` entfernt).
+
+Wahrnehmungs-Ereignisse ("ein Charakter bemerkt etwas") sind bewusst nicht angebunden – es existiert noch kein Wahrnehmungssystem im Projekt. Weitere Quellen (Quest-Fortschritt, Loot, …) können jederzeit einfach `EventLog.add(text)` aufrufen.
+
+### Party-Fähigkeiten außerhalb des Kampfes
+
+Taste **F** (Input-Action `Faehigkeiten`, nur am Leader) öffnet `state_party_skills.gd`: Charakter aus der Party wählen → Fähigkeit wählen → Ziel wählen. Ziele innerhalb der Party (SELF/SINGLE_ALLY/ALL_ALLIES) wirken sofort über `PartyAbilityResolver.apply_non_combat()` (nur `HEAL` implementiert, ruft ausschließlich bestehende `Playable`-Methoden auf). Ziele außerhalb der Party (SINGLE_ENEMY/ALL_ENEMIES) werden wie im E-Menü in Reichweite gesucht (`ActionRangeIndicator`) und lösen `CombatManager.trigger_attack()` aus – die Fähigkeit wird dann als Erstschlag im neuen/erweiterten Kampf ganz regulär über `CombatResolver` aufgelöst, ohne reguläre `end_turn()`-Buchhaltung (kein zweiter Schadenscode-Pfad).
+
 ### Offene Punkte
 
-Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, Steuerung mehrerer eigener Party-Mitglieder im Kampf, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung).
+Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung), ob sich der "Erstschlag außerhalb der Zugreihenfolge" bei Party-Fähigkeiten gegen Fremde richtig anfühlt oder eine reguläre Zug-Einreihung besser wäre, ob die Kamera während des Kampfzugs eines Followers kurz umschalten soll (aktuell: nein, bleibt beim Leader).
 
 ---
 

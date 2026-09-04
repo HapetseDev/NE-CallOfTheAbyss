@@ -2,15 +2,19 @@ class_name StateCombatTurn extends State
 
 ## Aktiver Kampfzug: Gegenstand / Fähigkeit / Bewegen / Reden / Fliehen.
 ## Menü-Baumuster aus state_action_menu.gd übernommen (programmatisch gebaute
-## CanvasLayer/Control/VBoxContainer statt eigener .tscn). ITEM/ABILITY/MOVE
-## laufen über CombatResolver; COMMUNICATE/FLEE haben Szenen-Seiteneffekte
-## und werden hier direkt behandelt (siehe combat_action.gd).
+## CanvasLayer/Control/VBoxContainer statt eigener .tscn). ITEM/ABILITY laufen
+## direkt hier über CombatResolver; "Bewegen" wechselt in den eigenen State
+## StateCombatMove (freie Positionierung im Kreis, siehe dort); COMMUNICATE/
+## FLEE haben Szenen-Seiteneffekte und werden hier direkt behandelt (siehe
+## combat_action.gd).
 
 @onready var combat_wait: State = $"../CombatWait"
+@onready var combat_move: State = $"../CombatMove"
 
 var _session: CombatSession = null
 var _participant: CombatParticipant = null
 var _turn_over: bool = false
+var _next_state: State = null
 
 var _canvas_layer: CanvasLayer
 var _vbox: VBoxContainer
@@ -20,6 +24,7 @@ func enter() -> void:
 	player.stop_horizontal_velocity()
 	player.update_animation("idle")
 	_turn_over = false
+	_next_state = null
 	_session = player.get_combat_session()
 	_participant = _session.get_participant(player) if _session else null
 	if _participant == null:
@@ -36,6 +41,10 @@ func exit() -> void:
 func process(_delta: float) -> State:
 	if _turn_over:
 		return combat_wait
+	if _next_state:
+		var target := _next_state
+		_next_state = null
+		return target
 	return null
 
 
@@ -96,7 +105,7 @@ func _render_root() -> void:
 	_add_label("%s ist am Zug" % player.get_display_name())
 	_add_button("Gegenstand", _render_item_menu)
 	_add_button("Fähigkeit", _render_ability_menu)
-	_add_button("Bewegen", _render_move_menu)
+	_add_button("Bewegen", _on_move_pressed)
 	_add_button("Reden", _render_communicate_menu)
 	_add_button("Fliehen", _on_flee_pressed)
 
@@ -140,7 +149,7 @@ func _on_item_target_chosen(item: ItemData, mode: ItemUsageMode, target: CombatP
 	action.item = item
 	action.item_usage_mode = mode
 	action.targets = [target]
-	_apply_result(CombatResolver.resolve_action(action))
+	_apply_result(action, CombatResolver.resolve_action(action))
 
 
 # --- Fähigkeit ---
@@ -200,29 +209,16 @@ func _execute_ability(ability: AbilityDefinition, targets: Array[CombatParticipa
 	action.type = CombatAction.ActionType.ABILITY
 	action.ability = ability
 	action.targets = targets
-	_apply_result(CombatResolver.resolve_action(action))
+	_apply_result(action, CombatResolver.resolve_action(action))
 
 
 # --- Bewegen ---
-# Fester Schritt relativ zur Blickrichtung, keine Kollisionsprüfung –
-# Detailmechanik (Reichweite/Dauer) laut Plan noch offen.
+# Freie Positionierung im Kreis statt fester Schritte – siehe state_combat_move.gd.
+# Der eigentliche Zugwechsel läuft über process()/_next_state, da Kampfmenü-
+# Buttons (anders als handle_input()) keinen State-Rückgabewert haben.
 
-func _render_move_menu() -> void:
-	_clear_vbox()
-	_add_label("Bewegen")
-	_add_button("Vorwärts", _on_move_chosen.bind(player.facing_direction))
-	_add_button("Rückwärts", _on_move_chosen.bind(-player.facing_direction))
-	_add_button("Links", _on_move_chosen.bind(player.facing_direction.rotated(Vector3.UP, PI / 2.0)))
-	_add_button("Rechts", _on_move_chosen.bind(player.facing_direction.rotated(Vector3.UP, -PI / 2.0)))
-	_add_button("Zurück", _render_root)
-
-
-func _on_move_chosen(direction: Vector3) -> void:
-	var action := CombatAction.new()
-	action.actor = _participant
-	action.type = CombatAction.ActionType.MOVE
-	action.move_target_position = player.global_position + direction.normalized() * CombatBalance.MOVE_STEP_DISTANCE
-	_apply_result(CombatResolver.resolve_action(action))
+func _on_move_pressed() -> void:
+	_next_state = combat_move
 
 
 # --- Reden ---
@@ -299,8 +295,9 @@ func _targets_on_side(side: StringName) -> Array[CombatParticipant]:
 	return result
 
 
-func _apply_result(result: CombatActionResult) -> void:
+func _apply_result(action: CombatAction, result: CombatActionResult) -> void:
 	if is_instance_valid(_session):
+		_session.announce_action(_participant, action, result)
 		for target in result.defeated_targets:
 			_session.mark_defeated(target)
 	_end_turn()

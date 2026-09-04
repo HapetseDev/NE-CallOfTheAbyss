@@ -30,20 +30,27 @@ static func resolve_action(action: CombatAction) -> CombatActionResult:
 ## Automatische Verteidigung: jeder Charakter weicht/mindert Schaden passiv
 ## über seine eigenen Attribute, ohne dass er dafür einen Zug braucht.
 static func resolve_damage(actor: CombatParticipant, target: CombatParticipant, raw_power: int, attacker_attribute: CharacterEnums.Attribute) -> int:
+	return int(_roll_damage(actor, target, raw_power, attacker_attribute)["damage"])
+
+
+## Wie resolve_damage(), gibt zusätzlich zurück, ob das Ziel ausgewichen ist
+## (für Anzeige-Zwecke, siehe CombatActionOutcome). Intern verwendet, damit
+## resolve_damage() selbst öffentlich weiterhin nur den Schadenswert liefert.
+static func _roll_damage(actor: CombatParticipant, target: CombatParticipant, raw_power: int, attacker_attribute: CharacterEnums.Attribute) -> Dictionary:
 	if target == null or target.playable == null or target.is_defeated:
-		return 0
+		return {"damage": 0, "evaded": false}
 	var accuracy := 0
 	if actor and actor.playable:
 		accuracy = actor.playable.get_effective_attribute(attacker_attribute)
 	var evasion := target.playable.get_effective_attribute(CharacterEnums.Attribute.GEWANDHEIT)
 	var evade_chance := clampf((evasion - accuracy) * CombatBalance.EVADE_FACTOR * 0.01, 0.0, CombatBalance.EVADE_CAP)
 	if randf() < evade_chance:
-		return 0
+		return {"damage": 0, "evaded": true}
 	var mitigation := target.playable.get_effective_attribute(CharacterEnums.Attribute.ROBUSTHEIT) * CombatBalance.MITIGATION_FACTOR
 	var final_damage := maxi(0, raw_power - int(mitigation))
 	if final_damage > 0:
 		target.playable.take_damage(final_damage)
-	return final_damage
+	return {"damage": final_damage, "evaded": false}
 
 
 static func _resolve_item(action: CombatAction) -> CombatActionResult:
@@ -59,8 +66,10 @@ static func _resolve_item(action: CombatAction) -> CombatActionResult:
 		if mode.requires_line_of_sight and not CombatLineOfSight.has_clear_line(action.actor.playable, target.playable):
 			result.failed_reason = "no_line_of_sight"
 			continue
-		var damage := resolve_damage(action.actor, target, mode.power, mode.attribute)
-		if damage > 0 and target.playable.is_character_dead():
+		var roll := _roll_damage(action.actor, target, mode.power, mode.attribute)
+		var outcome := _make_outcome(target, roll)
+		result.outcomes.append(outcome)
+		if outcome.defeated:
 			result.defeated_targets.append(target)
 	if mode.consumes_item:
 		action.actor.playable.remove_item(action.item, 1)
@@ -83,7 +92,7 @@ static func _resolve_ability(action: CombatAction) -> CombatActionResult:
 		AbilityDefinition.EffectType.DAMAGE:
 			_apply_damage_to_targets(action, ability, result)
 		AbilityDefinition.EffectType.HEAL:
-			_apply_heal_to_targets(action, ability)
+			_apply_heal_to_targets(action, ability, result)
 		_:
 			# Kein Status-/Buff-System vorhanden – ehrlich melden statt so tun,
 			# als hätte die Fähigkeit gewirkt.
@@ -100,16 +109,31 @@ static func _apply_damage_to_targets(action: CombatAction, ability: AbilityDefin
 		if ability.requires_line_of_sight and not CombatLineOfSight.has_clear_line(action.actor.playable, target.playable):
 			result.failed_reason = "no_line_of_sight"
 			continue
-		var damage := resolve_damage(action.actor, target, ability.power, scaling_attribute)
-		if damage > 0 and target.playable.is_character_dead():
+		var roll := _roll_damage(action.actor, target, ability.power, scaling_attribute)
+		var outcome := _make_outcome(target, roll)
+		result.outcomes.append(outcome)
+		if outcome.defeated:
 			result.defeated_targets.append(target)
 
 
-static func _apply_heal_to_targets(action: CombatAction, ability: AbilityDefinition) -> void:
+static func _apply_heal_to_targets(action: CombatAction, ability: AbilityDefinition, result: CombatActionResult) -> void:
 	for target in action.targets:
 		if target == null or target.playable == null or target.is_defeated:
 			continue
 		target.playable.heal(ability.power)
+		var outcome := CombatActionOutcome.new()
+		outcome.target = target
+		outcome.healed = ability.power
+		result.outcomes.append(outcome)
+
+
+static func _make_outcome(target: CombatParticipant, roll: Dictionary) -> CombatActionOutcome:
+	var outcome := CombatActionOutcome.new()
+	outcome.target = target
+	outcome.damage = int(roll["damage"])
+	outcome.evaded = bool(roll["evaded"])
+	outcome.defeated = outcome.damage > 0 and target.playable.is_character_dead()
+	return outcome
 
 
 static func _primary_attribute_for(ability: AbilityDefinition) -> CharacterEnums.Attribute:

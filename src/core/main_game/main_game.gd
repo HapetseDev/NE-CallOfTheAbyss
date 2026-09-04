@@ -7,6 +7,8 @@ extends Node3D
 static var instance: MainGame
 
 const PARTY_HUD_SCENE := preload("res://src/ui/hud/party_hud.tscn")
+const COMBAT_ORDER_HUD_SCENE := preload("res://src/ui/hud/combat_order_hud.tscn")
+const EVENT_LOG_HUD_SCENE := preload("res://src/ui/hud/event_log_hud.tscn")
 const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 
 @export var starting_level_path: String = DEFAULT_LEVEL
@@ -26,6 +28,8 @@ const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 
 var party: Party
 var _party_hud: PartyHud
+var _combat_order_hud: CombatOrderHud
+var _event_log_hud: EventLogHud
 
 
 func _enter_tree() -> void:
@@ -58,3 +62,18 @@ func _setup_hud() -> void:
 	hud_root.add_child(_party_hud)
 	if party:
 		party.bind_hud(_party_hud, hud_root)
+	_combat_order_hud = COMBAT_ORDER_HUD_SCENE.instantiate() as CombatOrderHud
+	hud_root.add_child(_combat_order_hud)
+	_combat_order_hud.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_combat_order_hud.offset_left = -236.0
+	_combat_order_hud.offset_right = -16.0
+	_combat_order_hud.offset_top = 16.0
+	_event_log_hud = EVENT_LOG_HUD_SCENE.instantiate() as EventLogHud
+	hud_root.add_child(_event_log_hud)
+	_event_log_hud.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_event_log_hud.offset_left = 16.0
+	_event_log_hud.offset_right = 436.0
+	_event_log_hud.offset_top = -320.0
+	_event_log_hud.offset_bottom = -16.0
+	if CombatManager.instance:
+		_combat_order_hud.bind(CombatManager.instance)

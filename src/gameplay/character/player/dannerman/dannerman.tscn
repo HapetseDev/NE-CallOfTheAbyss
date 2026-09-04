@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://d4nn3rm4nscn01"]
+[gd_scene load_steps=38 format=3 uid="uid://d4nn3rm4nscn01"]
 
 [ext_resource type="Script" uid="uid://d4nn3rm4ngd01" path="res://src/gameplay/character/player/dannerman/dannerman.gd" id="1_hlb18"]
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://assets/characters/shalka/shalka_sprite.png" id="2_ax5u6"]
@@ -13,6 +13,8 @@
 [ext_resource type="Script" uid="uid://su4niq4bx4bp" path="res://src/gameplay/character/state_machine/state_action_menu.gd" id="13_action"]
 [ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_wait.gd" id="17_combat_wait"]
 [ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_turn.gd" id="18_combat_turn"]
+[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_party_skills.gd" id="19_party_skills"]
+[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_move.gd" id="21_combat_move"]
 [ext_resource type="PackedScene" path="res://assets/characters/models/Schum_Merged_Animations.glb" id="14_dannerman_model"]
 [ext_resource type="Script" uid="uid://ou4q3lgfn1xf" path="res://src/gameplay/character/character_model_animator.gd" id="15_model_anim"]
 [ext_resource type="PackedScene" uid="uid://binventoryui01" path="res://src/ui/inventory/InventoryUI.tscn" id="16_inv"]
@@ -429,6 +431,13 @@ script = ExtResource("17_combat_wait")
 
 [node name="CombatTurn" type="Node" parent="StateMachine"]
 script = ExtResource("18_combat_turn")
+
+[node name="CombatMove" type="Node" parent="StateMachine"]
+script = ExtResource("21_combat_move")
+
+[node name="PartySkills" type="Node" parent="StateMachine"]
+script = ExtResource("19_party_skills")
+action_range = 1.5
 
 [node name="Audio" type="Node3D" parent="."]
 

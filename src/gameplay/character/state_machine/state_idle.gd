@@ -2,6 +2,7 @@ class_name StateIdle extends State
 
 @onready var walk: State = $"../Walk"
 @onready var action_menu: State = $"../ActionMenu"
+@onready var party_skills: State = $"../PartySkills"
 
 
 func enter() -> void:
@@ -28,4 +29,6 @@ func handle_input(_event: InputEvent) -> State:
 		return null
 	if _event.is_action_pressed("Interact"):
 		return action_menu
+	if _event.is_action_pressed("Faehigkeiten"):
+		return party_skills
 	return null
