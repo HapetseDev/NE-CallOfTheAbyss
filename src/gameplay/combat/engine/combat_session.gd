@@ -67,6 +67,12 @@ func remove(participant: CombatParticipant) -> void:
 	_check_side_wipe()
 
 
+## Wer gerade am Zug ist, oder null zwischen zwei Zügen. Für HUDs (z.B.
+## Kampfreihenfolge) – _active_turn bleibt intern gesetzt.
+func get_active_participant() -> CombatParticipant:
+	return _active_turn
+
+
 func get_participant(playable: Playable) -> CombatParticipant:
 	for participant in participants:
 		if participant.playable == playable:
