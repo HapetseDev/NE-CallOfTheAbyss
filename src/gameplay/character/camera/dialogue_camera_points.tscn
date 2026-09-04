@@ -11,14 +11,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 1.45, 1.2)
 gizmo_extents = 0.25
 script = ExtResource("2_marker")
 shot = 0
-weight = 3.0
+weight = 5.0
+tags = PackedStringArray("emotional", "intimate")
+fov = 62.0
+transition_sec = 0.35
+transition_ease = 2
 
 [node name="Medium" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1.55, 2.4)
 gizmo_extents = 0.35
 script = ExtResource("2_marker")
 shot = 1
-weight = 5.0
+weight = 2.0
+tags = PackedStringArray("neutral", "conversation")
+fov = 50.0
+transition_sec = 0.35
 
 [node name="Wide" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 2.05, 4.5)
@@ -26,6 +33,10 @@ gizmo_extents = 0.45
 script = ExtResource("2_marker")
 shot = 2
 weight = 2.0
+tags = PackedStringArray("neutral", "conversation")
+fov = 40.0
+transition_sec = 0.5
+transition_ease = 3
 
 [node name="Profile" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 1.5, 0.3)
@@ -33,6 +44,9 @@ gizmo_extents = 0.3
 script = ExtResource("2_marker")
 shot = 3
 weight = 1.0
+tags = PackedStringArray("dramatic")
+fov = 48.0
+transition_sec = 0.4
 
 [node name="OverShoulder" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1.55, -1.15)
@@ -40,3 +54,6 @@ gizmo_extents = 0.3
 script = ExtResource("2_marker")
 shot = 4
 weight = 2.0
+tags = PackedStringArray("conversation")
+fov = 52.0
+transition_sec = 0.35

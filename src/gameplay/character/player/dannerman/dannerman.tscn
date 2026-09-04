@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://d4nn3rm4nscn01"]
+[gd_scene load_steps=36 format=3 uid="uid://d4nn3rm4nscn01"]
 
 [ext_resource type="Script" uid="uid://d4nn3rm4ngd01" path="res://src/gameplay/character/player/dannerman/dannerman.gd" id="1_hlb18"]
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://assets/characters/shalka/shalka_sprite.png" id="2_ax5u6"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://binventoryui01" path="res://src/ui/inventory/InventoryUI.tscn" id="16_inv"]
 [ext_resource type="PackedScene" uid="uid://bcharsheetui01" path="res://src/ui/character/character_sheet_ui.tscn" id="17_sheet"]
 [ext_resource type="PackedScene" uid="uid://bdialogcampts01" path="res://src/gameplay/character/camera/dialogue_camera_points.tscn" id="18_cam_pts"]
+[ext_resource type="PackedScene" uid="uid://bdialoglooktg01" path="res://src/gameplay/character/camera/dialogue_look_targets.tscn" id="20_looks"]
 [ext_resource type="Script" path="res://src/gameplay/character/player/occlusion/occlusion_visual.gd" id="19_occl"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hlb18"]
@@ -445,6 +446,8 @@ layer = 27
 [node name="CharacterSheetUI" parent="CharacterSheetLayer" instance=ExtResource("17_sheet")]
 
 [node name="DialogueCameraPoints" parent="." instance=ExtResource("18_cam_pts")]
+
+[node name="DialogueLookTargets" parent="." instance=ExtResource("20_looks")]
 
 [node name="OcclusionVisual" type="Node" parent="."]
 script = ExtResource("19_occl")
