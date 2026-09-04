@@ -601,7 +601,8 @@ Kämpfe finden **in der normalen Spielwelt** statt (Chrono-Trigger/Ultima-6-Stil
 | Item-Nutzungsarten (stechen/schlagen/werfen) | `src/resources/items/item_usage_mode.gd` |
 | Party-Fähigkeiten-Menü außerhalb des Kampfes | `src/gameplay/character/state_machine/state_party_skills.gd`, `src/gameplay/combat/engine/party_ability_resolver.gd` |
 | Kampfreihenfolge-HUD | `src/ui/hud/combat_order_hud.gd`/`.tscn`, `combat_order_entry.gd`/`.tscn` |
-| Aktions-Feedback ("wer tut was") | `src/gameplay/combat/engine/combat_action_outcome.gd`, `combat_narrator.gd`, `src/ui/hud/combat_log_hud.gd`/`.tscn` |
+| Aktions-Feedback ("wer tut was") | `src/gameplay/combat/engine/combat_action_outcome.gd`, `combat_narrator.gd` |
+| Ereignis-Log (Kampf, Items, Dialog) | `src/core/autoload/event_log.gd` (Autoload), `src/ui/hud/event_log_hud.gd`/`.tscn` |
 
 ### Beziehungen entscheiden über Kampfseiten
 
@@ -641,7 +642,17 @@ Kein manueller "Verteidigen"-Zug: `CombatResolver.resolve_damage()` würfelt bei
 
 ### Aktions-Feedback ("wer tut was")
 
-`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `CombatLogHud` (unten links) gestapelt anzeigt und einzeln ausblendet. Reden/Fliehen laufen nicht über `CombatResolver` und erscheinen aktuell nicht im Log.
+`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `announce_action()` an das projektweite `EventLog` weiterreicht (siehe unten). Reden/Fliehen laufen nicht über `CombatResolver` und erscheinen aktuell nicht im Log.
+
+### Ereignis-Log (EventLog)
+
+`EventLog` (Autoload, `src/core/autoload/event_log.gd`) ist ein reiner Signal-Bus (`signal event_logged(text: String)`, Methoden `log(text)`/`log_lines(lines)`) im Fallout-1/2-Stil: eine laufende Textzeile für alles, was im Spiel passiert, statt eines auf den Kampf beschränkten Logs. `EventLogHud` (`src/ui/hud/event_log_hud.gd`/`.tscn`, unten links, immer sichtbar) hört direkt auf `event_logged` und stapelt/blendet Zeilen aus – kein Binding an `CombatManager` mehr nötig (ehemals `CombatLogHud`). Aktuell angebundene Quellen:
+
+- **Kampf**: `CombatSession.announce_action()` (siehe oben).
+- **Gegenstände aufnehmen**: `BasicItem._pickup()`.
+- **Dialog**: `DialogueSystem._log_dialogue_line()` (BBCode wird aus `DialogueLine.text` entfernt).
+
+Wahrnehmungs-Ereignisse ("ein Charakter bemerkt etwas") sind bewusst nicht angebunden – es existiert noch kein Wahrnehmungssystem im Projekt. Weitere Quellen (Quest-Fortschritt, Loot, …) können jederzeit einfach `EventLog.log(text)` aufrufen.
 
 ### Party-Fähigkeiten außerhalb des Kampfes
 

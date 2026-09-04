@@ -2,7 +2,7 @@ class_name CombatNarrator
 extends Object
 
 ## Baut deutsche Anzeige-Texte aus einer aufgelösten CombatAction für ein
-## Aktions-Feedback-HUD (siehe CombatLogHud). Kennt nur CombatAction/
+## Aktions-Feedback-HUD (siehe EventLogHud). Kennt nur CombatAction/
 ## CombatActionResult, keine Session/UI. Reden/Fliehen laufen nicht über
 ## CombatResolver und werden hier (noch) nicht behandelt.
 

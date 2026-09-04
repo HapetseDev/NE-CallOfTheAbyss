@@ -51,6 +51,7 @@ func _pickup(player: Playable) -> void:
 	if item_data == null:
 		return
 	player.add_item(item_data.duplicate_item())
+	EventLog.log("%s hat %s aufgenommen." % [player.get_display_name(), item_data.item_name])
 	queue_free()
 
 

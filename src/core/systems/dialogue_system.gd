@@ -121,6 +121,7 @@ func _on_got_dialogue(line: DialogueLine) -> void:
 		return
 	if line.type != DMConstants.TYPE_DIALOGUE:
 		return
+	_log_dialogue_line(line)
 	var shot_value: Variant = _shot_from_line(line)
 	var kind: CameraShot.Kind
 	if shot_value == null:
@@ -133,6 +134,26 @@ func _on_got_dialogue(line: DialogueLine) -> void:
 	if subject == null:
 		return
 	_emit_shot(subject, kind, _look_from_line(line), _shot_tags_from_line(line))
+
+
+## Dialogzeilen landen ebenfalls im projektweiten EventLog (EventLogHud) –
+## line.text kann BBCode enthalten (Dialogue Manager erlaubt z.B. [wave]),
+## das für die Log-Zeile entfernt wird.
+func _log_dialogue_line(line: DialogueLine) -> void:
+	var speaker := line.character.strip_edges()
+	var text := _strip_bbcode(line.text)
+	if text.is_empty():
+		return
+	if speaker.is_empty():
+		EventLog.log(text)
+	else:
+		EventLog.log("%s: %s" % [speaker, text])
+
+
+func _strip_bbcode(text: String) -> String:
+	var regex := RegEx.new()
+	regex.compile("\\[[^\\]]*\\]")
+	return regex.sub(text, "", true).strip_edges()
 
 
 func _emit_shot(

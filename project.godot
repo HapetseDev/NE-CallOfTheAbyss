@@ -24,6 +24,7 @@ config/icon="uid://b5ubgw6jktu33"
 [autoload]
 
 GameState="*res://src/core/autoload/game_state.gd"
+EventLog="*res://src/core/autoload/event_log.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 
 [display]
