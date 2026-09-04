@@ -29,21 +29,26 @@ func get_look_position(subject: Node3D) -> Vector3:
 	return subject.global_position + Vector3.UP * look_height
 
 
-func resolve_marker(kind: CameraShot.Kind) -> Marker3D:
+func resolve_marker(kind: CameraShot.Kind, shot_tags: PackedStringArray = PackedStringArray()) -> Marker3D:
 	_align_to_host()
 	var requested := kind
 	if requested == CameraShot.Kind.RANDOM:
-		requested = pick_random_kind()
+		requested = pick_random_kind(shot_tags)
 	var marker := _find_by_kind(requested)
 	if marker:
+		_remember_kind(requested)
 		return marker
 	for fallback in CameraShot.FALLBACK_ORDER:
 		if fallback == requested:
 			continue
 		marker = _find_by_kind(fallback)
 		if marker:
+			_remember_kind(fallback)
 			return marker
-	return _first_marker()
+	var first := _first_marker()
+	if first:
+		_remember_kind(_kind_of(first))
+	return first
 
 
 func resolve_kind(kind: CameraShot.Kind) -> CameraShot.Kind:
@@ -61,35 +66,49 @@ func marker_kind(marker: Marker3D) -> CameraShot.Kind:
 	return _kind_of(marker)
 
 
-func pick_random_kind() -> CameraShot.Kind:
-	var entries := _weighted_entries()
+func pick_random_kind(
+	shot_tags: PackedStringArray = PackedStringArray(),
+	avoid_repeat: bool = true
+) -> CameraShot.Kind:
+	var entries := _weighted_entries(shot_tags)
+	if entries.is_empty() and not shot_tags.is_empty():
+		entries = _weighted_entries(PackedStringArray())
 	if entries.is_empty():
 		return CameraShot.Kind.MEDIUM
-	if entries.size() > 1 and _last_random_kind != CameraShot.Kind.RANDOM:
+	if avoid_repeat and entries.size() > 1 and _last_random_kind != CameraShot.Kind.RANDOM:
 		var filtered: Array[Dictionary] = []
 		for entry in entries:
 			if entry["kind"] != _last_random_kind:
 				filtered.append(entry)
 		if not filtered.is_empty():
 			entries = filtered
+	var chosen := _pick_weighted(entries)
+	_remember_kind(chosen)
+	return chosen
+
+
+func reset_last_shot() -> void:
+	_last_random_kind = CameraShot.Kind.RANDOM
+
+
+func _remember_kind(kind: CameraShot.Kind) -> void:
+	if CameraShot.is_concrete(kind):
+		_last_random_kind = kind
+
+
+func _pick_weighted(entries: Array[Dictionary]) -> CameraShot.Kind:
 	var total := 0.0
 	for entry in entries:
 		total += float(entry["weight"])
 	if total <= 0.0:
-		var fallback_kind: CameraShot.Kind = CameraShot.coerce(entries[0]["kind"])
-		_last_random_kind = fallback_kind
-		return fallback_kind
+		return CameraShot.coerce(entries[0]["kind"])
 	var pick := randf() * total
 	var acc := 0.0
 	for entry in entries:
 		acc += float(entry["weight"])
 		if pick <= acc:
-			var chosen: CameraShot.Kind = CameraShot.coerce(entry["kind"])
-			_last_random_kind = chosen
-			return chosen
-	var last_kind: CameraShot.Kind = CameraShot.coerce(entries[entries.size() - 1]["kind"])
-	_last_random_kind = last_kind
-	return last_kind
+			return CameraShot.coerce(entry["kind"])
+	return CameraShot.coerce(entries[entries.size() - 1]["kind"])
 
 
 func has_any_marker() -> bool:
@@ -146,11 +165,36 @@ func _marker_weight(marker: Marker3D) -> float:
 	return 1.0
 
 
+func _marker_tags(marker: Marker3D) -> PackedStringArray:
+	if marker is DialogueCameraMarker:
+		var custom: PackedStringArray = (marker as DialogueCameraMarker).tags
+		if not custom.is_empty():
+			var normalized: PackedStringArray = []
+			for raw in custom:
+				var tag := CameraShot.normalize_tag(raw)
+				if not tag.is_empty() and not normalized.has(tag):
+					normalized.append(tag)
+			if not normalized.is_empty():
+				return normalized
+	return CameraShot.default_tags(_kind_of(marker))
+
+
+func _marker_matches_tags(marker: Marker3D, shot_tags: PackedStringArray) -> bool:
+	if shot_tags.is_empty():
+		return true
+	var owned := _marker_tags(marker)
+	for requested in shot_tags:
+		var tag := CameraShot.normalize_tag(requested)
+		if not tag.is_empty() and owned.has(tag):
+			return true
+	return false
+
+
 func _is_usable_marker(child: Node) -> bool:
 	return child is Marker3D and is_instance_valid(child) and (child as Node3D).visible
 
 
-func _weighted_entries() -> Array[Dictionary]:
+func _weighted_entries(shot_tags: PackedStringArray = PackedStringArray()) -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	for child in get_children():
 		if not _is_usable_marker(child):
@@ -158,6 +202,8 @@ func _weighted_entries() -> Array[Dictionary]:
 		var marker := child as Marker3D
 		var kind := _kind_of(marker)
 		if not CameraShot.is_concrete(kind):
+			continue
+		if not _marker_matches_tags(marker, shot_tags):
 			continue
 		entries.append({
 			"kind": kind,
