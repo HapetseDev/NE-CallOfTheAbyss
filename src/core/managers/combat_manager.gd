@@ -3,8 +3,10 @@ extends Node
 
 ## Kampfsystem unter MainGame/Systems. Kein Autoload. Löst BattleManager ab:
 ## keine separate Kampfszene, Kämpfe laufen in der normalen Spielwelt (Chrono
-## Trigger/Ultima-6-Stil). Wer sich beteiligt, entscheidet ausschließlich
-## RelationshipService/CombatParticipantResolver – nicht Party-Zugehörigkeit.
+## Trigger/Ultima-6-Stil). Wer sich beteiligt, entscheidet primär
+## RelationshipService/CombatParticipantResolver; Party-Zugehörigkeit ist der
+## Fallback für Kandidaten ohne gepflegte Beziehungsdaten (siehe
+## _default_party_side) – eine echte Beziehung kann das weiterhin übersteuern.
 
 static var instance: CombatManager
 
@@ -104,8 +106,37 @@ func _evaluate_bystanders(attacker: Playable, victim: Playable) -> void:
 		if active_session.get_participant(candidate) != null:
 			continue
 		var side := CombatParticipantResolver.classify(candidate, attacker, victim)
+		if side == CombatParticipantResolver.SIDE_NEUTRAL:
+			side = _default_party_side(candidate, attacker, victim)
 		if side != CombatParticipantResolver.SIDE_NEUTRAL:
 			active_session.admit(candidate, side)
+
+
+## Fällt ein Kandidat mangels Beziehungsdaten auf "neutral", greift die eigene
+## Party trotzdem füreinander ein – Party-Zugehörigkeit ist selbst ohne
+## gepflegten RelationshipEntry ein starkes "wir gehören zusammen"-Signal.
+## Eine tatsächliche Beziehung (siehe classify()) hat weiterhin Vorrang und
+## kann ein Mitglied auch gegen die eigene Party stellen.
+func _default_party_side(candidate: Playable, attacker: Playable, victim: Playable) -> StringName:
+	if _same_party(candidate, attacker):
+		return CombatParticipantResolver.SIDE_ATTACKER
+	if _same_party(candidate, victim):
+		return CombatParticipantResolver.SIDE_VICTIM
+	return CombatParticipantResolver.SIDE_NEUTRAL
+
+
+func _same_party(a: Playable, b: Playable) -> bool:
+	var party := _find_party(a)
+	return party != null and party.get_all_members().has(b)
+
+
+func _find_party(playable: Playable) -> Party:
+	var node: Node = playable
+	while node:
+		if node is Party:
+			return node as Party
+		node = node.get_parent()
+	return null
 
 
 func _on_side_wiped(losing_side: StringName, session: CombatSession) -> void:
