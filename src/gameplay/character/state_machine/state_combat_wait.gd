@@ -26,5 +26,7 @@ func exit() -> void:
 
 
 func _on_turn_started(participant: CombatParticipant) -> void:
+	if participant == null:
+		return
 	if participant.playable == player:
 		get_parent().change_state(combat_turn)

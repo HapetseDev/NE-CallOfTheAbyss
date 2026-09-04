@@ -491,7 +491,7 @@ func _tween_camera_to(
 	xf: Transform3D,
 	duration: float,
 	target_fov: float = -1.0,
-	ease: CameraShot.TransitionEase = CameraShot.TransitionEase.DEFAULT,
+	transition_ease: CameraShot.TransitionEase = CameraShot.TransitionEase.DEFAULT,
 	on_finished: Callable = Callable()
 ) -> void:
 	_camera_tween = CameraShot.tween_camera(
@@ -500,7 +500,7 @@ func _tween_camera_to(
 		xf,
 		duration,
 		target_fov,
-		ease,
+		transition_ease,
 		_camera_tween,
 		on_finished
 	)

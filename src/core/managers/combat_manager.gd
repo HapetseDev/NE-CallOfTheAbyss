@@ -68,10 +68,24 @@ func _start_session() -> void:
 ## Alle anderen – NPCs, Party-Begleiter ohne State Machine – bekommen ihren
 ## Zug automatisch von NPCCombatBrain abgenommen, sonst würde die
 ## Initiative-Uhr auf ihrem Zug hängen bleiben.
+##
+## NPCCombatBrain.take_turn() wird deferred aufgerufen statt direkt hier:
+## Löst der KI-Zug den Kampf aus (z.B. Sieg -> side_wiped -> exit_combat_mode
+## auf allen Teilnehmern, u.a. Player.StateCombatWait.exit() trennt sich
+## dabei selbst von diesem turn_started-Signal), würde das mitten in der
+## laufenden Signal-Verteilung passieren und die restlichen, noch nicht
+## aufgerufenen Listener mit korrumpierten/fehlenden Argumenten treffen
+## (genau das erzeugte "Invalid access ... on a base object of type Nil").
+## call_deferred lässt die Emission erst sauber durchlaufen.
 func _on_turn_started(participant: CombatParticipant) -> void:
+	if participant == null or participant.playable == null:
+		return
 	if _has_manual_control(participant.playable):
 		return
-	NPCCombatBrain.take_turn(active_session, participant)
+	var session := active_session
+	if session == null:
+		return
+	NPCCombatBrain.take_turn.call_deferred(session, participant)
 
 
 func _has_manual_control(playable: Playable) -> bool:
