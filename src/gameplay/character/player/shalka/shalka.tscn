@@ -4,7 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://assets/characters/shalka/shalka_sprite.png" id="2_ax5u6"]
 [ext_resource type="Texture2D" uid="uid://c50fdqiuagepc" path="res://assets/characters/shalka/attack.png" id="3_7qxdf"]
 [ext_resource type="Script" uid="uid://tbqs0iuyquhq" path="res://src/gameplay/character/state_machine/player_state_machine.gd" id="3_plxar"]
-[ext_resource type="Script" uid="uid://degeyw628v5k3" path="res://src/gameplay/character/state_machine/state_idle.gd" id="4_ax5u6"]
+[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_follower_idle.gd" id="4_follower_idle"]
+[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_wait.gd" id="16_combat_wait"]
+[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_turn.gd" id="17_combat_turn"]
 [ext_resource type="Texture2D" uid="uid://cha3i6k7s51uk" path="res://assets/characters/shalka/shadow.png" id="4_rr3s5"]
 [ext_resource type="Script" uid="uid://c134jdqd76jfk" path="res://src/gameplay/character/state_machine/state_walk.gd" id="5_3fsuu"]
 [ext_resource type="Script" uid="uid://dyehe27ouladm" path="res://src/gameplay/character/player/shalka/playerInteractonHost.gd" id="10_5blqt"]
@@ -403,6 +405,18 @@ texture = ExtResource("4_rr3s5")
 libraries = {
 &"": SubResource("AnimationLibrary_oxkgk")
 }
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("3_plxar")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("4_follower_idle")
+
+[node name="CombatWait" type="Node" parent="StateMachine"]
+script = ExtResource("16_combat_wait")
+
+[node name="CombatTurn" type="Node" parent="StateMachine"]
+script = ExtResource("17_combat_turn")
 
 [node name="Audio" type="Node3D" parent="."]
 

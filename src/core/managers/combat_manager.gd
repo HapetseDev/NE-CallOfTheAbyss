@@ -63,11 +63,12 @@ func _start_session() -> void:
 	combat_started.emit(active_session)
 
 
-## Teilnehmer mit eigenem CombatTurn-State (aktuell nur der menschlich
-## gesteuerte Player) reagieren selbst auf turn_started (state_combat_wait.gd).
-## Alle anderen – NPCs, Party-Begleiter ohne State Machine – bekommen ihren
-## Zug automatisch von NPCCombatBrain abgenommen, sonst würde die
-## Initiative-Uhr auf ihrem Zug hängen bleiben.
+## Teilnehmer mit eigenem CombatTurn-State (Player und Party-Follower – jedes
+## Partymitglied bekommt eine eigene StateMachine mit CombatWait/CombatTurn,
+## siehe PartyFollower._ready) reagieren selbst auf turn_started
+## (state_combat_wait.gd). Alle anderen – echte NPCs/Gegner ohne eigene
+## CombatTurn-State – bekommen ihren Zug automatisch von NPCCombatBrain
+## abgenommen, sonst würde die Initiative-Uhr auf ihrem Zug hängen bleiben.
 ##
 ## NPCCombatBrain.take_turn() wird deferred aufgerufen statt direkt hier:
 ## Löst der KI-Zug den Kampf aus (z.B. Sieg -> side_wiped -> exit_combat_mode

@@ -120,6 +120,10 @@ func enter_combat_mode(session: CombatSession) -> void:
 	var machine := get_node_or_null("StateMachine") as PlayerStateMachine
 	if machine == null:
 		return
+	# Follower halten ihre State Machine außerhalb des Kampfes deaktiviert
+	# (siehe PartyFollower._ready), sonst würden CombatWait/CombatTurn nie
+	# ihre process()/handle_input() bekommen. Für den Leader ist das ein No-Op.
+	machine.process_mode = Node.PROCESS_MODE_INHERIT
 	var wait_state := machine.get_node_or_null("CombatWait") as State
 	if wait_state:
 		machine.change_state(wait_state)
