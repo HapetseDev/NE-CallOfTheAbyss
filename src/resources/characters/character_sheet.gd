@@ -272,6 +272,11 @@ func unequip(slot_key: String) -> ItemData:
 	return inventory.unequip(slot_key)
 
 
+func get_combat_usable_items() -> Array[ItemData]:
+	_ensure_inventory()
+	return inventory.get_combat_usable_items()
+
+
 func debug_set_base_attribute(attr: CharacterEnums.Attribute, value: int) -> void:
 	value = maxi(0, value)
 	match attr:

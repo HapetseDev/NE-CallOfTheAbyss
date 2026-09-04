@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/resources/abilities/ability_definition.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+ability_id = "magie_feuerstoss"
+ability_name = "Feuerstoß"
+beschreibung = "Ein kurzer Stoß magischen Feuers gegen ein Ziel."
+source_skill_id = "magiekunde"
+min_skill_level = 1
+mana_cost = 8
+target_type = 1
+range_type = 1
+effect_type = 0
+power = 14
+requires_line_of_sight = true

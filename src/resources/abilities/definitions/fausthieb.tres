@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/resources/abilities/ability_definition.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+ability_id = "fausthieb"
+ability_name = "Fausthieb"
+beschreibung = "Ein einfacher Schlag ohne Waffe. Jeder Charakter kann das, unabhängig von Talenten."
+source_skill_id = ""
+min_skill_level = 1
+mana_cost = 0
+target_type = 1
+range_type = 0
+effect_type = 0
+power = 5
+requires_line_of_sight = true

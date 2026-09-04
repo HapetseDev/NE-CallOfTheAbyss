@@ -3,12 +3,12 @@
 [ext_resource type="Script" path="res://src/resources/items/item_data.gd" id="1_item"]
 [ext_resource type="Script" path="res://src/resources/items/item_usage_mode.gd" id="2_usage"]
 
-[sub_resource type="Resource" id="ItemUsageMode_stechen"]
+[sub_resource type="Resource" id="ItemUsageMode_schlagen"]
 script = ExtResource("2_usage")
-mode_id = "stechen"
-label = "Stechen"
-attribute = 1
-power = 6
+mode_id = "schlagen"
+label = "Schlagen"
+attribute = 0
+power = 4
 consumes_item = false
 requires_line_of_sight = true
 
@@ -17,18 +17,16 @@ script = ExtResource("2_usage")
 mode_id = "werfen"
 label = "Werfen"
 attribute = 1
-related_skill_id = "messerwerfen"
 range_type = 1
-power = 8
+power = 5
 consumes_item = true
 requires_line_of_sight = true
 
 [resource]
 script = ExtResource("1_item")
-item_id = "Messer"
-item_name = "Messer"
-description = "Zum Schneiden von Pflanzen und anderem. Kann gestochen oder geworfen werden."
-weight = 0.3
-max_stack = 1
-equipment_slot = "waffe"
-usage_modes = Array[ExtResource("2_usage")]([SubResource("ItemUsageMode_stechen"), SubResource("ItemUsageMode_werfen")])
+item_id = "Stein"
+item_name = "Stein"
+description = "Ein handlicher Stein. Kann geworfen oder als improvisierte Waffe genutzt werden."
+weight = 0.5
+max_stack = 5
+usage_modes = Array[ExtResource("2_usage")]([SubResource("ItemUsageMode_schlagen"), SubResource("ItemUsageMode_werfen")])

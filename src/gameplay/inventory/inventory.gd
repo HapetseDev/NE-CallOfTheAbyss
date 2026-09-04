@@ -8,6 +8,13 @@ signal contents_changed
 
 const EQUIPMENT_SLOTS: Array[String] = [
 	"kopf", "rumpf", "primaer_hand", "nebenhand", "beine", "fuesse", "waffe",
+	"guertel_1", "guertel_2", "guertel_3",
+]
+
+## Slots, deren Inhalt im Kampf als "Gegenstand verwenden" wählbar ist –
+## was in der Hand gehalten oder am Gürtel getragen wird, nicht das ganze Inventar.
+const COMBAT_USABLE_SLOTS: Array[String] = [
+	"primaer_hand", "nebenhand", "waffe", "guertel_1", "guertel_2", "guertel_3",
 ]
 
 @export var slots: Array[InventorySlot] = []
@@ -78,3 +85,15 @@ func unequip(slot_key: String) -> ItemData:
 	equipment[slot_key] = null
 	contents_changed.emit()
 	return item
+
+
+## Gegenstände, die in der Hand oder am Gürtel getragen werden – die im
+## Kampf tatsächlich einsetzbare Teilmenge des Besitzes (nicht der Rucksack).
+func get_combat_usable_items() -> Array[ItemData]:
+	ensure_equipment_slots()
+	var result: Array[ItemData] = []
+	for slot_key in COMBAT_USABLE_SLOTS:
+		var item: ItemData = equipment.get(slot_key)
+		if item and not result.has(item):
+			result.append(item)
+	return result

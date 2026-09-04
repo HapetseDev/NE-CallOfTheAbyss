@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/resources/abilities/ability_definition.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+ability_id = "bardenkunst_schlachtruf"
+ability_name = "Schlachtruf"
+beschreibung = "Ein anfeuernder Ruf, der Verbündete stärkt. Wirkt auch ohne freie Sicht auf jeden Verbündeten."
+source_skill_id = "bardenkunst"
+min_skill_level = 1
+mana_cost = 6
+target_type = 4
+range_type = 2
+effect_type = 2
+power = 3
+requires_line_of_sight = false
