@@ -9,6 +9,9 @@ signal konzentrationspunkte_changed(current: int, basis: int)
 signal sheet_changed
 signal inventory_changed
 
+## Stabile Referenz für Beziehungen/Fraktionen (RelationshipEntry.target_id).
+## Wird von CharacterSheetFactory beim Laden/Erzeugen gesetzt, falls leer.
+@export var character_id: String = ""
 @export var character_name: String = ""
 @export var ausbildung: CharacterEnums.Ausbildung = CharacterEnums.Ausbildung.KEINE
 @export var spezies: CharacterEnums.Spezies = CharacterEnums.Spezies.MENSCH
@@ -36,6 +39,7 @@ signal inventory_changed
 @export var skill_level_cap_bonus: int = 0
 
 @export_group("Soziales")
+@export var faction_ids: Array[String] = []
 @export var begleiter: Array[CompanionEntry] = []
 @export var beziehungen: Array[RelationshipEntry] = []
 
