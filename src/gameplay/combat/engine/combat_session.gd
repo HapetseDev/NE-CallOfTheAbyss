@@ -114,7 +114,10 @@ func _tick_initiative(delta: float) -> void:
 func _advance_turn_queue() -> void:
 	if _active_turn != null or turn_queue.is_empty():
 		return
-	_active_turn = turn_queue.pop_front()
+	var next: CombatParticipant = turn_queue.pop_front()
+	if next == null:
+		return
+	_active_turn = next
 	turn_started.emit(_active_turn)
 
 
