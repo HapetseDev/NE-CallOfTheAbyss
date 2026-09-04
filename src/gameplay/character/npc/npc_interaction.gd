@@ -24,10 +24,14 @@ func mark_defeated() -> void:
 func get_actions(_player: Playable) -> Array[Dictionary]:
 	if data == null:
 		return []
+	# "Alles ist angreifbar": Angreifen ist keine per-NPC-Sonderoption mehr,
+	# sondern für jeden nicht bereits besiegten Charakter verfügbar. Wer sich
+	# dem Angriff anschließt/entgegenstellt, entscheidet CombatParticipantResolver
+	# über Beziehungen – nicht dieses can_fight-Flag.
 	var actions: Array[Dictionary] = [{"label": "Reden", "action_id": "talk"}]
 	if data.can_trade and not is_defeated():
 		actions.append({"label": "Handeln", "action_id": "trade"})
-	if data.can_fight and not is_defeated():
+	if not is_defeated():
 		actions.append({"label": "Angreifen", "action_id": "fight"})
 	return actions
 
@@ -42,5 +46,5 @@ func perform_action(action_id: String, player: Playable) -> void:
 			if data.can_trade and not data.shop_id.is_empty():
 				ShopManager.open(data.shop_id, player)
 		"fight":
-			if data.can_fight and not data.encounter_id.is_empty():
-				BattleManager.start_encounter(data.encounter_id, player, self)
+			if _owner_npc and not is_defeated():
+				CombatManager.trigger_attack(player, _owner_npc)

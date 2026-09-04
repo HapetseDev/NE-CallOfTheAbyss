@@ -12,7 +12,8 @@ Diese Dokumentation beschreibt die implementierten Systeme und deren Verwendung.
 4. [Kamera-System](#kamera-system)
 5. [Hitbox/Hurtbox-System](#hitboxhurtbox-system)
 6. [State Machine](#state-machine)
-7. [Hauptmenü](#hauptmenü)
+7. [Kampfsystem](#kampfsystem)
+8. [Hauptmenü](#hauptmenü)
 
 ---
 
@@ -500,18 +501,20 @@ func on_damaged(damage: int):
 
 ### Ausrichtung
 
-Erkundung nutzt die State Machine für **Bewegung** und **Interaktion** (Kontextmenü). **Kampf** ist für später als **rundenbasiert** vorgesehen (eigene Szene oder Modus), nicht als Echtzeit-Angriff in Idle/Walk.
+Erkundung nutzt die State Machine für **Bewegung** und **Interaktion** (Kontextmenü). **Kampf** ist rundenbasiert und läuft direkt in der Erkundungs-Welt (kein Szenenwechsel) – siehe [Kampfsystem](#kampfsystem). Für Kampfteilnehmer übersteuern `CombatWait`/`CombatTurn` die normale Idle/Walk/ActionMenu-Steuerung, solange sie an einer Kampfsitzung beteiligt sind.
 
-### Struktur (Shalka)
+### Struktur (Dannerman, spielbarer Charakter)
 
 ```
 StateMachine (Node)
-├── Idle (Node) → stateIdle.gd
-├── Walk (Node) → stateWalk.gd
-└── ActionMenu (Node) → stateActionMenu.gd
+├── Idle (Node)       → state_idle.gd
+├── Walk (Node)        → state_walk.gd
+├── ActionMenu (Node)  → state_action_menu.gd
+├── CombatWait (Node)  → state_combat_wait.gd   (neu, Kampfsystem)
+└── CombatTurn (Node)  → state_combat_turn.gd   (neu, Kampfsystem)
 ```
 
-Das Script `stateAttack.gd` bleibt im Projekt, ist aber **nicht** als Kind der Shalka-State-Machine eingebunden (kein Action-Kampf als Standard).
+Das alte, nie eingebundene `state_attack.gd` (Echtzeit-Overworld-Angriff) bleibt unangetastet im Projekt, wird aber von nichts referenziert. NPCs und Party-Begleiter (z.B. Shalka) haben aktuell keine eigene StateMachine-Node und werden im Kampf automatisch von `NPCCombatBrain` gesteuert (siehe Kampfsystem).
 
 ### State-Basis (state.gd)
 
@@ -560,6 +563,66 @@ func HandleInput(_event: InputEvent) -> State:
         return some_other_state
     return null
 ```
+
+---
+
+## Kampfsystem
+
+### Übersicht
+
+Kämpfe finden **in der normalen Spielwelt** statt (Chrono-Trigger/Ultima-6-Stil) – keine separate Kampfszene, keine zweite HP/MP-Buchhaltung. Jeder Charakter (Spieler, Party-Begleiter, NPC) ist über sein `CharacterResource`-Charakterblatt gleichermaßen angreifbar. Wer sich an einem ausgebrochenen Kampf beteiligt und auf welcher Seite, entscheidet ausschließlich das Beziehungssystem – nicht Party-Zugehörigkeit oder ein statisches "Gegner"-Flag.
+
+### Dateien
+
+| Bereich | Datei |
+|---|---|
+| Beziehungsabfrage | `src/gameplay/combat/relationships/relationship_service.gd` |
+| Teilnehmer-Klassifikation | `src/gameplay/combat/engine/combat_participant_resolver.gd` |
+| Kampf-Sitzung/Initiative | `src/gameplay/combat/engine/combat_session.gd`, `combat_participant.gd` |
+| Einstiegspunkt (kein Autoload, Node unter `MainGame/Systems`) | `src/core/managers/combat_manager.gd` |
+| Aktion & Auflösung | `src/gameplay/combat/engine/combat_action.gd`, `combat_resolver.gd` |
+| Sichtlinie | `src/gameplay/combat/engine/combat_line_of_sight.gd` |
+| Einfache Gegner-KI | `src/gameplay/combat/engine/npc_combat_brain.gd` |
+| Spieler-Kampfmenü | `src/gameplay/character/state_machine/state_combat_wait.gd`, `state_combat_turn.gd` |
+| Balancing-Konstanten | `src/resources/combat/combat_balance.gd` |
+| Fähigkeiten (Magie, Gesang, …) | `src/resources/abilities/ability_definition.gd` + `src/resources/abilities/definitions/*.tres` |
+| Item-Nutzungsarten (stechen/schlagen/werfen) | `src/resources/items/item_usage_mode.gd` |
+
+### Beziehungen entscheiden über Kampfseiten
+
+`CharacterResource.beziehungen: Array[RelationshipEntry]` verweist per `target_id` auf einen anderen Charakter (`character_id`) oder eine Fraktion (`Faction.faction_id`, `CharacterResource.faction_ids`), mit einer Wertung von **-10 (feindlich) bis +10 (absolut intim)** (`CharacterEnums.BEZIEHUNG_MIN/MAX`). `RelationshipService.get_disposition(A, B)` liest das gerichtet aus `A`s eigenem `beziehungen`-Array (nicht symmetrisch) – ein Individual-Eintrag hat Vorrang vor Fraktions-Einträgen.
+
+Bricht ein Kampf aus, sammelt `CombatParticipantResolver.scan_candidates()` alle Charaktere aus der Gruppe `"combat_reactive"` im Wahrnehmungsradius (`CombatBalance.AWARENESS_RADIUS`) und ordnet jeden per `classify()` einer Seite zu: positive Beziehung zum Opfer → steht ihm bei; positive Beziehung zum Angreifer → unterstützt ihn; sonst neutral (schaut zu, wird kein Kampfteilnehmer). Das gilt uneingeschränkt auch für die eigene Party – ein Party-Mitglied mit hoher Beziehung zum Angegriffenen wechselt automatisch die Seite.
+
+### Initiative statt fester Rundenreihenfolge
+
+`CombatSession` führt kein starres Rundenschema, sondern ein Energiemeter pro Teilnehmer: proportional zur `GEWANDHEIT` steigt `initiative_meter` jeden Tick; bei Erreichen von `CombatBalance.INITIATIVE_THRESHOLD` kommt der Teilnehmer in die Zug-Warteschlange, der Überschuss bleibt erhalten. Ein doppelt so flinker Charakter sammelt so zwei Zugberechtigungen an, bevor ein langsamer die erste bekommt.
+
+### Kampfmodus statt Szenenwechsel
+
+`Playable.enter_combat_mode(session)`/`exit_combat_mode()` übersteuern nur für tatsächliche Teilnehmer die eigene State Machine (Wechsel zu `CombatWait`/`CombatTurn`) – **kein** globaler `GameState`-Input-Lock. Unbeteiligte Charaktere laufen währenddessen normal weiter. Nur der spielbare Charakter (Dannerman) hat einen `CombatTurn`-State mit Menü; alle anderen Teilnehmer (NPCs, Party-Begleiter ohne eigene State Machine) werden automatisch von `NPCCombatBrain` gesteuert, sobald sie an der Reihe sind – sonst bliebe die Initiative-Uhr auf ihrem Zug hängen.
+
+### Zug-Optionen
+
+Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
+
+- **Gegenstand**: nur was in der Hand oder am Gürtel getragen wird (`Inventory.get_combat_usable_items()`, Slots `primaer_hand`/`nebenhand`/`waffe`/`guertel_1-3`), mit den am Gegenstand definierten Nutzungsarten (`ItemData.usage_modes`, z.B. Messer: stechen/werfen; Stein: schlagen/werfen).
+- **Fähigkeit**: `AbilityCatalog.get_available_for(character)` filtert `AbilityDefinition`-Ressourcen danach, ob das zugehörige RPG-Talent (`source_skill_id`, z.B. `magiekunde`, `bardenkunst`) gelernt und hoch genug ist – die Brücke zwischen dem bestehenden Talentsystem und nutzbaren Kampf-Fähigkeiten. Nur `DAMAGE`/`HEAL` sind implementiert; `BUFF`/`DEBUFF`/`UTILITY` melden ehrlich `"effect_not_implemented"` (kein Status-Effekt-System vorhanden).
+- **Bewegen**: fester Schritt relativ zur Blickrichtung (`CombatBalance.MOVE_STEP_DISTANCE`), keine Kollisionsprüfung – Detailmechanik bewusst einfach gehalten.
+- **Reden**: öffnet den vorhandenen Dialog des Ziels (`NPCInteraction.perform_action("talk", …)`), falls vorhanden.
+- **Fliehen**: Erfolgschance aus der Differenz der eigenen Gewandheit zur durchschnittlichen Gewandheit der Gegenseite (`CombatBalance.FLEE_*`).
+
+### Sichtlinie
+
+`CombatLineOfSight.has_clear_line(from, to)` castet einen Ray auf Augenhöhe zwischen zwei Charakteren; die Maske deckt Wände **und andere Charakterkörper** ab (anders als die reine Kamera-Verdeckung von `OcclusionVisual`, aus deren Raycast-Muster diese Utility adaptiert ist). Aktionen mit `requires_line_of_sight = true` (Standard) blenden Ziele ohne freie Sicht im Menü als nicht wählbar aus und prüfen erneut bei der Ausführung.
+
+### Automatische Verteidigung
+
+Kein manueller "Verteidigen"-Zug: `CombatResolver.resolve_damage()` würfelt bei jedem Treffer automatisch Ausweichen (aus der Gewandheit des Ziels) und mindert den Schaden über die Robustheit des Ziels – für jeden Charakter, jederzeit.
+
+### Offene Punkte
+
+Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, Steuerung mehrerer eigener Party-Mitglieder im Kampf, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung).
 
 ---
 

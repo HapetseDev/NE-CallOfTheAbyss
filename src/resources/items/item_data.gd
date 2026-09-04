@@ -15,6 +15,9 @@ extends Resource
 @export var consumable: bool = false
 @export var heal_amount: int = 0
 @export var mana_amount: int = 0
+## Wie dieser Gegenstand im Kampf eingesetzt werden kann (stechen, schlagen,
+## werfen, …). Leer = im Kampf nicht als Waffe nutzbar (nur konsumierbar/passiv).
+@export var usage_modes: Array[ItemUsageMode] = []
 
 
 func apply_effects(target: Playable) -> void:

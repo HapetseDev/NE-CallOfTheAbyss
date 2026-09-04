@@ -9,6 +9,9 @@ signal konzentrationspunkte_changed(current: int, basis: int)
 signal sheet_changed
 signal inventory_changed
 
+## Stabile Referenz für Beziehungen/Fraktionen (RelationshipEntry.target_id).
+## Wird von CharacterSheetFactory beim Laden/Erzeugen gesetzt, falls leer.
+@export var character_id: String = ""
 @export var character_name: String = ""
 @export var ausbildung: CharacterEnums.Ausbildung = CharacterEnums.Ausbildung.KEINE
 @export var spezies: CharacterEnums.Spezies = CharacterEnums.Spezies.MENSCH
@@ -36,6 +39,7 @@ signal inventory_changed
 @export var skill_level_cap_bonus: int = 0
 
 @export_group("Soziales")
+@export var faction_ids: Array[String] = []
 @export var begleiter: Array[CompanionEntry] = []
 @export var beziehungen: Array[RelationshipEntry] = []
 
@@ -266,6 +270,11 @@ func equip(slot_key: String, item: ItemData) -> void:
 func unequip(slot_key: String) -> ItemData:
 	_ensure_inventory()
 	return inventory.unequip(slot_key)
+
+
+func get_combat_usable_items() -> Array[ItemData]:
+	_ensure_inventory()
+	return inventory.get_combat_usable_items()
 
 
 func debug_set_base_attribute(attr: CharacterEnums.Attribute, value: int) -> void:
