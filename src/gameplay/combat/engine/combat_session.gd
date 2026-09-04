@@ -9,11 +9,15 @@ extends Node
 ## langsamer die erste bekommt – löst "schnelle Charaktere kommen mehrfach
 ## pro Runde dran" ohne starre Rundenzählung.
 
-enum State { ACTIVE, ENDED }
+## "SessionState" statt "State", da "State" bereits die globale Basisklasse
+## der Charakter-State-Machine ist (state.gd) – ein gleichnamiges Enum hier
+## kollidiert damit beim Typ-Check ("Cannot assign CombatSession.State to
+## variable of type State").
+enum SessionState { ACTIVE, ENDED }
 
 var participants: Array[CombatParticipant] = []
 var turn_queue: Array[CombatParticipant] = []
-var state: State = State.ACTIVE
+var state: SessionState = SessionState.ACTIVE
 
 var _active_turn: CombatParticipant = null
 var _turned_this_round: Array[CombatParticipant] = []
@@ -30,7 +34,7 @@ signal side_wiped(losing_side: StringName)
 
 
 func _process(delta: float) -> void:
-	if state != State.ACTIVE:
+	if state != SessionState.ACTIVE:
 		return
 	_tick_initiative(delta)
 	_advance_turn_queue()
@@ -125,7 +129,7 @@ func _check_round_completed() -> void:
 
 
 func _check_side_wipe() -> void:
-	if state != State.ACTIVE:
+	if state != SessionState.ACTIVE:
 		return
 	var attacker_alive := false
 	var victim_alive := false
@@ -137,8 +141,8 @@ func _check_side_wipe() -> void:
 		elif participant.side == CombatParticipantResolver.SIDE_VICTIM:
 			victim_alive = true
 	if not attacker_alive and victim_alive:
-		state = State.ENDED
+		state = SessionState.ENDED
 		side_wiped.emit(CombatParticipantResolver.SIDE_ATTACKER)
 	elif not victim_alive and attacker_alive:
-		state = State.ENDED
+		state = SessionState.ENDED
 		side_wiped.emit(CombatParticipantResolver.SIDE_VICTIM)
