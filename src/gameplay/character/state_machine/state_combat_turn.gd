@@ -140,7 +140,7 @@ func _on_item_target_chosen(item: ItemData, mode: ItemUsageMode, target: CombatP
 	action.item = item
 	action.item_usage_mode = mode
 	action.targets = [target]
-	_apply_result(CombatResolver.resolve_action(action))
+	_apply_result(action, CombatResolver.resolve_action(action))
 
 
 # --- Fähigkeit ---
@@ -200,7 +200,7 @@ func _execute_ability(ability: AbilityDefinition, targets: Array[CombatParticipa
 	action.type = CombatAction.ActionType.ABILITY
 	action.ability = ability
 	action.targets = targets
-	_apply_result(CombatResolver.resolve_action(action))
+	_apply_result(action, CombatResolver.resolve_action(action))
 
 
 # --- Bewegen ---
@@ -222,7 +222,7 @@ func _on_move_chosen(direction: Vector3) -> void:
 	action.actor = _participant
 	action.type = CombatAction.ActionType.MOVE
 	action.move_target_position = player.global_position + direction.normalized() * CombatBalance.MOVE_STEP_DISTANCE
-	_apply_result(CombatResolver.resolve_action(action))
+	_apply_result(action, CombatResolver.resolve_action(action))
 
 
 # --- Reden ---
@@ -299,8 +299,9 @@ func _targets_on_side(side: StringName) -> Array[CombatParticipant]:
 	return result
 
 
-func _apply_result(result: CombatActionResult) -> void:
+func _apply_result(action: CombatAction, result: CombatActionResult) -> void:
 	if is_instance_valid(_session):
+		_session.announce_action(_participant, action, result)
 		for target in result.defeated_targets:
 			_session.mark_defeated(target)
 	_end_turn()

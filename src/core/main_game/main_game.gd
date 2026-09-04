@@ -8,6 +8,7 @@ static var instance: MainGame
 
 const PARTY_HUD_SCENE := preload("res://src/ui/hud/party_hud.tscn")
 const COMBAT_ORDER_HUD_SCENE := preload("res://src/ui/hud/combat_order_hud.tscn")
+const COMBAT_LOG_HUD_SCENE := preload("res://src/ui/hud/combat_log_hud.tscn")
 const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 
 @export var starting_level_path: String = DEFAULT_LEVEL
@@ -28,6 +29,7 @@ const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 var party: Party
 var _party_hud: PartyHud
 var _combat_order_hud: CombatOrderHud
+var _combat_log_hud: CombatLogHud
 
 
 func _enter_tree() -> void:
@@ -66,5 +68,13 @@ func _setup_hud() -> void:
 	_combat_order_hud.offset_left = -236.0
 	_combat_order_hud.offset_right = -16.0
 	_combat_order_hud.offset_top = 16.0
+	_combat_log_hud = COMBAT_LOG_HUD_SCENE.instantiate() as CombatLogHud
+	hud_root.add_child(_combat_log_hud)
+	_combat_log_hud.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_combat_log_hud.offset_left = 16.0
+	_combat_log_hud.offset_right = 436.0
+	_combat_log_hud.offset_top = -220.0
+	_combat_log_hud.offset_bottom = -16.0
 	if CombatManager.instance:
 		_combat_order_hud.bind(CombatManager.instance)
+		_combat_log_hud.bind(CombatManager.instance)

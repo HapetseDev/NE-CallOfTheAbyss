@@ -31,6 +31,9 @@ signal round_completed
 ## HOOK für spätere Niederlage-Konsequenz-Logik – hier passiert bewusst nichts
 ## außer der reinen Zustandsänderung (state = ENDED). Siehe Plan, "Offene Punkte".
 signal side_wiped(losing_side: StringName)
+## Für Aktions-Feedback-HUDs (siehe CombatNarrator/CombatLogHud). action kann
+## null sein (z.B. Reden/Fliehen, die nicht über CombatResolver laufen).
+signal action_resolved(actor: CombatParticipant, action: CombatAction, result: CombatActionResult)
 
 
 func _process(delta: float) -> void:
@@ -71,6 +74,14 @@ func remove(participant: CombatParticipant) -> void:
 ## Kampfreihenfolge) – _active_turn bleibt intern gesetzt.
 func get_active_participant() -> CombatParticipant:
 	return _active_turn
+
+
+## Zentraler Aufrufpunkt fürs Aktions-Feedback: von state_combat_turn.gd und
+## npc_combat_brain.gd nach CombatResolver.resolve_action() aufgerufen (result
+## kann für COMMUNICATE/FLEE auch direkt mit einem eigenen Text statt einem
+## echten CombatActionResult kombiniert werden, siehe CombatNarrator).
+func announce_action(actor: CombatParticipant, action: CombatAction, result: CombatActionResult) -> void:
+	action_resolved.emit(actor, action, result)
 
 
 func get_participant(playable: Playable) -> CombatParticipant:

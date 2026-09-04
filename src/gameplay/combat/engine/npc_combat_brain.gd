@@ -2,12 +2,12 @@ class_name NPCCombatBrain
 extends Object
 
 ## Einfache Kampf-KI für jeden Teilnehmer ohne eigene Spieler-Steuerung
-## (aktuell: alle NPCs sowie Party-Begleiter ohne CombatTurn-State, z.B.
-## Shalka). CombatManager ruft take_turn() auf, sobald turn_started für
-## einen solchen Teilnehmer feuert. Bewusst simpel: wählt das erreichbare
-## Ziel mit der größten Feindseligkeit und greift mit dem ersten nutzbaren
-## Gegenstand oder sonst waffenlos (Fausthieb) an. Kein Item-/Fähigkeiten-
-## Taktieren, keine Fluchtentscheidung.
+## (echte NPCs/Gegner ohne CombatTurn-State – alle Partymitglieder haben
+## inzwischen eine eigene, siehe PartyFollower). CombatManager ruft
+## take_turn() auf, sobald turn_started für einen solchen Teilnehmer feuert.
+## Bewusst simpel: wählt das erreichbare Ziel mit der größten Feindseligkeit
+## und greift mit dem ersten nutzbaren Gegenstand oder sonst waffenlos
+## (Fausthieb) an. Kein Item-/Fähigkeiten-Taktieren, keine Fluchtentscheidung.
 
 const FALLBACK_ABILITY_ID := "fausthieb"
 
@@ -21,6 +21,7 @@ static func take_turn(session: CombatSession, participant: CombatParticipant) ->
 		return
 	var action := _build_attack_action(participant, target)
 	var result := CombatResolver.resolve_action(action)
+	session.announce_action(participant, action, result)
 	for defeated in result.defeated_targets:
 		session.mark_defeated(defeated)
 	session.end_turn(participant)
