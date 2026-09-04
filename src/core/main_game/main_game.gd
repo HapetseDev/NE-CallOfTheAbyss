@@ -73,7 +73,7 @@ func _setup_hud() -> void:
 	_event_log_hud.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_event_log_hud.offset_left = 16.0
 	_event_log_hud.offset_right = 436.0
-	_event_log_hud.offset_top = -220.0
+	_event_log_hud.offset_top = -320.0
 	_event_log_hud.offset_bottom = -16.0
 	if CombatManager.instance:
 		_combat_order_hud.bind(CombatManager.instance)
