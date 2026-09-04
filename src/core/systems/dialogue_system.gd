@@ -222,9 +222,9 @@ func _resolve_subject(line: DialogueLine) -> Node3D:
 func _subject_from_key(subject_key: String) -> Node3D:
 	var key := subject_key.strip_edges().to_lower()
 	if key.is_empty() or key == "speaker" or key == "npc":
-		var npc := get_active_npc()
-		if npc:
-			return npc
+		var active_npc := get_active_npc()
+		if active_npc:
+			return active_npc
 		return _current_player if is_instance_valid(_current_player) else null
 	if key == "player" or key == "spieler":
 		return _current_player if is_instance_valid(_current_player) else null

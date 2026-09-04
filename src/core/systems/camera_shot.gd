@@ -149,10 +149,10 @@ static func split_tags(text: String) -> PackedStringArray:
 	return result
 
 
-static func parse_look(text: String, default_look: Look = Look.AUTO) -> Look:
+static func parse_look(text: String, fallback_look: Look = Look.AUTO) -> Look:
 	var key := _normalize(text)
 	if key.is_empty():
-		return default_look
+		return fallback_look
 	match key:
 		"eyes", "eye", "augen":
 			return Look.EYES
@@ -165,18 +165,18 @@ static func parse_look(text: String, default_look: Look = Look.AUTO) -> Look:
 		"auto":
 			return Look.AUTO
 		_:
-			return default_look
+			return fallback_look
 
 
-static func coerce_look(value: Variant, default_look: Look = Look.AUTO) -> Look:
+static func coerce_look(value: Variant, fallback_look: Look = Look.AUTO) -> Look:
 	match typeof(value):
 		TYPE_INT:
 			var as_int := int(value)
 			if as_int >= int(Look.AUTO) and as_int <= int(Look.MOUTH):
 				return as_int as Look
 		TYPE_STRING:
-			return parse_look(String(value), default_look)
-	return default_look
+			return parse_look(String(value), fallback_look)
+	return fallback_look
 
 
 static func default_look(kind: Kind) -> Look:
@@ -239,8 +239,8 @@ static func resolve_duration(requested: float, default_sec: float) -> float:
 	return maxf(0.0, requested)
 
 
-static func tween_ease(ease: TransitionEase) -> Tween.EaseType:
-	match ease:
+static func tween_ease(transition_ease: TransitionEase) -> Tween.EaseType:
+	match transition_ease:
 		TransitionEase.IN:
 			return Tween.EASE_IN
 		TransitionEase.OUT:
@@ -260,7 +260,7 @@ static func tween_camera(
 	xf: Transform3D,
 	duration: float,
 	target_fov: float = INHERIT_FOV,
-	ease: TransitionEase = TransitionEase.DEFAULT,
+	transition_ease: TransitionEase = TransitionEase.DEFAULT,
 	existing: Tween = null,
 	on_finished: Callable = Callable()
 ) -> Tween:
@@ -276,7 +276,7 @@ static func tween_camera(
 		return null
 	var tween := host.create_tween()
 	tween.set_parallel(true)
-	tween.set_trans(Tween.TRANS_SINE).set_ease(tween_ease(ease))
+	tween.set_trans(Tween.TRANS_SINE).set_ease(tween_ease(transition_ease))
 	tween.tween_property(camera, "global_transform", xf, duration)
 	if not is_equal_approx(camera.fov, next_fov):
 		tween.tween_property(camera, "fov", next_fov, duration)

@@ -18,28 +18,28 @@ var fov: float = 0.0
 
 
 static func make(
-	character: Node3D,
-	shot: CameraShot.Kind,
-	look_target: Node3D = null,
-	duration: float = 0.0,
-	look: CameraShot.Look = CameraShot.Look.AUTO,
-	source: StringName = SOURCE_DIALOGUE
+	p_character: Node3D,
+	p_shot: CameraShot.Kind,
+	p_look_target: Node3D = null,
+	p_duration: float = 0.0,
+	p_look: CameraShot.Look = CameraShot.Look.AUTO,
+	p_source: StringName = SOURCE_DIALOGUE
 ) -> RefCounted:
 	var event := new()
-	event.character = character
-	event.shot = shot
-	event.look_target = look_target
-	event.duration = duration
-	event.look = look
-	event.source = source
+	event.character = p_character
+	event.shot = p_shot
+	event.look_target = p_look_target
+	event.duration = p_duration
+	event.look = p_look
+	event.source = p_source
 	return event
 
 
-static func make_restore(duration: float, fov: float = 0.0) -> RefCounted:
+static func make_restore(p_duration: float, p_fov: float = 0.0) -> RefCounted:
 	var event := new()
 	event.source = SOURCE_RESTORE
-	event.duration = duration
-	event.fov = fov
+	event.duration = p_duration
+	event.fov = p_fov
 	return event
 
 
