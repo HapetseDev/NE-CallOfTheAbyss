@@ -503,18 +503,30 @@ func on_damaged(damage: int):
 
 Erkundung nutzt die State Machine für **Bewegung** und **Interaktion** (Kontextmenü). **Kampf** ist rundenbasiert und läuft direkt in der Erkundungs-Welt (kein Szenenwechsel) – siehe [Kampfsystem](#kampfsystem). Für Kampfteilnehmer übersteuern `CombatWait`/`CombatTurn` die normale Idle/Walk/ActionMenu-Steuerung, solange sie an einer Kampfsitzung beteiligt sind.
 
-### Struktur (Dannerman, spielbarer Charakter)
+### Struktur (Dannerman, Leader/spielbarer Charakter)
 
 ```
 StateMachine (Node)
-├── Idle (Node)       → state_idle.gd
-├── Walk (Node)        → state_walk.gd
-├── ActionMenu (Node)  → state_action_menu.gd
-├── CombatWait (Node)  → state_combat_wait.gd   (neu, Kampfsystem)
-└── CombatTurn (Node)  → state_combat_turn.gd   (neu, Kampfsystem)
+├── Idle (Node)        → state_idle.gd
+├── Walk (Node)         → state_walk.gd
+├── ActionMenu (Node)   → state_action_menu.gd
+├── CombatWait (Node)   → state_combat_wait.gd     (Kampfsystem)
+├── CombatTurn (Node)   → state_combat_turn.gd     (Kampfsystem)
+└── PartySkills (Node)  → state_party_skills.gd    (Party-Fähigkeiten, neu)
 ```
 
-Das alte, nie eingebundene `state_attack.gd` (Echtzeit-Overworld-Angriff) bleibt unangetastet im Projekt, wird aber von nichts referenziert. NPCs und Party-Begleiter (z.B. Shalka) haben aktuell keine eigene StateMachine-Node und werden im Kampf automatisch von `NPCCombatBrain` gesteuert (siehe Kampfsystem).
+### Struktur (Party-Follower, z.B. Shalka)
+
+Follower werden nie durch WASD/Interact gesteuert (Bewegung läuft komplett über `PartyFollower._update_follow`) – ihre StateMachine bleibt deshalb außerhalb des Kampfes deaktiviert (`process_mode = PROCESS_MODE_DISABLED`) und hat bewusst kein `Walk`/`ActionMenu`:
+
+```
+StateMachine (Node)
+├── Idle (Node)       → state_follower_idle.gd   (kein Input-Handling)
+├── CombatWait (Node) → state_combat_wait.gd      (identisch zum Leader)
+└── CombatTurn (Node) → state_combat_turn.gd      (identisch zum Leader)
+```
+
+`Playable.enter_combat_mode()`/`exit_combat_mode()` schalten `process_mode` gezielt für die Dauer der eigenen Kampfteilnahme ein/aus – dadurch sind inzwischen **alle** Partymitglieder im Kampf manuell steuerbar (gleiches Kampfmenü wie der Leader), nicht mehr nur er. `NPCCombatBrain` steuert nur noch echte NPCs/Gegner ohne eigene `CombatTurn`-State (siehe Kampfsystem). Das alte, nie eingebundene `state_attack.gd` (Echtzeit-Overworld-Angriff) bleibt unangetastet im Projekt, wird aber von nichts referenziert.
 
 ### State-Basis (state.gd)
 
@@ -587,6 +599,9 @@ Kämpfe finden **in der normalen Spielwelt** statt (Chrono-Trigger/Ultima-6-Stil
 | Balancing-Konstanten | `src/resources/combat/combat_balance.gd` |
 | Fähigkeiten (Magie, Gesang, …) | `src/resources/abilities/ability_definition.gd` + `src/resources/abilities/definitions/*.tres` |
 | Item-Nutzungsarten (stechen/schlagen/werfen) | `src/resources/items/item_usage_mode.gd` |
+| Party-Fähigkeiten-Menü außerhalb des Kampfes | `src/gameplay/character/state_machine/state_party_skills.gd`, `src/gameplay/combat/engine/party_ability_resolver.gd` |
+| Kampfreihenfolge-HUD | `src/ui/hud/combat_order_hud.gd`/`.tscn`, `combat_order_entry.gd`/`.tscn` |
+| Aktions-Feedback ("wer tut was") | `src/gameplay/combat/engine/combat_action_outcome.gd`, `combat_narrator.gd`, `src/ui/hud/combat_log_hud.gd`/`.tscn` |
 
 ### Beziehungen entscheiden über Kampfseiten
 
@@ -600,7 +615,7 @@ Bricht ein Kampf aus, sammelt `CombatParticipantResolver.scan_candidates()` alle
 
 ### Kampfmodus statt Szenenwechsel
 
-`Playable.enter_combat_mode(session)`/`exit_combat_mode()` übersteuern nur für tatsächliche Teilnehmer die eigene State Machine (Wechsel zu `CombatWait`/`CombatTurn`) – **kein** globaler `GameState`-Input-Lock. Unbeteiligte Charaktere laufen währenddessen normal weiter. Nur der spielbare Charakter (Dannerman) hat einen `CombatTurn`-State mit Menü; alle anderen Teilnehmer (NPCs, Party-Begleiter ohne eigene State Machine) werden automatisch von `NPCCombatBrain` gesteuert, sobald sie an der Reihe sind – sonst bliebe die Initiative-Uhr auf ihrem Zug hängen.
+`Playable.enter_combat_mode(session)`/`exit_combat_mode()` übersteuern nur für tatsächliche Teilnehmer die eigene State Machine (Wechsel zu `CombatWait`/`CombatTurn`) – **kein** globaler `GameState`-Input-Lock. Unbeteiligte Charaktere laufen währenddessen normal weiter. **Alle** Partymitglieder (Leader und Follower, siehe [State Machine](#state-machine)) haben einen `CombatTurn`-State mit demselben Kampfmenü und werden dadurch automatisch manuell erkannt (`CombatManager._has_manual_control()`); nur echte NPCs/Gegner ohne eigene `CombatTurn`-State werden von `NPCCombatBrain` gesteuert, sobald sie an der Reihe sind – sonst bliebe die Initiative-Uhr auf ihrem Zug hängen.
 
 ### Zug-Optionen
 
@@ -620,9 +635,21 @@ Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 
 Kein manueller "Verteidigen"-Zug: `CombatResolver.resolve_damage()` würfelt bei jedem Treffer automatisch Ausweichen (aus der Gewandheit des Ziels) und mindert den Schaden über die Robustheit des Ziels – für jeden Charakter, jederzeit.
 
+### Kampfreihenfolge-HUD
+
+`CombatOrderHud` (oben rechts) zeigt während eines Kampfes die Zugreihenfolge: aktiver Teilnehmer zuerst (hervorgehoben), danach `turn_queue` (bereits bereit), danach der Rest nach `initiative_meter` absteigend sortiert (Schätzung, da sich die Geschwindigkeit laufend ändert). Grün/Rot markiert eigene Party (`Player`/`PartyFollower`) vs. alles andere, unabhängig davon, wer den Kampf ausgelöst hat. Bindet an `CombatManager.combat_started`/`combat_ended` zum Ein-/Ausblenden; `CombatSession.get_active_participant()` ist der öffentliche Getter für den aktuell aktiven Teilnehmer.
+
+### Aktions-Feedback ("wer tut was")
+
+`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `CombatLogHud` (unten links) gestapelt anzeigt und einzeln ausblendet. Reden/Fliehen laufen nicht über `CombatResolver` und erscheinen aktuell nicht im Log.
+
+### Party-Fähigkeiten außerhalb des Kampfes
+
+Taste **F** (Input-Action `Faehigkeiten`, nur am Leader) öffnet `state_party_skills.gd`: Charakter aus der Party wählen → Fähigkeit wählen → Ziel wählen. Ziele innerhalb der Party (SELF/SINGLE_ALLY/ALL_ALLIES) wirken sofort über `PartyAbilityResolver.apply_non_combat()` (nur `HEAL` implementiert, ruft ausschließlich bestehende `Playable`-Methoden auf). Ziele außerhalb der Party (SINGLE_ENEMY/ALL_ENEMIES) werden wie im E-Menü in Reichweite gesucht (`ActionRangeIndicator`) und lösen `CombatManager.trigger_attack()` aus – die Fähigkeit wird dann als Erstschlag im neuen/erweiterten Kampf ganz regulär über `CombatResolver` aufgelöst, ohne reguläre `end_turn()`-Buchhaltung (kein zweiter Schadenscode-Pfad).
+
 ### Offene Punkte
 
-Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, Steuerung mehrerer eigener Party-Mitglieder im Kampf, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung).
+Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung), ob sich der "Erstschlag außerhalb der Zugreihenfolge" bei Party-Fähigkeiten gegen Fremde richtig anfühlt oder eine reguläre Zug-Einreihung besser wäre, ob die Kamera während des Kampfzugs eines Followers kurz umschalten soll (aktuell: nein, bleibt beim Leader).
 
 ---
 
