@@ -17,3 +17,13 @@ const MITIGATION_FACTOR := 1.0
 
 ## Radius, in dem Charaktere auf einen Angriff reagieren (CombatParticipantResolver).
 const AWARENESS_RADIUS := 8.0
+
+## Fliehen: Grundchance +/- Differenz zur durchschnittlichen Gewandheit der Gegenseite.
+const FLEE_BASE_CHANCE := 0.5
+const FLEE_SPEED_FACTOR := 0.02
+const FLEE_CHANCE_MIN := 0.1
+const FLEE_CHANCE_MAX := 0.9
+
+## "Bewegen"-Kampfzug: fester Schritt in eine der vier Richtungen, keine
+## Animation/Kollisionsprüfung (Detailmechanik laut Plan noch offen).
+const MOVE_STEP_DISTANCE := 2.0

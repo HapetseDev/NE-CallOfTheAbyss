@@ -56,6 +56,8 @@ func end_dialogue_facing() -> void:
 
 # Wird von KI-Logik / States gesetzt, nicht von Input
 func get_move_direction() -> Vector3:
+	if is_in_combat_mode():
+		return Vector3.ZERO
 	return _target_direction
 
 

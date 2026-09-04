@@ -43,6 +43,8 @@ func admit(playable: Playable, side: StringName) -> CombatParticipant:
 		return existing
 	var participant := CombatParticipant.new(playable, side)
 	participants.append(participant)
+	if playable:
+		playable.enter_combat_mode(self)
 	participant_joined.emit(participant)
 	return participant
 
@@ -55,6 +57,8 @@ func remove(participant: CombatParticipant) -> void:
 	_turned_this_round.erase(participant)
 	if _active_turn == participant:
 		_active_turn = null
+	if participant.playable and is_instance_valid(participant.playable):
+		participant.playable.exit_combat_mode()
 	participant_left.emit(participant)
 	_check_side_wipe()
 

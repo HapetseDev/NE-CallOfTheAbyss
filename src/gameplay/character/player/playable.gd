@@ -105,6 +105,46 @@ func get_display_name() -> String:
 	return name
 
 
+# --- Kampf-Modus (CombatSession, siehe src/gameplay/combat/engine) ---
+# Übersteuert die normale State Machine nur für tatsächliche Teilnehmer;
+# alle anderen Playable-Instanzen laufen unverändert weiter (kein globaler
+# Input-Lock, siehe CombatManager).
+var _combat_session: CombatSession = null
+
+
+func enter_combat_mode(session: CombatSession) -> void:
+	if _combat_session == session:
+		return
+	_combat_session = session
+	stop_horizontal_velocity()
+	var machine := get_node_or_null("StateMachine") as PlayerStateMachine
+	if machine == null:
+		return
+	var wait_state := machine.get_node_or_null("CombatWait") as State
+	if wait_state:
+		machine.change_state(wait_state)
+
+
+func exit_combat_mode() -> void:
+	if _combat_session == null:
+		return
+	_combat_session = null
+	var machine := get_node_or_null("StateMachine") as PlayerStateMachine
+	if machine == null:
+		return
+	var idle_state := machine.get_node_or_null("Idle") as State
+	if idle_state:
+		machine.change_state(idle_state)
+
+
+func is_in_combat_mode() -> bool:
+	return _combat_session != null
+
+
+func get_combat_session() -> CombatSession:
+	return _combat_session
+
+
 func _ready() -> void:
 	if gravity < 0.0:
 		gravity = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)

@@ -58,8 +58,29 @@ func _start_session() -> void:
 	active_session = CombatSession.new()
 	add_child(active_session)
 	active_session.side_wiped.connect(_on_side_wiped.bind(active_session))
+	active_session.turn_started.connect(_on_turn_started)
 	GameState.set_flag("in_combat", true)
 	combat_started.emit(active_session)
+
+
+## Teilnehmer mit eigenem CombatTurn-State (aktuell nur der menschlich
+## gesteuerte Player) reagieren selbst auf turn_started (state_combat_wait.gd).
+## Alle anderen – NPCs, Party-Begleiter ohne State Machine – bekommen ihren
+## Zug automatisch von NPCCombatBrain abgenommen, sonst würde die
+## Initiative-Uhr auf ihrem Zug hängen bleiben.
+func _on_turn_started(participant: CombatParticipant) -> void:
+	if _has_manual_control(participant.playable):
+		return
+	NPCCombatBrain.take_turn(active_session, participant)
+
+
+func _has_manual_control(playable: Playable) -> bool:
+	if playable == null:
+		return false
+	var machine := playable.get_node_or_null("StateMachine") as PlayerStateMachine
+	if machine == null:
+		return false
+	return machine.get_node_or_null("CombatTurn") != null
 
 
 func _evaluate_bystanders(attacker: Playable, victim: Playable) -> void:
@@ -77,5 +98,8 @@ func _on_side_wiped(losing_side: StringName, session: CombatSession) -> void:
 		return
 	active_session = null
 	GameState.set_flag("in_combat", false)
+	for participant in session.participants:
+		if participant.playable and is_instance_valid(participant.playable):
+			participant.playable.exit_combat_mode()
 	combat_ended.emit(session, {"losing_side": losing_side})
 	session.queue_free()
