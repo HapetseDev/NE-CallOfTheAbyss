@@ -112,6 +112,7 @@ func _ready() -> void:
 	_ensure_inventory_component()
 	_ensure_model_animator()
 	_apply_facing()
+	add_to_group(CombatParticipantResolver.COMBAT_REACTIVE_GROUP)
 
 
 func bind_character(new_character: CharacterResource, duplicate_runtime: bool = true) -> void:
