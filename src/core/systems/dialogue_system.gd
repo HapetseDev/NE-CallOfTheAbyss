@@ -145,9 +145,9 @@ func _log_dialogue_line(line: DialogueLine) -> void:
 	if text.is_empty():
 		return
 	if speaker.is_empty():
-		EventLog.log(text)
+		EventLog.add(text)
 	else:
-		EventLog.log("%s: %s" % [speaker, text])
+		EventLog.add("%s: %s" % [speaker, text])
 
 
 func _strip_bbcode(text: String) -> String:

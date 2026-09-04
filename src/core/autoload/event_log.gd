@@ -9,12 +9,16 @@ extends Node
 signal event_logged(text: String)
 
 
-func log(text: String) -> void:
+## Heißt bewusst nicht "log": GDScript reserviert diesen Namen für die
+## eingebaute globale Math-Funktion log(x: float) (natürlicher Logarithmus) –
+## eine gleichnamige Methode hier wird beim Aufruf trotzdem an das Builtin
+## gebunden ("argument 1 should be float but is String").
+func add(text: String) -> void:
 	if text.is_empty():
 		return
 	event_logged.emit(text)
 
 
-func log_lines(lines: Array[String]) -> void:
+func add_lines(lines: Array[String]) -> void:
 	for line in lines:
-		log(line)
+		add(line)

@@ -84,7 +84,7 @@ func get_active_participant() -> CombatParticipant:
 ## selben Log wie Item-Pickups/Dialog erscheinen.
 func announce_action(actor: CombatParticipant, action: CombatAction, result: CombatActionResult) -> void:
 	action_resolved.emit(actor, action, result)
-	EventLog.log_lines(CombatNarrator.describe(actor, action, result))
+	EventLog.add_lines(CombatNarrator.describe(actor, action, result))
 
 
 func get_participant(playable: Playable) -> CombatParticipant:

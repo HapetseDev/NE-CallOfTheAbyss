@@ -646,13 +646,13 @@ Kein manueller "Verteidigen"-Zug: `CombatResolver.resolve_damage()` würfelt bei
 
 ### Ereignis-Log (EventLog)
 
-`EventLog` (Autoload, `src/core/autoload/event_log.gd`) ist ein reiner Signal-Bus (`signal event_logged(text: String)`, Methoden `log(text)`/`log_lines(lines)`) im Fallout-1/2-Stil: eine laufende Textzeile für alles, was im Spiel passiert, statt eines auf den Kampf beschränkten Logs. `EventLogHud` (`src/ui/hud/event_log_hud.gd`/`.tscn`, unten links, immer sichtbar) hört direkt auf `event_logged` und stapelt/blendet Zeilen aus – kein Binding an `CombatManager` mehr nötig (ehemals `CombatLogHud`). Aktuell angebundene Quellen:
+`EventLog` (Autoload, `src/core/autoload/event_log.gd`) ist ein reiner Signal-Bus (`signal event_logged(text: String)`, Methoden `add(text)`/`add_lines(lines)` – bewusst nicht `log()`, das kollidiert mit GDScripts eingebauter globaler Math-Funktion `log(x: float)`) im Fallout-1/2-Stil: eine laufende Textzeile für alles, was im Spiel passiert, statt eines auf den Kampf beschränkten Logs. `EventLogHud` (`src/ui/hud/event_log_hud.gd`/`.tscn`, unten links, immer sichtbar) hört direkt auf `event_logged` und stapelt/blendet Zeilen aus – kein Binding an `CombatManager` mehr nötig (ehemals `CombatLogHud`). Aktuell angebundene Quellen:
 
 - **Kampf**: `CombatSession.announce_action()` (siehe oben).
 - **Gegenstände aufnehmen**: `BasicItem._pickup()`.
 - **Dialog**: `DialogueSystem._log_dialogue_line()` (BBCode wird aus `DialogueLine.text` entfernt).
 
-Wahrnehmungs-Ereignisse ("ein Charakter bemerkt etwas") sind bewusst nicht angebunden – es existiert noch kein Wahrnehmungssystem im Projekt. Weitere Quellen (Quest-Fortschritt, Loot, …) können jederzeit einfach `EventLog.log(text)` aufrufen.
+Wahrnehmungs-Ereignisse ("ein Charakter bemerkt etwas") sind bewusst nicht angebunden – es existiert noch kein Wahrnehmungssystem im Projekt. Weitere Quellen (Quest-Fortschritt, Loot, …) können jederzeit einfach `EventLog.add(text)` aufrufen.
 
 ### Party-Fähigkeiten außerhalb des Kampfes
 
