@@ -1,10 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://cmaingameroot01"]
+[gd_scene load_steps=8 format=3 uid="uid://cmaingameroot01"]
 
 [ext_resource type="Script" path="res://src/core/main_game/main_game.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://src/gameplay/character/party/party.tscn" id="2_party"]
 [ext_resource type="Script" path="res://src/core/managers/level_manager.gd" id="3_level_manager"]
 [ext_resource type="Script" path="res://src/core/systems/camera_system.gd" id="4_camera"]
-[ext_resource type="Script" path="res://src/core/managers/battle_manager.gd" id="5_battle"]
 [ext_resource type="Script" path="res://src/core/managers/combat_manager.gd" id="5b_combat"]
 [ext_resource type="Script" path="res://src/core/managers/shop_manager.gd" id="6_shop"]
 [ext_resource type="Script" path="res://src/core/systems/dialogue_system.gd" id="7_dialogue"]
@@ -23,8 +22,6 @@ script = ExtResource("1_main")
 
 [node name="EffectRoot" type="Node3D" parent="World"]
 
-[node name="BattleRoot" type="Node3D" parent="."]
-
 [node name="Systems" type="Node" parent="."]
 
 [node name="LevelManager" type="Node" parent="Systems"]
@@ -37,9 +34,6 @@ script = ExtResource("4_camera")
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 6, 8)
 fov = 50.0
 current = true
-
-[node name="BattleManager" type="Node" parent="Systems"]
-script = ExtResource("5_battle")
 
 [node name="CombatManager" type="Node" parent="Systems"]
 script = ExtResource("5b_combat")

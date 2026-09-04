@@ -56,11 +56,16 @@ func open_shop(shop_id: String) -> void:
 	ShopManager.open(shop_id, player)
 
 
-func start_encounter(encounter_id: String) -> void:
+## Dialog-Mutation "do start_encounter(...)" – Signatur bleibt für bestehende
+## .dialogue-Dateien kompatibel, encounter_id wird aber nicht mehr genutzt:
+## die neue Kampf-Engine ermittelt Teilnehmer dynamisch (CombatParticipantResolver)
+## statt aus einer festen Encounter-Gegnerliste. Greift den aktiven Dialog-NPC an.
+func start_encounter(_encounter_id: String) -> void:
 	var player := get_current_player()
-	if player == null:
+	var npc := get_active_npc()
+	if player == null or npc == null:
 		return
-	BattleManager.start_encounter(encounter_id, player)
+	CombatManager.trigger_attack(player, npc)
 
 
 func request_shot(shot_name: String, subject_key: String = "") -> void:

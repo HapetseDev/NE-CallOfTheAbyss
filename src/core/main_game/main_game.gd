@@ -7,7 +7,6 @@ extends Node3D
 static var instance: MainGame
 
 const PARTY_HUD_SCENE := preload("res://src/ui/hud/party_hud.tscn")
-const BATTLE_SCENE := preload("res://src/gameplay/combat/battle_scene.tscn")
 const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 
 @export var starting_level_path: String = DEFAULT_LEVEL
@@ -16,7 +15,6 @@ const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 @onready var level_root: Node3D = $World/LevelRoot
 @onready var entity_root: Node3D = $World/EntityRoot
 @onready var effect_root: Node3D = $World/EffectRoot
-@onready var battle_root: Node3D = $BattleRoot
 @onready var level_manager: LevelManager = $Systems/LevelManager
 @onready var camera_system: CameraSystem = $Systems/CameraSystem
 @onready var shop_manager: ShopManager = $Systems/ShopManager
@@ -28,7 +26,6 @@ const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 
 var party: Party
 var _party_hud: PartyHud
-var _battle_instance: Node
 
 
 func _enter_tree() -> void:
@@ -54,30 +51,6 @@ func get_item_drop_parent() -> Node:
 	if level_root:
 		return level_root
 	return self
-
-
-func start_battle() -> void:
-	if camera_system:
-		camera_system.set_enabled(false)
-	world.visible = false
-	world.process_mode = Node.PROCESS_MODE_DISABLED
-	hud_root.visible = false
-	if _battle_instance:
-		_battle_instance.queue_free()
-	_battle_instance = BATTLE_SCENE.instantiate()
-	battle_root.add_child(_battle_instance)
-
-
-func end_battle() -> void:
-	if _battle_instance:
-		_battle_instance.queue_free()
-		_battle_instance = null
-	world.process_mode = Node.PROCESS_MODE_INHERIT
-	world.visible = true
-	hud_root.visible = true
-	if camera_system:
-		camera_system.set_enabled(true)
-	BattleManager.apply_pending_party_state(party)
 
 
 func _setup_hud() -> void:
