@@ -48,6 +48,22 @@ signal inventory_changed
 @export var inventory: Inventory
 
 
+## Portrait-Konvention (z.B. für PartyHudEntry): res://assets/characters/
+## <character_name_lowercase>/<character_name_lowercase>_portrait.png –
+## gleicher Ordner wie Modell/Sprite des Charakters. Kein @export-Feld, da die
+## Bilder nicht pro .tres im Editor zugewiesen werden, sondern einfach unter
+## diesem Namen abgelegt werden – gibt null zurück, wenn (noch) keine Datei
+## existiert.
+func get_portrait() -> Texture2D:
+	if character_name.is_empty():
+		return null
+	var key := character_name.to_lower()
+	var path := "res://assets/characters/%s/%s_portrait.png" % [key, key]
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
+
+
 func ensure_initialized() -> void:
 	_ensure_inventory()
 	if staerkepunkte == 0 and konzentrationspunkte == 0:

@@ -19,11 +19,18 @@ script = ExtResource("1_entry")
 [node name="PortraitPanel" type="PanelContainer" parent="."]
 custom_minimum_size = Vector2(52, 52)
 
-[node name="Portrait" type="ColorRect" parent="PortraitPanel"]
+[node name="PortraitBackground" type="ColorRect" parent="PortraitPanel"]
 layout_mode = 2
 color = Color(0.35, 0.38, 0.45, 1)
 
+[node name="Portrait" type="TextureRect" parent="PortraitPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 6
+
 [node name="PortraitLabel" type="Label" parent="PortraitPanel"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "?"
