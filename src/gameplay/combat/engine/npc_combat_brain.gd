@@ -38,7 +38,7 @@ static func _choose_target(session: CombatSession, participant: CombatParticipan
 	var best: CombatParticipant = null
 	var best_score := -1000
 	for candidate in session.participants:
-		if candidate.side != enemy_side or candidate.is_defeated:
+		if candidate.side != enemy_side or candidate.is_out_of_combat():
 			continue
 		if not CombatLineOfSight.has_clear_line(participant.playable, candidate.playable):
 			continue

@@ -23,6 +23,11 @@ const FLEE_BASE_CHANCE := 0.5
 const FLEE_SPEED_FACTOR := 0.02
 const FLEE_CHANCE_MIN := 0.1
 const FLEE_CHANCE_MAX := 0.9
+## Strecke, die ein erfolgreich geflohener Charakter vom Schwerpunkt der
+## Gegenseite weg zurücklegt (Teleport, keine Kollisionsprüfung) – größer als
+## AWARENESS_RADIUS, damit er den Kampfbereich tatsächlich verlässt statt
+## nur knapp am Rand stehen zu bleiben.
+const FLEE_DISTANCE := AWARENESS_RADIUS + 4.0
 
 ## "Bewegen"-Kampfzug: freie Positionierung in einem Kreis um die
 ## Ausgangsposition. Radius = effektive Gewandheit * STANDARD_LENGTH (später

@@ -629,7 +629,7 @@ Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 - **Fähigkeit**: `AbilityCatalog.get_available_for(character)` filtert `AbilityDefinition`-Ressourcen danach, ob das zugehörige RPG-Talent (`source_skill_id`, z.B. `magiekunde`, `bardenkunst`) gelernt und hoch genug ist – die Brücke zwischen dem bestehenden Talentsystem und nutzbaren Kampf-Fähigkeiten. Nur `DAMAGE`/`HEAL` sind implementiert; `BUFF`/`DEBUFF`/`UTILITY` melden ehrlich `"effect_not_implemented"` (kein Status-Effekt-System vorhanden).
 - **Bewegen**: wechselt in einen eigenen State (`state_combat_move.gd`) statt sofort aufzulösen – siehe eigener Abschnitt unten.
 - **Reden**: öffnet den vorhandenen Dialog des Ziels (`NPCInteraction.perform_action("talk", …)`), falls vorhanden.
-- **Fliehen**: Erfolgschance aus der Differenz der eigenen Gewandheit zur durchschnittlichen Gewandheit der Gegenseite (`CombatBalance.FLEE_*`).
+- **Fliehen**: Erfolgschance aus der Differenz der eigenen Gewandheit zur durchschnittlichen Gewandheit der Gegenseite (`CombatBalance.FLEE_*`) – siehe eigener Abschnitt unten.
 
 ### Bewegen: freie Positionierung im Kreis
 
@@ -639,6 +639,12 @@ Solange `StateCombatMove` aktiv ist, läuft die Runde nicht weiter – wie bei j
 
 - **Bewegung ausführen**: löst die aktuelle Position regulär als `CombatAction.ActionType.MOVE` über `CombatResolver`/`CombatSession.announce_action()` auf (gleicher Pfad wie zuvor) und beendet den Zug (`end_turn`).
 - **Abbrechen**: setzt die Position auf die Ausgangsposition zurück und kehrt ohne Zugverbrauch ins Kampfmenü (`CombatTurn`) zurück.
+
+### Fliehen: verlässt den Kampfbereich, hält aber die eigene Seite fest
+
+Bei Erfolg teleportiert `_flee_away()` (`state_combat_turn.gd`) den Charakter vom Schwerpunkt der Gegenseite weg, mindestens `CombatBalance.FLEE_DISTANCE` (> `AWARENESS_RADIUS`) – er verlässt den Kampfbereich also tatsächlich, statt nur knapp am Rand stehen zu bleiben (keine Kollisionsprüfung, wie bei der übrigen Kampf-Bewegung).
+
+Der Charakter wird dabei über `CombatSession.mark_fled()` aus der Zugvergabe genommen – **nicht** über ein sofortiges `exit_combat_mode()`. Wie ein besiegter Charakter (`mark_defeated()`/`is_defeated`) bleibt er als `has_fled` in `participants`, zählt nirgends mehr als Ziel oder aktiver Teilnehmer (`CombatParticipant.is_out_of_combat()` fasst beide Flags zusammen), bekommt aber erst dann seine freie Steuerung zurück, wenn die gesamte eigene Seite den Kampf verlassen hat und `CombatManager._on_side_wiped()` `exit_combat_mode()` für alle Teilnehmer aufruft. Flieht z.B. nur der Party-Leader, während ein Begleiter weiterkämpft, bleibt der Leader bis zum Ende dieses Kampfes blockiert (`CombatWait`) statt sofort wieder frei steuerbar zu sein. Wird ein bereits Geflohener erneut angegriffen, holt `admit()` ihn zurück in den Kampf (`has_fled` wird zurückgesetzt).
 
 ### Sichtlinie
 
@@ -654,7 +660,7 @@ Kein manueller "Verteidigen"-Zug: `CombatResolver.resolve_damage()` würfelt bei
 
 ### Aktions-Feedback ("wer tut was")
 
-`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `announce_action()` an das projektweite `EventLog` weiterreicht (siehe unten). Reden/Fliehen laufen nicht über `CombatResolver` und erscheinen aktuell nicht im Log.
+`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `announce_action()` an das projektweite `EventLog` weiterreicht (siehe unten). Reden läuft nicht über `CombatResolver` und erscheint aktuell nicht im Log. Ein erfolgreicher Fluchtversuch loggt direkt eine eigene Zeile (`EventLog.add(...)` in `_on_flee_pressed()`), ohne über `CombatNarrator`/`announce_action()` zu laufen, da er kein `CombatActionResult` erzeugt.
 
 ### Ereignis-Log (EventLog)
 

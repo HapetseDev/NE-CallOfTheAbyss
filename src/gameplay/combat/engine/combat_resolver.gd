@@ -37,7 +37,7 @@ static func resolve_damage(actor: CombatParticipant, target: CombatParticipant, 
 ## (für Anzeige-Zwecke, siehe CombatActionOutcome). Intern verwendet, damit
 ## resolve_damage() selbst öffentlich weiterhin nur den Schadenswert liefert.
 static func _roll_damage(actor: CombatParticipant, target: CombatParticipant, raw_power: int, attacker_attribute: CharacterEnums.Attribute) -> Dictionary:
-	if target == null or target.playable == null or target.is_defeated:
+	if target == null or target.playable == null or target.is_out_of_combat():
 		return {"damage": 0, "evaded": false}
 	var accuracy := 0
 	if actor and actor.playable:
@@ -61,7 +61,7 @@ static func _resolve_item(action: CombatAction) -> CombatActionResult:
 		result.failed_reason = "invalid_item"
 		return result
 	for target in action.targets:
-		if target == null or target.playable == null or target.is_defeated:
+		if target == null or target.playable == null or target.is_out_of_combat():
 			continue
 		if mode.requires_line_of_sight and not CombatLineOfSight.has_clear_line(action.actor.playable, target.playable):
 			result.failed_reason = "no_line_of_sight"
@@ -104,7 +104,7 @@ static func _resolve_ability(action: CombatAction) -> CombatActionResult:
 static func _apply_damage_to_targets(action: CombatAction, ability: AbilityDefinition, result: CombatActionResult) -> void:
 	var scaling_attribute := _primary_attribute_for(ability)
 	for target in action.targets:
-		if target == null or target.playable == null or target.is_defeated:
+		if target == null or target.playable == null or target.is_out_of_combat():
 			continue
 		if ability.requires_line_of_sight and not CombatLineOfSight.has_clear_line(action.actor.playable, target.playable):
 			result.failed_reason = "no_line_of_sight"
@@ -118,7 +118,7 @@ static func _apply_damage_to_targets(action: CombatAction, ability: AbilityDefin
 
 static func _apply_heal_to_targets(action: CombatAction, ability: AbilityDefinition, result: CombatActionResult) -> void:
 	for target in action.targets:
-		if target == null or target.playable == null or target.is_defeated:
+		if target == null or target.playable == null or target.is_out_of_combat():
 			continue
 		target.playable.heal(ability.power)
 		var outcome := CombatActionOutcome.new()

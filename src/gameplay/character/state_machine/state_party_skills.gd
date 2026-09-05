@@ -194,7 +194,7 @@ func _on_world_target_chosen(actor: Playable, ability: AbilityDefinition, target
 	var targets: Array[CombatParticipant] = []
 	if ability.target_type == AbilityDefinition.TargetType.ALL_ENEMIES:
 		for participant in session.participants:
-			if participant.side == enemy_side and not participant.is_defeated:
+			if participant.side == enemy_side and not participant.is_out_of_combat():
 				targets.append(participant)
 	else:
 		var target_participant := session.get_participant(target)

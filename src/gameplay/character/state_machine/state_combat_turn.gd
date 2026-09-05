@@ -255,7 +255,14 @@ func _on_communicate_chosen(interaction: NPCInteraction) -> void:
 
 
 # --- Fliehen ---
-# Erfolgschance aus eigener Gewandheit vs. Durchschnitt der Gegenseite.
+# Erfolgschance aus eigener Gewandheit vs. Durchschnitt der Gegenseite. Bei
+# Erfolg bewegt sich der Charakter physisch aus dem Kampfbereich (siehe
+# _flee_away) und wird über mark_fled() (statt remove()) aus der aktiven
+# Zugvergabe genommen: er bleibt Teil der Session, bis auch der Rest seiner
+# Seite raus ist – erst dann (CombatManager._on_side_wiped) bekommt er seine
+# freie Steuerung zurück. Vermeidet den Bug, dass ein einzeln geflohener
+# Party-Leader sofort wieder frei steuerbar war, während der Rest der Party
+# noch kämpft.
 
 func _on_flee_pressed() -> void:
 	var enemies := _targets_on_side(_enemy_side())
@@ -272,9 +279,30 @@ func _on_flee_pressed() -> void:
 		CombatBalance.FLEE_CHANCE_MAX
 	)
 	if randf() < chance:
-		_session.remove(_participant)
+		_flee_away(enemies)
+		EventLog.add("%s flieht aus dem Kampf." % player.get_display_name())
+		_session.mark_fled(_participant)
+		_end_turn()
 	else:
 		_end_turn()
+
+
+## Teleportiert weg vom Schwerpunkt der Gegenseite, mindestens FLEE_DISTANCE
+## (> AWARENESS_RADIUS, damit er wirklich außerhalb des Wahrnehmungsradius
+## landet) – keine Kollisionsprüfung, bewusst so einfach wie die restliche
+## Bewegungsmechanik im Kampf.
+func _flee_away(enemies: Array[CombatParticipant]) -> void:
+	var away_direction := -player.facing_direction
+	if not enemies.is_empty():
+		var center := Vector3.ZERO
+		for enemy in enemies:
+			center += enemy.playable.global_position
+		center /= enemies.size()
+		var offset := player.global_position - center
+		offset.y = 0.0
+		if offset.length_squared() > 0.0001:
+			away_direction = offset.normalized()
+	player.global_position += away_direction * CombatBalance.FLEE_DISTANCE
 
 
 # --- Gemeinsame Hilfsfunktionen ---
@@ -290,7 +318,7 @@ func _targets_on_side(side: StringName) -> Array[CombatParticipant]:
 	if _session == null:
 		return result
 	for participant in _session.participants:
-		if participant.side == side and not participant.is_defeated:
+		if participant.side == side and not participant.is_out_of_combat():
 			result.append(participant)
 	return result
 
