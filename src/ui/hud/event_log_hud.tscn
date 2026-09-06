@@ -2,22 +2,9 @@
 
 [ext_resource type="Script" path="res://src/ui/hud/event_log_hud.gd" id="1_hud"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.08, 0.09, 0.11, 0.72)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.35, 0.38, 0.42, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
 [node name="EventLogHud" type="PanelContainer"]
 custom_minimum_size = Vector2(420, 0)
 offset_right = 420.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 script = ExtResource("1_hud")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
