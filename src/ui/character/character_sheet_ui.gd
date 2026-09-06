@@ -1,5 +1,7 @@
 class_name CharacterSheetUI extends Control
 
+const SECTION_HEADER_SCENE := preload("res://src/ui/components/panels/ne_section_header.tscn")
+
 var playable: Playable
 
 @onready var _window: Window = %Window
@@ -74,15 +76,14 @@ func _build_attribute_section(section: Dictionary) -> Control:
 	vbox.add_theme_constant_override(&"separation", 6)
 	margin.add_child(vbox)
 
-	var header := Label.new()
+	var header := SECTION_HEADER_SCENE.instantiate() as Label
 	header.text = "%s  (%d)" % [section["attribute_name"], section["attribute_value"]]
-	header.add_theme_font_size_override(&"font_size", 16)
 	vbox.add_child(header)
 
 	var influence := Label.new()
 	influence.text = section["influence"]
 	influence.add_theme_font_size_override(&"font_size", 12)
-	influence.add_theme_color_override(&"font_color", Color(0.75, 0.78, 0.82))
+	influence.add_theme_color_override(&"font_color", NEColors.TEXT_SECONDARY)
 	vbox.add_child(influence)
 
 	var grid := GridContainer.new()
@@ -117,7 +118,7 @@ func _build_attribute_section(section: Dictionary) -> Control:
 	var talent_hint := Label.new()
 	talent_hint.text = "%d Talente im Katalog" % talents.size()
 	talent_hint.add_theme_font_size_override(&"font_size", 11)
-	talent_hint.add_theme_color_override(&"font_color", Color(0.55, 0.58, 0.62))
+	talent_hint.add_theme_color_override(&"font_color", NEColors.TEXT_DISABLED)
 	vbox.add_child(talent_hint)
 
 	return panel

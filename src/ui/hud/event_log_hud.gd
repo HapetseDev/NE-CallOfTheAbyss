@@ -29,7 +29,7 @@ func _push_line(text: String) -> void:
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override(&"font_size", 13)
-	label.add_theme_color_override(&"font_color", Color(0.92, 0.92, 0.88, 1))
+	label.add_theme_color_override(&"font_color", NEColors.TEXT_PRIMARY)
 	_list.add_child(label)
 	_list.move_child(label, 0)
 	while _list.get_child_count() > MAX_ENTRIES:

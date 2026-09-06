@@ -24,8 +24,8 @@ func refresh(is_active: bool) -> void:
 
 func _name_color() -> Color:
 	if _is_own_party(participant.playable):
-		return Color(0.45, 0.8, 0.5, 1)
-	return Color(0.85, 0.4, 0.35, 1)
+		return NEColors.SUCCESS
+	return NEColors.DANGER
 
 
 func _is_own_party(playable: Playable) -> bool:

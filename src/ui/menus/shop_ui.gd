@@ -35,7 +35,7 @@ func close() -> void:
 func _build_ui() -> void:
 	var dim := ColorRect.new()
 	dim.set_anchors_preset(PRESET_FULL_RECT)
-	dim.color = Color(0, 0, 0, 0.55)
+	dim.color = NEColors.SCRIM
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(dim)
 
@@ -44,13 +44,21 @@ func _build_ui() -> void:
 	_panel.custom_minimum_size = Vector2(520, 360)
 	add_child(_panel)
 
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override(&"margin_left", NEDimensions.PANEL_MARGIN)
+	margin.add_theme_constant_override(&"margin_top", NEDimensions.PANEL_MARGIN)
+	margin.add_theme_constant_override(&"margin_right", NEDimensions.PANEL_MARGIN)
+	margin.add_theme_constant_override(&"margin_bottom", NEDimensions.PANEL_MARGIN)
+	_panel.add_child(margin)
+
 	var root := VBoxContainer.new()
-	root.custom_minimum_size = Vector2(500, 340)
-	_panel.add_child(root)
+	root.add_theme_constant_override(&"separation", NEDimensions.SPACING_S)
+	margin.add_child(root)
 
 	var title := Label.new()
 	title.text = "Handel"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override(&"font_size", NETypography.SIZE_H2)
 	root.add_child(title)
 
 	_gold_label = Label.new()
@@ -58,13 +66,17 @@ func _build_ui() -> void:
 
 	var lists := HBoxContainer.new()
 	lists.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	lists.add_theme_constant_override(&"separation", NEDimensions.SPACING_M)
 	root.add_child(lists)
 
 	var shop_box := VBoxContainer.new()
 	shop_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	shop_box.add_theme_constant_override(&"separation", NEDimensions.SPACING_XS)
 	lists.add_child(shop_box)
 	var shop_title := Label.new()
 	shop_title.text = "Angebot"
+	shop_title.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
+	shop_title.add_theme_color_override(&"font_color", NEColors.TEXT_SECONDARY)
 	shop_box.add_child(shop_title)
 	_shop_list = ItemList.new()
 	_shop_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -73,9 +85,12 @@ func _build_ui() -> void:
 
 	var player_box := VBoxContainer.new()
 	player_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	player_box.add_theme_constant_override(&"separation", NEDimensions.SPACING_XS)
 	lists.add_child(player_box)
 	var player_title := Label.new()
 	player_title.text = "Dein Inventar"
+	player_title.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
+	player_title.add_theme_color_override(&"font_color", NEColors.TEXT_SECONDARY)
 	player_box.add_child(player_title)
 	_player_list = ItemList.new()
 	_player_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -84,11 +99,14 @@ func _build_ui() -> void:
 
 	_info_label = Label.new()
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_info_label.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
+	_info_label.add_theme_color_override(&"font_color", NEColors.TEXT_SECONDARY)
 	root.add_child(_info_label)
 
 	var buttons := HBoxContainer.new()
 	root.add_child(buttons)
 	var close_btn := Button.new()
+	close_btn.custom_minimum_size = Vector2(NEDimensions.BUTTON_MIN_WIDTH, NEDimensions.BUTTON_HEIGHT)
 	close_btn.text = "Schließen"
 	close_btn.pressed.connect(close)
 	buttons.add_child(close_btn)

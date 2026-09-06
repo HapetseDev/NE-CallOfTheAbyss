@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://bpartyhudroot01" path="res://src/ui/hud/party_hud.tscn" id="3_hud"]
 [ext_resource type="PackedScene" uid="uid://binvslotbtn01" path="res://src/ui/inventory/inventory_slot_button.tscn" id="4_slot"]
 [ext_resource type="Script" path="res://src/ui/inventory/equip_slot_button.gd" id="5_equip"]
+[ext_resource type="PackedScene" path="res://src/ui/components/panels/ne_section_header.tscn" id="6_header"]
 
 [node name="InventoryUI" type="Control"]
 layout_mode = 3
@@ -24,7 +25,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-color = Color(0, 0, 0, 0.65)
+color = Color(0, 0, 0, 0.6)
 script = ExtResource("2_drop")
 
 [node name="Window" type="Window" parent="."]
@@ -65,7 +66,7 @@ layout_mode = 2
 [node name="DropHint" type="Label" parent="Window/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.7, 0.72, 0.76, 1)
+theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 1)
 text = "Fenster per Titelleiste verschieben · Items auf den dunklen Hintergrund ziehen zum Ablegen · Items auf Ausrüstungs-Slot ziehen zum Ausrüsten"
 
 [node name="ContentHBox" type="HBoxContainer" parent="Window/MarginContainer/VBoxContainer"]
@@ -77,9 +78,8 @@ theme_override_constants/separation = 20
 layout_mode = 2
 custom_minimum_size = Vector2(190, 0)
 
-[node name="EquipTitle" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol"]
+[node name="EquipTitle" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol" instance=ExtResource("6_header")]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
 text = "Ausrüstung"
 
 [node name="EquipGrid" type="GridContainer" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol"]
@@ -96,16 +96,15 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="InvTitle" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol"]
+[node name="InvTitle" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol" instance=ExtResource("6_header")]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
 text = "Gegenstände"
 
 [node name="WeightLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.7, 0.72, 0.76, 1)
+theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 1)
 text = "Gewicht: 0.0 / 0.0"
 
 [node name="InvGrid" type="GridContainer" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol"]

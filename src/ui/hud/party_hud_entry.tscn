@@ -1,15 +1,9 @@
 [gd_scene format=3 uid="uid://btf0yubqbc4vg"]
 
 [ext_resource type="Script" uid="uid://cv8p50yo16mky" path="res://src/ui/hud/party_hud_entry.gd" id="1_entry"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_bg"]
-bg_color = Color(0.12, 0.12, 0.14, 0.9)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
-bg_color = Color(0.75, 0.2, 0.2, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mp_fill"]
-bg_color = Color(0.2, 0.35, 0.85, 1)
+[ext_resource type="StyleBoxFlat" path="res://src/ui/components/indicators/bar_background.tres" id="2_bar_bg"]
+[ext_resource type="StyleBoxFlat" path="res://src/ui/components/indicators/hp_fill.tres" id="3_hp_fill"]
+[ext_resource type="StyleBoxFlat" path="res://src/ui/components/indicators/mp_fill.tres" id="4_mp_fill"]
 
 [node name="PartyHudEntry" type="HBoxContainer" unique_id=496063770]
 custom_minimum_size = Vector2(0, 72)
@@ -59,8 +53,8 @@ text = "SP"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 16)
 layout_mode = 2
-theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
-theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+theme_override_styles/background = ExtResource("2_bar_bg")
+theme_override_styles/fill = ExtResource("3_hp_fill")
 show_percentage = false
 
 [node name="MpLabel" type="Label" parent="Stats" unique_id=2122943035]
@@ -74,6 +68,6 @@ text = "KP"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 16)
 layout_mode = 2
-theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
-theme_override_styles/fill = SubResource("StyleBoxFlat_mp_fill")
+theme_override_styles/background = ExtResource("2_bar_bg")
+theme_override_styles/fill = ExtResource("4_mp_fill")
 show_percentage = false
