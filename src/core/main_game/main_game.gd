@@ -10,6 +10,7 @@ const PARTY_HUD_SCENE := preload("res://src/ui/hud/party_hud.tscn")
 const COMBAT_ORDER_HUD_SCENE := preload("res://src/ui/hud/combat_order_hud.tscn")
 const EVENT_LOG_HUD_SCENE := preload("res://src/ui/hud/event_log_hud.tscn")
 const TOP_BAR_HUD_SCENE := preload("res://src/ui/hud/top_bar_hud.tscn")
+const PARTY_ORDER_UI_SCENE := preload("res://src/ui/menus/party_order_ui.tscn")
 const MAP_UI_SCENE := preload("res://src/ui/menus/map_ui.tscn")
 const PAUSE_MENU_SCENE := preload("res://src/ui/menus/pause_menu.tscn")
 const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
@@ -41,6 +42,7 @@ var _party_hud: PartyHud
 var _combat_order_hud: CombatOrderHud
 var _event_log_hud: EventLogHud
 var _top_bar_hud: TopBarHud
+var _party_order_ui: PartyOrderUI
 var _map_ui: MapUI
 var _pause_menu: PauseMenu
 
@@ -80,6 +82,7 @@ func _setup_hud() -> void:
 	_top_bar_hud.offset_bottom = TOP_BAR_HEIGHT
 	_top_bar_hud.inventory_pressed.connect(_on_top_bar_inventory_pressed)
 	_top_bar_hud.character_pressed.connect(_on_top_bar_character_pressed)
+	_top_bar_hud.party_pressed.connect(_on_top_bar_party_pressed)
 	_top_bar_hud.map_pressed.connect(_on_top_bar_map_pressed)
 	_top_bar_hud.log_pressed.connect(_on_top_bar_log_pressed)
 	_top_bar_hud.menu_pressed.connect(_on_top_bar_menu_pressed)
@@ -108,6 +111,11 @@ func _setup_hud() -> void:
 
 
 func _setup_menus() -> void:
+	_party_order_ui = PARTY_ORDER_UI_SCENE.instantiate() as PartyOrderUI
+	menu_root.add_child(_party_order_ui)
+	_party_order_ui.bind_party(party)
+	_party_order_ui.visible = false
+
 	_map_ui = MAP_UI_SCENE.instantiate() as MapUI
 	menu_root.add_child(_map_ui)
 	_map_ui.visible = false
@@ -124,6 +132,10 @@ func _on_top_bar_inventory_pressed() -> void:
 func _on_top_bar_character_pressed() -> void:
 	if party and party.leader:
 		party.leader.toggle_character_sheet()
+
+
+func _on_top_bar_party_pressed() -> void:
+	_party_order_ui.visible = not _party_order_ui.visible
 
 
 func _on_top_bar_map_pressed() -> void:

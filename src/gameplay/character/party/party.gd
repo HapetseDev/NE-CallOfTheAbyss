@@ -31,6 +31,22 @@ func get_party_hud() -> PartyHud:
 	return _game_hud
 
 
+## Verschiebt einen Follower um `delta` Plätze innerhalb der Marschreihenfolge
+## (negativ = nach vorn, positiv = nach hinten). Der Anführer (Index 0 in
+## get_all_members()) ist davon nicht betroffen.
+func move_follower(follower: PartyFollower, delta: int) -> void:
+	var index := followers.find(follower)
+	if index == -1:
+		return
+	var new_index := clampi(index + delta, 0, followers.size() - 1)
+	if new_index == index:
+		return
+	followers.remove_at(index)
+	followers.insert(new_index, follower)
+	if _game_hud:
+		_game_hud.rebuild()
+
+
 func set_game_hud_visible(hud_visible: bool) -> void:
 	if _hud_layer:
 		_hud_layer.visible = hud_visible

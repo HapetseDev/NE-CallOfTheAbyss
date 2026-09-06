@@ -29,6 +29,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Charakter"
 
+[node name="PartyButton" type="Button" parent="MarginContainer/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Party"
+
 [node name="MapButton" type="Button" parent="MarginContainer/Row"]
 unique_name_in_owner = true
 layout_mode = 2
