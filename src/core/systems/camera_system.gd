@@ -614,10 +614,18 @@ func _dramatic_shot_transform(subject: Node3D, forward_dist: float, side_dist: f
 ## SOURCE_COMBAT. Setzt keinen Haltetimer selbst – das entscheiden die
 ## Aufrufer (_on_combat_turn_started/_play_combat_*_shot setzen ihn, ein
 ## Rücksprung in den Orbit lässt ihn bewusst auf 0).
+## _ensure_combat_mode() läuft trotzdem immer (Bewegen/Haltezeiten sollen
+## nicht auf den Dialog warten) – nur das eigentliche Tweenen der Kamera
+## unterbleibt, solange ein Dialog (z.B. "Ich will kämpfen!" mit
+## anschließendem do start_encounter(...) im selben Dialog) noch die Kamera
+## belegt. _update_combat_camera() greift automatisch, sobald der Dialog
+## endet (_dialogue_active wird false), kein zusätzlicher Anstoß nötig.
 func _show_combat_shot(xf: Transform3D, duration: float, subject: Node3D = null) -> void:
 	if camera == null:
 		return
 	_ensure_combat_mode()
+	if _dialogue_active:
+		return
 	var event: CameraShotEvent = CameraShotEvent.make(
 		subject, CameraShot.Kind.MEDIUM, null, duration, CameraShot.Look.NONE, CameraShotEvent.SOURCE_COMBAT
 	) as CameraShotEvent
@@ -626,12 +634,21 @@ func _show_combat_shot(xf: Transform3D, duration: float, subject: Node3D = null)
 	_tween_camera_to(xf, duration, CameraShot.INHERIT_FOV, CameraShot.TransitionEase.DEFAULT, _on_shot_transition_finished)
 
 
+## Kämpfe können mitten in einem Dialog ausgelöst werden (z.B. "do
+## start_encounter(...)" im Bandit-Dialog, direkt gefolgt von => END) – dann
+## ist _dialogue_active noch true, wenn dieser State betreten wird. Bewusst
+## IMMER _gameplay_transform() sichern (nicht _current_camera_snapshot_
+## transform(), das ist für die umgekehrte Verschachtelung gedacht – Dialog
+## während eines laufenden Kampfes): camera.global_transform würde hier
+## sonst die aktuelle Dialog-Einstellung einfrieren, und restore_gameplay_
+## camera() später zur falschen (Dialog-)Pose statt zur echten
+## Verfolgungskamera-Position zurückkehren.
 func _ensure_combat_mode() -> void:
 	if _combat_active:
 		return
 	_combat_active = true
 	begin_cutscene()
-	_saved_pre_combat_transform = _current_camera_snapshot_transform()
+	_saved_pre_combat_transform = _gameplay_transform()
 	_saved_pre_combat_fov = camera.fov if camera else 50.0
 	_has_saved_pre_combat_transform = true
 	_orbit_angle = 0.0
@@ -642,7 +659,7 @@ func _ensure_combat_mode() -> void:
 func _leave_combat_mode() -> void:
 	if not _combat_active:
 		return
-	if camera == null or not _has_saved_pre_combat_transform:
+	if _dialogue_active or camera == null or not _has_saved_pre_combat_transform:
 		_combat_active = false
 		_has_saved_pre_combat_transform = false
 		return
