@@ -6,6 +6,7 @@ extends RefCounted
 const SOURCE_DIALOGUE := &"dialogue"
 const SOURCE_RESTORE := &"restore"
 const SOURCE_CINEMATIC := &"cinematic"
+const SOURCE_COMBAT := &"combat"
 
 var source: StringName = SOURCE_DIALOGUE
 var character: Node3D

@@ -21,6 +21,24 @@ static var instance: CameraSystem
 @export_group("Dialogkamera")
 @export var dialogue_transition_sec: float = 0.35
 
+@export_group("Kampfkamera")
+## Radius/Höhe der Orbit-Kamera um den Schwerpunkt der aktiven Kampfteilnehmer,
+## während niemand gerade eine Aktion ausführt (z.B. während der Spieler im
+## Kampfmenü wählt).
+@export var combat_orbit_radius: float = 9.0
+@export var combat_orbit_height: float = 5.5
+## Grad pro Sekunde – bewusst langsam, siehe Nutzerwunsch "langsam drehende Kamera".
+@export var combat_orbit_speed_deg: float = 4.0
+@export var combat_shot_transition_sec: float = 0.45
+## Wie lange der "Wer ist dran"-Schnitt auf den aktiven Teilnehmer stehen bleibt,
+## bevor die Kamera zurück in den Orbit übergeht.
+@export var combat_turn_shot_hold_sec: float = 0.9
+## Wie lange der Angriffs-/Einschlags-Schnitt stehen bleibt.
+@export var combat_action_shot_hold_sec: float = 1.1
+## Wie lange die erste Einstellung eines Fähigkeiten-Zaubers (Handbewegung des
+## Wirkenden) stehen bleibt, bevor auf den Einschlag beim Ziel geschnitten wird.
+@export var combat_cast_lead_hold_sec: float = 0.6
+
 const GOLDEN_RATIO: float = 0.618
 const DEFAULT_LOOK_HEIGHT: float = 1.4
 
@@ -43,6 +61,21 @@ var _saved_gameplay_transform: Transform3D
 var _saved_gameplay_fov: float = 50.0
 var _has_saved_gameplay_transform: bool = false
 var _pending_event: CameraShotEvent
+
+## Kampfkamera – eigener Modus neben Dialog/Gameplay-Follow (siehe _process()).
+## Eigene gespeicherte Rückkehr-Transform statt der Dialog-Felder, damit ein
+## "Reden" mitten im Kampf (Kampfmenü-Aktion) die eigentliche Vor-Kampf-Kamera
+## nicht überschreibt – _ensure_dialogue_mode() sichert in diesem Fall stattdessen
+## die aktuelle Kampfkamera-Pose (siehe _current_camera_snapshot_transform()).
+var _combat_active: bool = false
+var _combat_session: CombatSession = null
+var _combat_focus: Vector3 = Vector3.ZERO
+var _orbit_angle: float = 0.0
+var _combat_shot_hold_timer: float = 0.0
+var _combat_pending_followup: Callable = Callable()
+var _saved_pre_combat_transform: Transform3D
+var _saved_pre_combat_fov: float = 50.0
+var _has_saved_pre_combat_transform: bool = false
 
 var events: CameraEventHub = CameraEventHub.new()
 
@@ -71,6 +104,7 @@ func _ready() -> void:
 		if not LevelManager.instance.tilemap_bounds_changed.is_connected(_on_tilemap_bounds_changed):
 			LevelManager.instance.tilemap_bounds_changed.connect(_on_tilemap_bounds_changed)
 	_connect_dialogue_signals()
+	_connect_combat_signals()
 
 
 func get_camera() -> Camera3D:
@@ -268,6 +302,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if _dialogue_active:
 		return
+	if _combat_active:
+		_update_combat_camera(delta)
+		return
 	if target:
 		_update_camera_position(delta)
 
@@ -368,9 +405,267 @@ func _ensure_dialogue_mode() -> void:
 		return
 	_dialogue_active = true
 	begin_cutscene()
-	_saved_gameplay_transform = _gameplay_transform()
+	_saved_gameplay_transform = _current_camera_snapshot_transform()
 	_saved_gameplay_fov = camera.fov if camera else 50.0
 	_has_saved_gameplay_transform = true
+
+
+## "Reden" (state_combat_turn.gd) kann eine Dialogszene mitten im Kampf starten
+## – dann ist beim Sichern nicht die normale Verfolgungskamera relevant,
+## sondern die aktuelle Kampfkamera-Pose (Orbit oder gerade gehaltener Schnitt),
+## damit restore_gameplay_camera() danach dorthin zurückkehrt statt zur
+## Verfolgungskamera zu springen. _combat_active selbst bleibt währenddessen
+## unverändert – sobald der Dialog endet, übernimmt _process() den Kampf-Modus
+## wieder genau dort, wo er stehen geblieben ist.
+func _current_camera_snapshot_transform() -> Transform3D:
+	if camera == null:
+		return Transform3D.IDENTITY
+	if _combat_active:
+		return camera.global_transform
+	return _gameplay_transform()
+
+
+# --- Kampfkamera ---
+# Eigener dritter Modus neben Dialog/Gameplay-Follow (siehe _process()).
+# Statt der Verfolgungskamera, die zuvor stur dem Party-Leader folgte
+# (Bug: floh der Leader, riss er die Kamera mit sich aus dem Kampf), zeigt
+# die Kampfkamera immer den Schwerpunkt der noch aktiven Teilnehmer
+# (CombatParticipant.is_out_of_combat() ausgeschlossen) – ein geflohener
+# oder besiegter Charakter fällt automatisch aus der Fokus-Berechnung raus.
+#
+# Modell: eine langsame Orbit-Kamera (_update_combat_camera) läuft immer im
+# Hintergrund weiter (auch während ein diskreter Schnitt gehalten wird, damit
+# der Rücksprung in den Orbit nahtlos ist); bei turn_started/action_resolved
+# wird per _show_combat_shot() kurz auf einen dramatischen Winkel geschnitten
+# und für eine feste Haltezeit (_combat_shot_hold_timer) dort gehalten, bevor
+# automatisch zurück in den Orbit übergegangen wird. Fähigkeiten (Zaubern)
+# bekommen dabei zwei Einstellungen nacheinander (Wirkender, dann Ziel) über
+# _combat_pending_followup als einzelnen nächsten Schritt.
+
+func _connect_combat_signals() -> void:
+	var cm := CombatManager.instance
+	if cm == null:
+		return
+	if not cm.combat_started.is_connected(_on_combat_started):
+		cm.combat_started.connect(_on_combat_started)
+	if not cm.combat_ended.is_connected(_on_combat_ended):
+		cm.combat_ended.connect(_on_combat_ended)
+
+
+func _on_combat_started(session: CombatSession) -> void:
+	if session == null:
+		return
+	_combat_session = session
+	if not session.turn_started.is_connected(_on_combat_turn_started):
+		session.turn_started.connect(_on_combat_turn_started)
+	if not session.action_resolved.is_connected(_on_combat_action_resolved):
+		session.action_resolved.connect(_on_combat_action_resolved)
+	_ensure_combat_mode()
+	_update_combat_focus()
+	_show_combat_shot(_combat_orbit_transform(), combat_shot_transition_sec)
+
+
+func _on_combat_ended(session: CombatSession, _outcome: Dictionary) -> void:
+	if session:
+		if session.turn_started.is_connected(_on_combat_turn_started):
+			session.turn_started.disconnect(_on_combat_turn_started)
+		if session.action_resolved.is_connected(_on_combat_action_resolved):
+			session.action_resolved.disconnect(_on_combat_action_resolved)
+	_combat_session = null
+	_leave_combat_mode()
+
+
+func _on_combat_turn_started(participant: CombatParticipant) -> void:
+	if not _combat_active or participant == null or participant.playable == null:
+		return
+	_update_combat_focus()
+	_show_combat_shot(_dramatic_shot_transform(participant.playable, 1.6, 2.0), combat_shot_transition_sec, participant.playable)
+	_combat_shot_hold_timer = combat_turn_shot_hold_sec
+	_combat_pending_followup = Callable()
+
+
+func _on_combat_action_resolved(actor: CombatParticipant, action: CombatAction, result: CombatActionResult) -> void:
+	if not _combat_active or action == null or actor == null or actor.playable == null:
+		return
+	if result == null or not result.success:
+		return
+	match action.type:
+		CombatAction.ActionType.ABILITY:
+			_play_combat_cast_sequence(actor.playable, action.targets)
+		CombatAction.ActionType.ITEM:
+			_play_combat_attack_shot(actor.playable, action.targets)
+		_:
+			pass
+
+
+## Einzelner dramatischer Schnitt für Gegenstands-/Nahkampfangriffe: Winkel auf
+## den Angreifer, Blick geht zum Ziel (oder zurück auf den Angreifer, falls
+## kein gültiges Ziel mehr existiert, z.B. schon durch eine vorige Aktion besiegt).
+func _play_combat_attack_shot(actor: Playable, targets: Array[CombatParticipant]) -> void:
+	var target_playable := _first_target_playable(targets)
+	var look_subject: Node3D = target_playable if target_playable else actor
+	_show_combat_shot(_dramatic_shot_transform(actor, 1.9, 1.6, look_subject), combat_shot_transition_sec, actor)
+	_combat_shot_hold_timer = combat_action_shot_hold_sec
+	_combat_pending_followup = Callable()
+
+
+## Zwei Einstellungen nacheinander für Fähigkeiten (Zaubern): erst die
+## Handbewegung des Wirkenden, danach automatisch der Einschlag beim Ziel.
+func _play_combat_cast_sequence(actor: Playable, targets: Array[CombatParticipant]) -> void:
+	_show_combat_shot(_dramatic_shot_transform(actor, 1.0, 0.8, actor), combat_shot_transition_sec, actor)
+	_combat_shot_hold_timer = combat_cast_lead_hold_sec
+	var target_playable := _first_target_playable(targets)
+	_combat_pending_followup = func() -> void:
+		if target_playable and is_instance_valid(target_playable):
+			_show_combat_shot(
+				_dramatic_shot_transform(target_playable, 1.7, 1.4, target_playable),
+				combat_shot_transition_sec,
+				target_playable
+			)
+		else:
+			_show_combat_shot(_combat_orbit_transform(), combat_shot_transition_sec)
+		_combat_shot_hold_timer = combat_action_shot_hold_sec
+
+
+func _first_target_playable(targets: Array[CombatParticipant]) -> Playable:
+	for participant in targets:
+		if participant and participant.playable and is_instance_valid(participant.playable):
+			return participant.playable
+	return null
+
+
+## Läuft jeden Frame, solange _combat_active – auch während ein Schnitt
+## gehalten wird, damit _orbit_angle nie "hinterherhinkt" und der Rücksprung
+## in den Orbit (siehe unten) nahtlos an der richtigen Position ansetzt.
+func _update_combat_camera(delta: float) -> void:
+	_update_combat_focus()
+	_orbit_angle = wrapf(_orbit_angle + deg_to_rad(combat_orbit_speed_deg) * delta, 0.0, TAU)
+	if _combat_shot_hold_timer > 0.0:
+		_combat_shot_hold_timer -= delta
+		if _combat_shot_hold_timer <= 0.0:
+			var followup := _combat_pending_followup
+			_combat_pending_followup = Callable()
+			if followup.is_valid():
+				followup.call()
+			else:
+				_show_combat_shot(_combat_orbit_transform(), combat_shot_transition_sec)
+		return
+	if camera and (_camera_tween == null or not _camera_tween.is_valid()):
+		camera.global_transform = _combat_orbit_transform()
+
+
+## Schwerpunkt aller noch aktiven Teilnehmer (weder besiegt noch geflohen) –
+## bleibt beim letzten bekannten Wert, falls die Session keine mehr hat
+## (z.B. im Moment des Kampfendes selbst).
+func _update_combat_focus() -> void:
+	if _combat_session == null or not is_instance_valid(_combat_session):
+		return
+	var sum := Vector3.ZERO
+	var count := 0
+	for participant in _combat_session.participants:
+		if participant.is_out_of_combat():
+			continue
+		if participant.playable and is_instance_valid(participant.playable):
+			sum += participant.playable.global_position
+			count += 1
+	if count > 0:
+		_combat_focus = sum / count
+
+
+func _combat_orbit_transform() -> Transform3D:
+	var offset := Vector3(sin(_orbit_angle), 0.0, cos(_orbit_angle)) * combat_orbit_radius
+	var origin := _combat_focus + offset + Vector3.UP * combat_orbit_height
+	var look_pos := _combat_focus + Vector3.UP * DEFAULT_LOOK_HEIGHT
+	return _shot_transform(origin, look_pos)
+
+
+## Diagonaler "dramatischer" Punkt schräg vor/neben dem Charakter, in seine
+## Blickrichtung schauend – prozedural aus facing_direction, unabhängig von
+## DialogueCameraPoints (funktioniert also auch für Gegner ohne Marker).
+func _dramatic_point(subject: Node3D, forward_dist: float, side_dist: float) -> Vector3:
+	if subject == null or not is_instance_valid(subject):
+		return _combat_focus + Vector3.UP * combat_orbit_height
+	var facing := Vector3(0.0, 0.0, 1.0)
+	if "facing_direction" in subject:
+		var value: Variant = subject.get("facing_direction")
+		if value is Vector3 and (value as Vector3).length_squared() > 0.0001:
+			facing = (value as Vector3).normalized()
+	var right := Vector3.UP.cross(facing)
+	if right.length_squared() < 0.0001:
+		right = Vector3.RIGHT
+	else:
+		right = right.normalized()
+	return subject.global_position + Vector3.UP * DEFAULT_LOOK_HEIGHT - facing * forward_dist + right * side_dist
+
+
+func _character_look_point(subject: Node3D) -> Vector3:
+	if subject == null or not is_instance_valid(subject):
+		return _combat_focus + Vector3.UP * DEFAULT_LOOK_HEIGHT
+	return subject.global_position + Vector3.UP * DEFAULT_LOOK_HEIGHT
+
+
+func _dramatic_shot_transform(subject: Node3D, forward_dist: float, side_dist: float, look_subject: Node3D = null) -> Transform3D:
+	var origin := _dramatic_point(subject, forward_dist, side_dist)
+	var look_pos := _character_look_point(look_subject if look_subject else subject)
+	return _shot_transform(origin, look_pos)
+
+
+## Generischer Kampf-Schnitt: tweent die Kamera zu xf, taggt das Event als
+## SOURCE_COMBAT. Setzt keinen Haltetimer selbst – das entscheiden die
+## Aufrufer (_on_combat_turn_started/_play_combat_*_shot setzen ihn, ein
+## Rücksprung in den Orbit lässt ihn bewusst auf 0).
+func _show_combat_shot(xf: Transform3D, duration: float, subject: Node3D = null) -> void:
+	if camera == null:
+		return
+	_ensure_combat_mode()
+	var event: CameraShotEvent = CameraShotEvent.make(
+		subject, CameraShot.Kind.MEDIUM, null, duration, CameraShot.Look.NONE, CameraShotEvent.SOURCE_COMBAT
+	) as CameraShotEvent
+	_pending_event = event
+	events.notify_shot_changed(event)
+	_tween_camera_to(xf, duration, CameraShot.INHERIT_FOV, CameraShot.TransitionEase.DEFAULT, _on_shot_transition_finished)
+
+
+func _ensure_combat_mode() -> void:
+	if _combat_active:
+		return
+	_combat_active = true
+	begin_cutscene()
+	_saved_pre_combat_transform = _current_camera_snapshot_transform()
+	_saved_pre_combat_fov = camera.fov if camera else 50.0
+	_has_saved_pre_combat_transform = true
+	_orbit_angle = 0.0
+	_combat_shot_hold_timer = 0.0
+	_combat_pending_followup = Callable()
+
+
+func _leave_combat_mode() -> void:
+	if not _combat_active:
+		return
+	if camera == null or not _has_saved_pre_combat_transform:
+		_combat_active = false
+		_has_saved_pre_combat_transform = false
+		return
+	_pending_event = CameraShotEvent.make_restore(combat_shot_transition_sec, _saved_pre_combat_fov) as CameraShotEvent
+	_tween_camera_to(
+		_saved_pre_combat_transform,
+		combat_shot_transition_sec,
+		_saved_pre_combat_fov,
+		CameraShot.TransitionEase.DEFAULT,
+		_on_combat_restore_finished
+	)
+
+
+func _on_combat_restore_finished() -> void:
+	if _pending_event:
+		events.notify_transition_finished(_pending_event)
+	_combat_active = false
+	_has_saved_pre_combat_transform = false
+	_pending_event = null
+	end_cutscene()
+	if target and camera:
+		_update_camera_position(1.0)
+	events.notify_control_returned()
 
 
 func _on_shot_transition_finished() -> void:

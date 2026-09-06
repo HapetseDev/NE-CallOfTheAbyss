@@ -410,9 +410,23 @@ func _exit_tree() -> void:
 | `transition_finished` | Tween fertig oder Duration 0; nicht bei Abbruch | `CameraShotEvent` |
 | `control_returned` | Gameplay-Kamera wieder aktiv (Dialogende, Levelwechsel, `set_enabled(false)`) | — |
 
-`source`: `dialogue` (jetzt), `restore` (Rückfahrt), `cinematic` (reserviert). Ein späteres CinematicSystem würde `show_dialogue_shot(..., source=&"cinematic")` aufrufen und dieselben Events für Animation/Licht/Audio nutzen — ohne die Kamera selbst zu bewegen.
+`source`: `dialogue` (Dialogsystem), `combat` (Kampfkamera, siehe unten), `restore` (Rückfahrt), `cinematic` (reserviert). Ein späteres CinematicSystem würde `show_dialogue_shot(..., source=&"cinematic")` aufrufen und dieselben Events für Animation/Licht/Audio nutzen — ohne die Kamera selbst zu bewegen.
 
 Levelwechsel und `set_enabled(false)` brechen einen Dialog-Shot ab und senden `control_returned`, ohne `transition_finished`.
+
+### Kampfkamera
+
+Dritter Kamera-Modus neben Gameplay-Follow und Dialog (`_combat_active` in `camera_system.gd`), analog zur Dialogkamera per Signal an `CombatManager.combat_started`/`combat_ended` gekoppelt (`_connect_combat_signals()`). Löst den Bug, dass die Verfolgungskamera stur dem Party-Leader folgte – floh er, riss er die Kamera aus dem Kampf: die Kampfkamera folgt keinem einzelnen `target` mehr, sondern zeigt immer den Schwerpunkt der noch **aktiven** Teilnehmer (`CombatParticipant.is_out_of_combat()` ausgeschlossen) – ein geflohener oder besiegter Charakter fällt automatisch aus der Fokus-Berechnung.
+
+- **Orbit**: Solange niemand gerade eine Aktion ausführt (z.B. während der Spieler im Kampfmenü wählt), dreht sich die Kamera langsam (`combat_orbit_speed_deg`, Standard 4°/s) auf einem Kreis (`combat_orbit_radius`/`combat_orbit_height`) um diesen Schwerpunkt. Läuft als reine Transform-Zuweisung in `_update_combat_camera()`, kein Tween nötig (stetige Kreisbewegung).
+- **Wer-ist-dran-Schnitt**: Bei `CombatSession.turn_started` schneidet die Kamera kurz auf einen dramatischen Winkel des aktiven Teilnehmers (`combat_turn_shot_hold_sec` Haltezeit), bevor sie automatisch zurück in den Orbit übergeht.
+- **Aktions-Schnitt**: Bei `CombatSession.action_resolved` (nur bei Erfolg, `action`/`result` nicht null) je nach `CombatAction.type`:
+  - `ITEM` (Gegenstand/Nahkampf): ein Schnitt auf den Angreifer, Blick geht zum Ziel.
+  - `ABILITY` (Fähigkeit/Zauber): zwei Einstellungen nacheinander – erst der Wirkende (`combat_cast_lead_hold_sec` Haltezeit, "Handbewegung"), danach automatisch der Einschlag beim Ziel (`combat_action_shot_hold_sec`). Umgesetzt über `_combat_pending_followup`, ein einzelner nächster Schritt, den `_update_combat_camera()` beim Ablauf der Haltezeit aufruft statt direkt zurück in den Orbit zu gehen.
+  - `MOVE`/`COMMUNICATE`/`FLEE`: kein Schnitt (Bewegen/Reden/Fliehen sollen die freie Positionierung bzw. laufende Kampfkamera nicht unterbrechen).
+- **Framing**: rein prozedural aus `facing_direction` (`_dramatic_point()`), unabhängig von `DialogueCameraPoints` – funktioniert also auch für Gegner ohne Dialog-Marker. Eigene Marker-Sets für die Kampfkamera (analog `dialogue_camera_points.tscn`) sind als spätere Verfeinerung offen, aber nicht Voraussetzung.
+- **"Reden" mitten im Kampf**: startet `NPCInteraction`/`DialogueSystem` einen Dialog während `_combat_active`, sichert `_ensure_dialogue_mode()` die aktuelle Kampfkamera-Pose (nicht die Verfolgungskamera) über `_current_camera_snapshot_transform()`, damit `restore_gameplay_camera()` danach dorthin zurückkehrt statt in die falsche Pose zu springen; `_combat_active` bleibt währenddessen unverändert bestehen.
+- Bei `combat_ended` fährt die Kamera zur vor dem Kampf gespeicherten Pose zurück (`_saved_pre_combat_transform`, eigenes Feld statt der Dialog-Rückfahrt-Felder, damit ein zwischenzeitliches "Reden" die eigentliche Vor-Kampf-Kamera nicht überschreibt).
 
 ### Player-Occlusion (X-Ray)
 
@@ -676,9 +690,13 @@ Wahrnehmungs-Ereignisse ("ein Charakter bemerkt etwas") sind bewusst nicht angeb
 
 Taste **F** (Input-Action `Faehigkeiten`, nur am Leader) öffnet `state_party_skills.gd`: Charakter aus der Party wählen → Fähigkeit wählen → Ziel wählen. Ziele innerhalb der Party (SELF/SINGLE_ALLY/ALL_ALLIES) wirken sofort über `PartyAbilityResolver.apply_non_combat()` (nur `HEAL` implementiert, ruft ausschließlich bestehende `Playable`-Methoden auf). Ziele außerhalb der Party (SINGLE_ENEMY/ALL_ENEMIES) werden wie im E-Menü in Reichweite gesucht (`ActionRangeIndicator`) und lösen `CombatManager.trigger_attack()` aus – die Fähigkeit wird dann als Erstschlag im neuen/erweiterten Kampf ganz regulär über `CombatResolver` aufgelöst, ohne reguläre `end_turn()`-Buchhaltung (kein zweiter Schadenscode-Pfad).
 
+### Kamera im Kampf
+
+Die Kamera folgt während eines Kampfes keinem einzelnen Charakter mehr (weder Leader noch dem gerade aktiven Teilnehmer), sondern zeigt den Schwerpunkt aller noch aktiven Teilnehmer mit langsamem Orbit und dramatischen Schnitten bei Zugwechsel/Aktionen – siehe [Kampfkamera](#kampfkamera) im Abschnitt Kamera-System.
+
 ### Offene Punkte
 
-Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung), ob sich der "Erstschlag außerhalb der Zugreihenfolge" bei Party-Fähigkeiten gegen Fremde richtig anfühlt oder eine reguläre Zug-Einreihung besser wäre, ob die Kamera während des Kampfzugs eines Followers kurz umschalten soll (aktuell: nein, bleibt beim Leader).
+Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung), ob sich der "Erstschlag außerhalb der Zugreihenfolge" bei Party-Fähigkeiten gegen Fremde richtig anfühlt oder eine reguläre Zug-Einreihung besser wäre. Kampfkamera bewusst rein prozedural (kein eigenes Marker-Set analog `DialogueCameraPoints`) – als spätere Verfeinerung offen.
 
 ---
 
