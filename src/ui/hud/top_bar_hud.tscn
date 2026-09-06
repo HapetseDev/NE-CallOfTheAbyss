@@ -1,0 +1,53 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://src/ui/hud/top_bar_hud.gd" id="1_bar"]
+
+[node name="TopBarHud" type="PanelContainer"]
+offset_right = 900.0
+offset_bottom = 60.0
+script = ExtResource("1_bar")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Row" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="InventoryButton" type="Button" parent="MarginContainer/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Inventar"
+
+[node name="CharacterButton" type="Button" parent="MarginContainer/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Charakter"
+
+[node name="MapButton" type="Button" parent="MarginContainer/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Karte"
+
+[node name="LogButton" type="Button" parent="MarginContainer/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Log"
+
+[node name="MenuButton" type="Button" parent="MarginContainer/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Menü"
+
+[node name="Separator" type="VSeparator" parent="MarginContainer/Row"]
+layout_mode = 2
+
+[node name="DebugButton" type="Button" parent="MarginContainer/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Debug"

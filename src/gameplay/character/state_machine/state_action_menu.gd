@@ -186,19 +186,6 @@ func _build_menu(actions: Array) -> void:
 	var sep := HSeparator.new()
 	vbox.add_child(sep)
 
-	var debug_title := Label.new()
-	debug_title.text = "Debug"
-	debug_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	debug_title.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
-	debug_title.add_theme_color_override(&"font_color", NEColors.WARNING)
-	vbox.add_child(debug_title)
-
-	var debug_sheet_btn := Button.new()
-	debug_sheet_btn.text = "Charakterbogen bearbeiten"
-	debug_sheet_btn.custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
-	debug_sheet_btn.pressed.connect(_on_debug_character_sheet_pressed)
-	vbox.add_child(debug_sheet_btn)
-
 	var cancel_btn := Button.new()
 	cancel_btn.text = "Abbrechen"
 	cancel_btn.custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
@@ -220,10 +207,4 @@ func _on_action_pressed(action_data: Dictionary) -> void:
 
 
 func _on_cancel_pressed() -> void:
-	_action_done = true
-
-
-func _on_debug_character_sheet_pressed() -> void:
-	if player is Playable:
-		DebugMenu.open_character_editor(player as Playable)
 	_action_done = true
