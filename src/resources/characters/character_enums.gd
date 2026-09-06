@@ -47,6 +47,11 @@ const MAX_BESONDERHEITEN := 2
 const BEZIEHUNG_MIN := -10
 const BEZIEHUNG_MAX := 10
 
+## Traggewicht: Basiswert + effektive Körperkraft * Faktor. Siehe
+## CharacterResource.get_max_carry_weight().
+const CARRY_WEIGHT_BASE := 10.0
+const CARRY_WEIGHT_PER_KOERPERKRAFT := 5.0
+
 const ALL_ATTRIBUTES: Array[Attribute] = [
 	Attribute.KOERPERKRAFT,
 	Attribute.ROBUSTHEIT,

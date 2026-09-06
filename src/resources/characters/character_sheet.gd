@@ -293,6 +293,33 @@ func get_combat_usable_items() -> Array[ItemData]:
 	return inventory.get_combat_usable_items()
 
 
+## Summe aus Rucksack (Slot-Gewicht * Anzahl) und Ausrüstung – Ausrüsten/
+## Ablegen verschiebt ein Item nur zwischen Slot und Ausrüstung desselben
+## Charakters und ändert diese Summe daher nie; nur echte Neuzugänge
+## (Aufheben, Kauf, künftig Tauschen/Stehlen) müssen gegen can_carry_
+## additional() geprüft werden.
+func get_total_weight() -> float:
+	_ensure_inventory()
+	var total := 0.0
+	for slot in inventory.slots:
+		if slot and slot.item:
+			total += slot.item.weight * slot.count
+	for slot_key in inventory.equipment:
+		var equipped: Variant = inventory.equipment[slot_key]
+		if equipped is ItemData:
+			total += (equipped as ItemData).weight
+	return total
+
+
+func get_max_carry_weight() -> float:
+	var koerperkraft_eff := get_effective_attribute(CharacterEnums.Attribute.KOERPERKRAFT)
+	return CharacterEnums.CARRY_WEIGHT_BASE + koerperkraft_eff * CharacterEnums.CARRY_WEIGHT_PER_KOERPERKRAFT
+
+
+func can_carry_additional(additional_weight: float) -> bool:
+	return get_total_weight() + additional_weight <= get_max_carry_weight()
+
+
 func debug_set_base_attribute(attr: CharacterEnums.Attribute, value: int) -> void:
 	value = maxi(0, value)
 	match attr:

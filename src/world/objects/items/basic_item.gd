@@ -50,6 +50,9 @@ func perform_action(action_id: String, player: Playable) -> void:
 func _pickup(player: Playable) -> void:
 	if item_data == null:
 		return
+	if not player.can_carry_additional(item_data.weight):
+		EventLog.add("%s kann %s nicht tragen (zu schwer)." % [player.get_display_name(), item_data.item_name])
+		return
 	player.add_item(item_data.duplicate_item())
 	EventLog.add("%s hat %s aufgenommen." % [player.get_display_name(), item_data.item_name])
 	queue_free()

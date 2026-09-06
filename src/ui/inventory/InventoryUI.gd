@@ -13,6 +13,7 @@ var _inv: InventoryComponent  # neu hinzufügen
 @onready var _window: Window = %Window
 @onready var _equip_grid: GridContainer = %EquipGrid
 @onready var _inv_grid: GridContainer = %InvGrid
+@onready var _weight_label: Label = %WeightLabel
 
 
 func _ready() -> void:
@@ -85,6 +86,8 @@ func _on_close_requested() -> void:
 func _refresh() -> void:
 	if not playable:
 		return
+
+	_weight_label.text = "Gewicht: %.1f / %.1f" % [playable.get_total_weight(), playable.get_max_carry_weight()]
 
 	for i in _inv_slots.size():
 		var btn := _inv_slots[i]
