@@ -19,3 +19,12 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 		preview.text += " x%d" % slot.count
 	set_drag_preview(preview)
 	return {"type": "inventory_item", "index": slot_index}
+
+
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	return data is Dictionary and data.get("type") == "equipped_item"
+
+
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
+	if inventory_ui:
+		inventory_ui.unequip_to_backpack(data["slot_key"])
