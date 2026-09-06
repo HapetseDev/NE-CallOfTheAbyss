@@ -177,7 +177,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 clip_text = true
-metadata/slot_key = "füße"
+metadata/slot_key = "fuesse"
 
 [node name="Slot0" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
 layout_mode = 2

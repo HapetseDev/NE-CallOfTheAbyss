@@ -91,13 +91,17 @@ func _refresh() -> void:
 			var slot := playable.inventory[i]
 			if slot != null and slot.item is ItemData:
 				var item: ItemData = slot.item
-				btn.text = "%s\nx%d" % [item.item_name, slot.count] if item.max_stack > 1 else item.item_name
+				var label := "%s\nx%d" % [item.item_name, slot.count] if item.max_stack > 1 else item.item_name
+				var can_equip := not item.consumable and not item.equipment_slot.is_empty()
+				if can_equip:
+					label += "\n[Ausrüsten]"
+				btn.text = label
 				btn.icon = item.icon
 				var hint := item.description
 				hint += "\n(Ziehen auf dunklen Bereich: Ablegen)"
 				if item.consumable:
 					hint += "\n(Klicken: Verwenden)"
-				elif not item.equipment_slot.is_empty():
+				elif can_equip:
 					hint += "\n(Klicken: Ausrüsten)"
 				btn.tooltip_text = hint
 			else:
@@ -115,7 +119,7 @@ func _refresh() -> void:
 		if equipped is ItemData:
 			btn.text = equipped.item_name
 			btn.icon = equipped.icon
-			btn.tooltip_text = equipped.description
+			btn.tooltip_text = "%s\n(Klicken: Ablegen)" % equipped.description
 		elif equipped is String:
 			btn.text = equipped
 			btn.icon = null
