@@ -29,6 +29,14 @@ const FLEE_CHANCE_MAX := 0.9
 ## nur knapp am Rand stehen zu bleiben.
 const FLEE_DISTANCE := AWARENESS_RADIUS + 4.0
 
+## Stehlen: Grundchance +/- Differenz zwischen Gewandheit des Diebs und
+## Bewusstsein des Opfers. Fehlschlag löst Kampf aus (siehe StealUI), also
+## bewusst etwas riskanter kalibriert als das kostenlose Party-Tauschen.
+const STEAL_BASE_CHANCE := 0.5
+const STEAL_SKILL_FACTOR := 0.04
+const STEAL_CHANCE_MIN := 0.05
+const STEAL_CHANCE_MAX := 0.9
+
 ## "Bewegen"-Kampfzug: freie Positionierung in einem Kreis um die
 ## Ausgangsposition. Radius = effektive Gewandheit * STANDARD_LENGTH (später
 ## ggf. durch Perks modifizierbar). Ein Attributspunkt Gewandheit entspricht

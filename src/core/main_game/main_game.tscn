@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cmaingameroot01"]
+[gd_scene load_steps=10 format=3 uid="uid://cmaingameroot01"]
 
 [ext_resource type="Script" path="res://src/core/main_game/main_game.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://src/gameplay/character/party/party.tscn" id="2_party"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://src/core/systems/dialogue_system.gd" id="7_dialogue"]
 [ext_resource type="Script" path="res://src/debug/debug_menu.gd" id="8_debug"]
 [ext_resource type="Script" path="res://src/core/managers/party_trade_manager.gd" id="9_trade"]
+[ext_resource type="Script" path="res://src/core/managers/steal_manager.gd" id="10_steal"]
 
 [node name="MainGame" type="Node3D"]
 script = ExtResource("1_main")
@@ -44,6 +45,9 @@ script = ExtResource("6_shop")
 
 [node name="PartyTradeManager" type="Node" parent="Systems"]
 script = ExtResource("9_trade")
+
+[node name="StealManager" type="Node" parent="Systems"]
+script = ExtResource("10_steal")
 
 [node name="DialogueSystem" type="Node" parent="Systems"]
 script = ExtResource("7_dialogue")

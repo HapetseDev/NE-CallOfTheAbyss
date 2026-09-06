@@ -1,9 +1,12 @@
-[gd_resource type="Resource" script_class="CharacterResource" format=3 uid="uid://daxgumgpkjthv"]
+[gd_resource type="Resource" script_class="CharacterResource" load_steps=8 format=3 uid="uid://daxgumgpkjthv"]
 
 [ext_resource type="Script" uid="uid://b00j3lcjo3wq5" path="res://src/resources/characters/character_sheet.gd" id="1"]
 [ext_resource type="Script" uid="uid://bwosmotj8yrat" path="res://src/resources/characters/companion_entry.gd" id="1_5mv63"]
 [ext_resource type="Script" uid="uid://dvaktft3p8jrl" path="res://src/resources/characters/learned_skill.gd" id="2"]
 [ext_resource type="Script" uid="uid://byjd75n0v2o8b" path="res://src/resources/characters/relationship_entry.gd" id="2_16kkk"]
+[ext_resource type="Script" uid="uid://cinventory01nec" path="res://src/gameplay/inventory/inventory.gd" id="3_inv"]
+[ext_resource type="Script" uid="uid://dmdcfbd4cnam" path="res://src/gameplay/inventory/InventorySlot.gd" id="4_slot"]
+[ext_resource type="Resource" path="res://src/resources/items/heiltrank.tres" id="5_heiltrank"]
 
 [sub_resource type="Resource" id="LearnedSkill_nahkampf"]
 script = ExtResource("2")
@@ -14,6 +17,15 @@ level = 2
 script = ExtResource("2")
 skill_id = "hiebwaffenfuehrung"
 level = 1
+
+[sub_resource type="Resource" id="InventorySlot_heiltrank"]
+script = ExtResource("4_slot")
+item = ExtResource("5_heiltrank")
+count = 1
+
+[sub_resource type="Resource" id="Inventory_bandit"]
+script = ExtResource("3_inv")
+slots = Array[ExtResource("4_slot")]([SubResource("InventorySlot_heiltrank")])
 
 [resource]
 script = ExtResource("1")
@@ -27,3 +39,4 @@ gewandheit = 2
 robustheit = 3
 learned_skills = Array[ExtResource("2")]([SubResource("LearnedSkill_nahkampf"), SubResource("LearnedSkill_hieb")])
 active_training_skill_ids = Array[String](["nahkampfwaffen", "hiebwaffenfuehrung"])
+inventory = SubResource("Inventory_bandit")
