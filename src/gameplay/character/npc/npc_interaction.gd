@@ -33,6 +33,7 @@ func get_actions(_player: Playable) -> Array[Dictionary]:
 		actions.append({"label": "Handeln", "action_id": "trade"})
 	if not is_defeated():
 		actions.append({"label": "Angreifen", "action_id": "fight"})
+		actions.append({"label": "Stehlen", "action_id": "steal"})
 	return actions
 
 
@@ -48,3 +49,6 @@ func perform_action(action_id: String, player: Playable) -> void:
 		"fight":
 			if _owner_npc and not is_defeated():
 				CombatManager.trigger_attack(player, _owner_npc)
+		"steal":
+			if _owner_npc and not is_defeated():
+				StealManager.open(player, _owner_npc)

@@ -97,7 +97,9 @@ func _build_ui() -> void:
 func _refresh() -> void:
 	if _player == null or _shop == null:
 		return
-	_gold_label.text = "Gold: %d" % _player.gold
+	_gold_label.text = "Gold: %d  ·  Gewicht: %.1f / %.1f" % [
+		_player.gold, _player.get_total_weight(), _player.get_max_carry_weight()
+	]
 	_shop_list.clear()
 	for i in _shop.entries.size():
 		var entry := _shop.entries[i]
@@ -137,6 +139,9 @@ func _on_shop_item_selected(index: int) -> void:
 		return
 	if entry.stock == 0:
 		_info_label.text = "Ausverkauft."
+		return
+	if not _player.can_carry_additional(entry.item.weight):
+		_info_label.text = "Zu schwer, um es zu tragen."
 		return
 	_player.gold -= entry.buy_price
 	_player.add_item(entry.item.duplicate_item(), 1)

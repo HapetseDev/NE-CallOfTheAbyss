@@ -8,6 +8,16 @@ var playable: Playable
 var side: StringName
 var initiative_meter: float = 0.0
 var is_defeated: bool = false
+## Erfolgreich geflohen (siehe CombatSession.mark_fled) – bleibt wie
+## is_defeated Teil von participants (kein Ziel mehr, keine Züge mehr), bis
+## die Session endet. So bekommt z.B. ein geflohener Party-Leader seine freie
+## Steuerung erst zurück, wenn auch der Rest der eigenen Seite raus ist
+## (besiegt oder ebenfalls geflohen) – nicht schon beim eigenen Fluchtversuch.
+var has_fled: bool = false
+
+
+func is_out_of_combat() -> bool:
+	return is_defeated or has_fled
 
 
 func _init(p_playable: Playable = null, p_side: StringName = &"neutral") -> void:

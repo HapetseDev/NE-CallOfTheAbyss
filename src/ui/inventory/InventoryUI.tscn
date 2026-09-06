@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://src/ui/inventory/inventory_drop_zone.gd" id="2_drop"]
 [ext_resource type="PackedScene" uid="uid://bpartyhudroot01" path="res://src/ui/hud/party_hud.tscn" id="3_hud"]
 [ext_resource type="PackedScene" uid="uid://binvslotbtn01" path="res://src/ui/inventory/inventory_slot_button.tscn" id="4_slot"]
+[ext_resource type="Script" path="res://src/ui/inventory/equip_slot_button.gd" id="5_equip"]
 
 [node name="InventoryUI" type="Control"]
 layout_mode = 3
@@ -65,7 +66,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 theme_override_colors/font_color = Color(0.7, 0.72, 0.76, 1)
-text = "Fenster per Titelleiste verschieben · Items auf den dunklen Hintergrund ziehen zum Ablegen"
+text = "Fenster per Titelleiste verschieben · Items auf den dunklen Hintergrund ziehen zum Ablegen · Items auf Ausrüstungs-Slot ziehen zum Ausrüsten"
 
 [node name="ContentHBox" type="HBoxContainer" parent="Window/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -100,6 +101,13 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Gegenstände"
 
+[node name="WeightLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.7, 0.72, 0.76, 1)
+text = "Gewicht: 0.0 / 0.0"
+
 [node name="InvGrid" type="GridContainer" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -118,6 +126,7 @@ custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 clip_text = true
 metadata/slot_key = "kopf"
+script = ExtResource("5_equip")
 
 [node name="RumpfLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
 layout_mode = 2
@@ -130,6 +139,7 @@ custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 clip_text = true
 metadata/slot_key = "rumpf"
+script = ExtResource("5_equip")
 
 [node name="WaffeLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
 layout_mode = 2
@@ -142,6 +152,7 @@ custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 clip_text = true
 metadata/slot_key = "waffe"
+script = ExtResource("5_equip")
 
 [node name="NebenhandLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
 layout_mode = 2
@@ -154,6 +165,7 @@ custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 clip_text = true
 metadata/slot_key = "nebenhand"
+script = ExtResource("5_equip")
 
 [node name="BeineLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
 layout_mode = 2
@@ -166,6 +178,7 @@ custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 clip_text = true
 metadata/slot_key = "beine"
+script = ExtResource("5_equip")
 
 [node name="FüßeLabel" type="Label" parent="Window/MarginContainer/VBoxContainer/ContentHBox/EquipCol/EquipGrid"]
 layout_mode = 2
@@ -177,7 +190,8 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 clip_text = true
-metadata/slot_key = "füße"
+metadata/slot_key = "fuesse"
+script = ExtResource("5_equip")
 
 [node name="Slot0" parent="Window/MarginContainer/VBoxContainer/ContentHBox/InvCol/InvGrid" instance=ExtResource("4_slot")]
 layout_mode = 2

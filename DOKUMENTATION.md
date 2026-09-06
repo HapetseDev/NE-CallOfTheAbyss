@@ -410,9 +410,24 @@ func _exit_tree() -> void:
 | `transition_finished` | Tween fertig oder Duration 0; nicht bei Abbruch | `CameraShotEvent` |
 | `control_returned` | Gameplay-Kamera wieder aktiv (Dialogende, Levelwechsel, `set_enabled(false)`) | — |
 
-`source`: `dialogue` (jetzt), `restore` (Rückfahrt), `cinematic` (reserviert). Ein späteres CinematicSystem würde `show_dialogue_shot(..., source=&"cinematic")` aufrufen und dieselben Events für Animation/Licht/Audio nutzen — ohne die Kamera selbst zu bewegen.
+`source`: `dialogue` (Dialogsystem), `combat` (Kampfkamera, siehe unten), `restore` (Rückfahrt), `cinematic` (reserviert). Ein späteres CinematicSystem würde `show_dialogue_shot(..., source=&"cinematic")` aufrufen und dieselben Events für Animation/Licht/Audio nutzen — ohne die Kamera selbst zu bewegen.
 
 Levelwechsel und `set_enabled(false)` brechen einen Dialog-Shot ab und senden `control_returned`, ohne `transition_finished`.
+
+### Kampfkamera
+
+Dritter Kamera-Modus neben Gameplay-Follow und Dialog (`_combat_active` in `camera_system.gd`), analog zur Dialogkamera per Signal an `CombatManager.combat_started`/`combat_ended` gekoppelt (`_connect_combat_signals()`). Löst den Bug, dass die Verfolgungskamera stur dem Party-Leader folgte – floh er, riss er die Kamera aus dem Kampf: die Kampfkamera folgt keinem einzelnen `target` mehr, sondern zeigt immer den Schwerpunkt der noch **aktiven** Teilnehmer (`CombatParticipant.is_out_of_combat()` ausgeschlossen) – ein geflohener oder besiegter Charakter fällt automatisch aus der Fokus-Berechnung.
+
+- **Orbit**: Solange niemand gerade eine Aktion ausführt (z.B. während der Spieler im Kampfmenü wählt), dreht sich die Kamera langsam (`combat_orbit_speed_deg`, Standard 4°/s) auf einem Kreis (`combat_orbit_radius`/`combat_orbit_height`) um diesen Schwerpunkt. Läuft als reine Transform-Zuweisung in `_update_combat_camera()`, kein Tween nötig (stetige Kreisbewegung).
+- **Wer-ist-dran-Schnitt**: Bei `CombatSession.turn_started` schneidet die Kamera kurz auf einen dramatischen Winkel des aktiven Teilnehmers (`combat_turn_shot_hold_sec` Haltezeit), bevor sie automatisch zurück in den Orbit übergeht.
+- **Aktions-Schnitt**: Bei `CombatSession.action_resolved` (nur bei Erfolg, `action`/`result` nicht null) je nach `CombatAction.type`:
+  - `ITEM` (Gegenstand/Nahkampf): ein Schnitt auf den Angreifer, Blick geht zum Ziel.
+  - `ABILITY` (Fähigkeit/Zauber): zwei Einstellungen nacheinander – erst der Wirkende (`combat_cast_lead_hold_sec` Haltezeit, "Handbewegung"), danach automatisch der Einschlag beim Ziel (`combat_action_shot_hold_sec`). Umgesetzt über `_combat_pending_followup`, ein einzelner nächster Schritt, den `_update_combat_camera()` beim Ablauf der Haltezeit aufruft statt direkt zurück in den Orbit zu gehen.
+  - `MOVE`/`COMMUNICATE`/`FLEE`: kein Schnitt (Bewegen/Reden/Fliehen sollen die freie Positionierung bzw. laufende Kampfkamera nicht unterbrechen).
+- **Framing**: rein prozedural aus `facing_direction` (`_dramatic_point()`), unabhängig von `DialogueCameraPoints` – funktioniert also auch für Gegner ohne Dialog-Marker. Eigene Marker-Sets für die Kampfkamera (analog `dialogue_camera_points.tscn`) sind als spätere Verfeinerung offen, aber nicht Voraussetzung.
+- **"Reden" mitten im Kampf**: startet `NPCInteraction`/`DialogueSystem` einen Dialog während `_combat_active`, sichert `_ensure_dialogue_mode()` die aktuelle Kampfkamera-Pose (nicht die Verfolgungskamera) über `_current_camera_snapshot_transform()`, damit `restore_gameplay_camera()` danach dorthin zurückkehrt statt in die falsche Pose zu springen; `_combat_active` bleibt währenddessen unverändert bestehen.
+- **Kampf mitten in einem Dialog** (umgekehrte Verschachtelung, z.B. der Bandit-Dialog: Wahl "Ich will kämpfen!" ruft `do start_encounter(...)` auf und beendet den Dialog erst danach mit `=> END`): `_ensure_combat_mode()` sichert hier bewusst *immer* `_gameplay_transform()` statt `_current_camera_snapshot_transform()` – sonst würde die aktuelle Dialog-Einstellung (z.B. ein Nahaufnahme-Schnitt auf den Gegner) als "Vor-Kampf-Pose" eingefroren und die Kamera würde nach einer späteren Flucht/Kampfende nie zur echten Verfolgungskamera zurückkehren. `_show_combat_shot()` tweent währenddessen nicht (nur Buchführung wie Haltezeiten läuft weiter) – die Kampfkamera übernimmt automatisch, sobald der Dialog endet und `_dialogue_active` false wird, ohne zusätzlichen Anstoß.
+- Bei `combat_ended` fährt die Kamera zur vor dem Kampf gespeicherten Pose zurück (`_saved_pre_combat_transform`, eigenes Feld statt der Dialog-Rückfahrt-Felder, damit ein zwischenzeitliches "Reden" die eigentliche Vor-Kampf-Kamera nicht überschreibt). Ist dabei ausnahmsweise noch ein Dialog aktiv, wird nur der interne Zustand zurückgesetzt (kein Tween) – der Dialog übernimmt die Kamera ohnehin gerade.
 
 ### Player-Occlusion (X-Ray)
 
@@ -629,7 +644,7 @@ Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 - **Fähigkeit**: `AbilityCatalog.get_available_for(character)` filtert `AbilityDefinition`-Ressourcen danach, ob das zugehörige RPG-Talent (`source_skill_id`, z.B. `magiekunde`, `bardenkunst`) gelernt und hoch genug ist – die Brücke zwischen dem bestehenden Talentsystem und nutzbaren Kampf-Fähigkeiten. Nur `DAMAGE`/`HEAL` sind implementiert; `BUFF`/`DEBUFF`/`UTILITY` melden ehrlich `"effect_not_implemented"` (kein Status-Effekt-System vorhanden).
 - **Bewegen**: wechselt in einen eigenen State (`state_combat_move.gd`) statt sofort aufzulösen – siehe eigener Abschnitt unten.
 - **Reden**: öffnet den vorhandenen Dialog des Ziels (`NPCInteraction.perform_action("talk", …)`), falls vorhanden.
-- **Fliehen**: Erfolgschance aus der Differenz der eigenen Gewandheit zur durchschnittlichen Gewandheit der Gegenseite (`CombatBalance.FLEE_*`).
+- **Fliehen**: Erfolgschance aus der Differenz der eigenen Gewandheit zur durchschnittlichen Gewandheit der Gegenseite (`CombatBalance.FLEE_*`) – siehe eigener Abschnitt unten.
 
 ### Bewegen: freie Positionierung im Kreis
 
@@ -639,6 +654,12 @@ Solange `StateCombatMove` aktiv ist, läuft die Runde nicht weiter – wie bei j
 
 - **Bewegung ausführen**: löst die aktuelle Position regulär als `CombatAction.ActionType.MOVE` über `CombatResolver`/`CombatSession.announce_action()` auf (gleicher Pfad wie zuvor) und beendet den Zug (`end_turn`).
 - **Abbrechen**: setzt die Position auf die Ausgangsposition zurück und kehrt ohne Zugverbrauch ins Kampfmenü (`CombatTurn`) zurück.
+
+### Fliehen: verlässt den Kampfbereich, hält aber die eigene Seite fest
+
+Bei Erfolg teleportiert `_flee_away()` (`state_combat_turn.gd`) den Charakter vom Schwerpunkt der Gegenseite weg, mindestens `CombatBalance.FLEE_DISTANCE` (> `AWARENESS_RADIUS`) – er verlässt den Kampfbereich also tatsächlich, statt nur knapp am Rand stehen zu bleiben (keine Kollisionsprüfung, wie bei der übrigen Kampf-Bewegung).
+
+Der Charakter wird dabei über `CombatSession.mark_fled()` aus der Zugvergabe genommen – **nicht** über ein sofortiges `exit_combat_mode()`. Wie ein besiegter Charakter (`mark_defeated()`/`is_defeated`) bleibt er als `has_fled` in `participants`, zählt nirgends mehr als Ziel oder aktiver Teilnehmer (`CombatParticipant.is_out_of_combat()` fasst beide Flags zusammen), bekommt aber erst dann seine freie Steuerung zurück, wenn die gesamte eigene Seite den Kampf verlassen hat und `CombatManager._on_side_wiped()` `exit_combat_mode()` für alle Teilnehmer aufruft. Flieht z.B. nur der Party-Leader, während ein Begleiter weiterkämpft, bleibt der Leader bis zum Ende dieses Kampfes blockiert (`CombatWait`) statt sofort wieder frei steuerbar zu sein. Wird ein bereits Geflohener erneut angegriffen, holt `admit()` ihn zurück in den Kampf (`has_fled` wird zurückgesetzt).
 
 ### Sichtlinie
 
@@ -654,7 +675,7 @@ Kein manueller "Verteidigen"-Zug: `CombatResolver.resolve_damage()` würfelt bei
 
 ### Aktions-Feedback ("wer tut was")
 
-`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `announce_action()` an das projektweite `EventLog` weiterreicht (siehe unten). Reden/Fliehen laufen nicht über `CombatResolver` und erscheinen aktuell nicht im Log.
+`CombatActionResult` trägt pro Ziel ein `CombatActionOutcome` (Schaden/Heilung/Ausweichen/besiegt). `CombatSession.announce_action(actor, action, result)` (Signal `action_resolved`) ist der zentrale Aufrufpunkt, den sowohl `state_combat_turn.gd` als auch `npc_combat_brain.gd` nach jeder aufgelösten Aktion aufrufen. `CombatNarrator.describe(...)` baut daraus deutsche Zeilen ("Bandit trifft Dannerman mit Messer (Stechen) – 6 Schaden"), die `announce_action()` an das projektweite `EventLog` weiterreicht (siehe unten). Reden läuft nicht über `CombatResolver` und erscheint aktuell nicht im Log. Ein erfolgreicher Fluchtversuch loggt direkt eine eigene Zeile (`EventLog.add(...)` in `_on_flee_pressed()`), ohne über `CombatNarrator`/`announce_action()` zu laufen, da er kein `CombatActionResult` erzeugt.
 
 ### Ereignis-Log (EventLog)
 
@@ -670,9 +691,13 @@ Wahrnehmungs-Ereignisse ("ein Charakter bemerkt etwas") sind bewusst nicht angeb
 
 Taste **F** (Input-Action `Faehigkeiten`, nur am Leader) öffnet `state_party_skills.gd`: Charakter aus der Party wählen → Fähigkeit wählen → Ziel wählen. Ziele innerhalb der Party (SELF/SINGLE_ALLY/ALL_ALLIES) wirken sofort über `PartyAbilityResolver.apply_non_combat()` (nur `HEAL` implementiert, ruft ausschließlich bestehende `Playable`-Methoden auf). Ziele außerhalb der Party (SINGLE_ENEMY/ALL_ENEMIES) werden wie im E-Menü in Reichweite gesucht (`ActionRangeIndicator`) und lösen `CombatManager.trigger_attack()` aus – die Fähigkeit wird dann als Erstschlag im neuen/erweiterten Kampf ganz regulär über `CombatResolver` aufgelöst, ohne reguläre `end_turn()`-Buchhaltung (kein zweiter Schadenscode-Pfad).
 
+### Kamera im Kampf
+
+Die Kamera folgt während eines Kampfes keinem einzelnen Charakter mehr (weder Leader noch dem gerade aktiven Teilnehmer), sondern zeigt den Schwerpunkt aller noch aktiven Teilnehmer mit langsamem Orbit und dramatischen Schnitten bei Zugwechsel/Aktionen – siehe [Kampfkamera](#kampfkamera) im Abschnitt Kamera-System.
+
 ### Offene Punkte
 
-Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung), ob sich der "Erstschlag außerhalb der Zugreihenfolge" bei Party-Fähigkeiten gegen Fremde richtig anfühlt oder eine reguläre Zug-Einreihung besser wäre, ob die Kamera während des Kampfzugs eines Followers kurz umschalten soll (aktuell: nein, bleibt beim Leader).
+Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung), ob sich der "Erstschlag außerhalb der Zugreihenfolge" bei Party-Fähigkeiten gegen Fremde richtig anfühlt oder eine reguläre Zug-Einreihung besser wäre. Kampfkamera bewusst rein prozedural (kein eigenes Marker-Set analog `DialogueCameraPoints`) – als spätere Verfeinerung offen.
 
 ---
 

@@ -20,6 +20,8 @@ const DEFAULT_LEVEL := "res://src/world/levels/regions/Level1Ep1.tscn"
 @onready var level_manager: LevelManager = $Systems/LevelManager
 @onready var camera_system: CameraSystem = $Systems/CameraSystem
 @onready var shop_manager: ShopManager = $Systems/ShopManager
+@onready var party_trade_manager: PartyTradeManager = $Systems/PartyTradeManager
+@onready var steal_manager: StealManager = $Systems/StealManager
 @onready var hud_root: CanvasLayer = $UI/HudRoot
 @onready var menu_root: CanvasLayer = $UI/MenuRoot
 @onready var dialogue_root: CanvasLayer = $UI/DialogueRoot
@@ -46,6 +48,8 @@ func _ready() -> void:
 	_setup_hud()
 	level_manager.setup(level_root, party)
 	shop_manager.setup(menu_root)
+	party_trade_manager.setup(menu_root)
+	steal_manager.setup(menu_root)
 	if party and party.leader:
 		camera_system.set_target(party.leader, true)
 	LevelManager.load_level(starting_level_path)

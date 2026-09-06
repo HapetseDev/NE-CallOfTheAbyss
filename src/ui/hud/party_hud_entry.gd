@@ -7,13 +7,24 @@ var member: Playable
 @onready var _hp_bar: ProgressBar = %HpBar
 @onready var _mp_label: Label = %MpLabel
 @onready var _mp_bar: ProgressBar = %MpBar
+@onready var _portrait: TextureRect = %Portrait
+@onready var _portrait_label: Label = %PortraitLabel
 
 
 func bind(playable: Playable) -> void:
 	member = playable
 	if member:
 		_name_label.text = member.get_display_name()
+		_apply_portrait()
 	refresh()
+
+
+## Portrait kommt aus CharacterResource.get_portrait() (Konvention siehe dort);
+## ohne Datei bleibt der "?"-Platzhalter sichtbar statt eines leeren Rechtecks.
+func _apply_portrait() -> void:
+	var portrait: Texture2D = member.character.get_portrait() if member.character else null
+	_portrait.texture = portrait
+	_portrait_label.visible = portrait == null
 
 
 func refresh() -> void:

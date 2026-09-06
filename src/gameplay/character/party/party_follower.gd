@@ -14,6 +14,7 @@ func set_leader(p: Playable) -> void:
 
 
 func _ready() -> void:
+	add_to_group("interactable")
 	footstep_player = get_node_or_null("FootstepPlayer") as FootstepPlayer
 	var state_machine := get_node_or_null("StateMachine") as PlayerStateMachine
 	if state_machine:
@@ -100,3 +101,17 @@ func _get_follow_target_position() -> Vector3:
 	if back.length_squared() < 0.01:
 		back = Vector3(0.0, 0.0, 1.0)
 	return leader.global_position + back.normalized() * follow_distance
+
+
+# --- E-Menü-Interaktion (state_action_menu.gd, "interactable"-Gruppe) ---
+# Direkt auf dem Follower selbst statt über eine eigene Interaction-Node
+# (wie bei NPCs) - der Follower ist bereits sein eigener Node3D-Wurzelknoten,
+# eine zusätzliche Ebene wäre hier nur Overhead.
+
+func get_actions(_player: Playable) -> Array[Dictionary]:
+	return [{"label": "Tauschen", "action_id": "trade_party"}]
+
+
+func perform_action(action_id: String, player: Playable) -> void:
+	if action_id == "trade_party":
+		PartyTradeManager.open(player, self)

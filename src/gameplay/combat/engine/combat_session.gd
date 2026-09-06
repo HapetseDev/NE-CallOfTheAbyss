@@ -23,7 +23,7 @@ var _active_turn: CombatParticipant = null
 var _turned_this_round: Array[CombatParticipant] = []
 
 signal participant_joined(participant: CombatParticipant)
-signal participant_left(participant: CombatParticipant)
+signal participant_fled(participant: CombatParticipant)
 signal participant_defeated(participant: CombatParticipant)
 signal turn_started(participant: CombatParticipant)
 signal turn_ended(participant: CombatParticipant)
@@ -43,10 +43,14 @@ func _process(delta: float) -> void:
 	_advance_turn_queue()
 
 
+## Erneutes admit() eines bereits Geflohenen (z.B. wieder angegriffen) holt
+## ihn zurück in den Kampf – has_fled wird zurückgesetzt, sonst bekäme er nie
+## wieder eigene Züge.
 func admit(playable: Playable, side: StringName) -> CombatParticipant:
 	var existing := get_participant(playable)
 	if existing:
 		existing.side = side
+		existing.has_fled = false
 		return existing
 	var participant := CombatParticipant.new(playable, side)
 	participants.append(participant)
@@ -56,17 +60,22 @@ func admit(playable: Playable, side: StringName) -> CombatParticipant:
 	return participant
 
 
-func remove(participant: CombatParticipant) -> void:
-	if not participants.has(participant):
+## Erfolgreiche Flucht (state_combat_turn.gd). Bewusst wie mark_defeated() –
+## der Teilnehmer bleibt in participants (kein Ziel mehr, keine Züge mehr,
+## siehe CombatParticipant.is_out_of_combat()), bis die eigene Seite komplett
+## raus ist (besiegt/geflohen) und die Session per side_wiped endet. Erst dann
+## ruft CombatManager._on_side_wiped() exit_combat_mode() für alle Teilnehmer
+## dieser Seite auf – ein einzeln geflohener Party-Leader bekommt seine freie
+## Steuerung also nicht schon beim eigenen Fluchtversuch zurück, sondern erst
+## wenn auch der Rest der Party raus ist.
+func mark_fled(participant: CombatParticipant) -> void:
+	if participant == null or participant.is_out_of_combat():
 		return
-	participants.erase(participant)
+	participant.has_fled = true
 	turn_queue.erase(participant)
-	_turned_this_round.erase(participant)
 	if _active_turn == participant:
 		_active_turn = null
-	if participant.playable and is_instance_valid(participant.playable):
-		participant.playable.exit_combat_mode()
-	participant_left.emit(participant)
+	participant_fled.emit(participant)
 	_check_side_wipe()
 
 
@@ -95,7 +104,7 @@ func get_participant(playable: Playable) -> CombatParticipant:
 
 
 func mark_defeated(participant: CombatParticipant) -> void:
-	if participant == null or participant.is_defeated:
+	if participant == null or participant.is_out_of_combat():
 		return
 	participant.is_defeated = true
 	turn_queue.erase(participant)
@@ -119,7 +128,7 @@ func end_turn(participant: CombatParticipant) -> void:
 
 func _tick_initiative(delta: float) -> void:
 	for participant in participants:
-		if participant.is_defeated or participant == _active_turn or turn_queue.has(participant):
+		if participant.is_out_of_combat() or participant == _active_turn or turn_queue.has(participant):
 			continue
 		var playable := participant.playable
 		if playable == null or not is_instance_valid(playable):
@@ -144,7 +153,7 @@ func _advance_turn_queue() -> void:
 func _check_round_completed() -> void:
 	var active_count := 0
 	for participant in participants:
-		if not participant.is_defeated:
+		if not participant.is_out_of_combat():
 			active_count += 1
 	if active_count > 0 and _turned_this_round.size() >= active_count:
 		_turned_this_round.clear()
@@ -157,7 +166,7 @@ func _check_side_wipe() -> void:
 	var attacker_alive := false
 	var victim_alive := false
 	for participant in participants:
-		if participant.is_defeated:
+		if participant.is_out_of_combat():
 			continue
 		if participant.side == CombatParticipantResolver.SIDE_ATTACKER:
 			attacker_alive = true

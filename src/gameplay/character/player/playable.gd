@@ -206,6 +206,18 @@ func get_effective_attribute(attr: CharacterEnums.Attribute) -> int:
 	return 0
 
 
+func get_total_weight() -> float:
+	return character.get_total_weight() if character else 0.0
+
+
+func get_max_carry_weight() -> float:
+	return character.get_max_carry_weight() if character else 0.0
+
+
+func can_carry_additional(additional_weight: float) -> bool:
+	return character != null and character.can_carry_additional(additional_weight)
+
+
 func _process(_delta: float) -> void:
 	direction = get_move_direction()
 

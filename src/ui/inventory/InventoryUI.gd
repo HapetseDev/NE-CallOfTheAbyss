@@ -13,6 +13,7 @@ var _inv: InventoryComponent  # neu hinzufügen
 @onready var _window: Window = %Window
 @onready var _equip_grid: GridContainer = %EquipGrid
 @onready var _inv_grid: GridContainer = %InvGrid
+@onready var _weight_label: Label = %WeightLabel
 
 
 func _ready() -> void:
@@ -52,6 +53,7 @@ func _wire_equip_buttons() -> void:
 			if slot_key.is_empty():
 				continue
 			_equip_buttons[slot_key] = child
+			child.inventory_ui = self
 			child.pressed.connect(_on_equip_pressed.bind(slot_key))
 
 
@@ -85,19 +87,25 @@ func _refresh() -> void:
 	if not playable:
 		return
 
+	_weight_label.text = "Gewicht: %.1f / %.1f" % [playable.get_total_weight(), playable.get_max_carry_weight()]
+
 	for i in _inv_slots.size():
 		var btn := _inv_slots[i]
 		if i < playable.inventory.size():
 			var slot := playable.inventory[i]
 			if slot != null and slot.item is ItemData:
 				var item: ItemData = slot.item
-				btn.text = "%s\nx%d" % [item.item_name, slot.count] if item.max_stack > 1 else item.item_name
+				var label := "%s\nx%d" % [item.item_name, slot.count] if item.max_stack > 1 else item.item_name
+				var can_equip := not item.consumable and not item.equipment_slot.is_empty()
+				if can_equip:
+					label += "\n[Ausrüsten]"
+				btn.text = label
 				btn.icon = item.icon
 				var hint := item.description
 				hint += "\n(Ziehen auf dunklen Bereich: Ablegen)"
 				if item.consumable:
 					hint += "\n(Klicken: Verwenden)"
-				elif not item.equipment_slot.is_empty():
+				elif can_equip:
 					hint += "\n(Klicken: Ausrüsten)"
 				btn.tooltip_text = hint
 			else:
@@ -115,7 +123,7 @@ func _refresh() -> void:
 		if equipped is ItemData:
 			btn.text = equipped.item_name
 			btn.icon = equipped.icon
-			btn.tooltip_text = equipped.description
+			btn.tooltip_text = "%s\n(Klicken: Ablegen)" % equipped.description
 		elif equipped is String:
 			btn.text = equipped
 			btn.icon = null
@@ -136,17 +144,43 @@ func _on_inv_slot_pressed(index: int) -> void:
 	if item.consumable:
 		playable.consume_item(item)
 		return
-	if item.equipment_slot.is_empty():
-		return
-	playable.remove_item(item)
-	var old = playable.unequip(item.equipment_slot)
-	if old != null:
-		playable.add_item(old)
-	playable.equip(item.equipment_slot, item)
+	equip_from_slot(index, item.equipment_slot)
 
 
 func _on_equip_pressed(slot_key: String) -> void:
-	if not playable:
+	unequip_to_backpack(slot_key)
+
+
+## Von Klick (_on_inv_slot_pressed) und Drag&Drop (equip_slot_button.gd)
+## gemeinsam genutzt. slot_key muss zum equipment_slot des Items passen –
+## verhindert per Drag, dass z.B. ein Helm im Waffen-Slot landet.
+func can_equip_from_slot(index: int, slot_key: String) -> bool:
+	if playable == null or slot_key.is_empty():
+		return false
+	if index < 0 or index >= playable.inventory.size():
+		return false
+	var slot := playable.inventory[index]
+	if slot == null or not (slot.item is ItemData):
+		return false
+	var item: ItemData = slot.item
+	return not item.consumable and item.equipment_slot == slot_key
+
+
+func equip_from_slot(index: int, slot_key: String) -> void:
+	if not can_equip_from_slot(index, slot_key):
+		return
+	var item: ItemData = playable.inventory[index].item
+	playable.remove_item(item)
+	var old = playable.unequip(slot_key)
+	if old != null:
+		playable.add_item(old)
+	playable.equip(slot_key, item)
+
+
+## Von Klick (_on_equip_pressed) und Drag&Drop (inventory_slot_button.gd,
+## Ziehen aus der Ausrüstung zurück in den Rucksack) gemeinsam genutzt.
+func unequip_to_backpack(slot_key: String) -> void:
+	if playable == null:
 		return
 	var item = playable.unequip(slot_key)
 	if item != null:

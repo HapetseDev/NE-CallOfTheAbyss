@@ -75,14 +75,14 @@ func _ordered_participants() -> Array[CombatParticipant]:
 	if _session == null:
 		return result
 	var active := _session.get_active_participant()
-	if active and not active.is_defeated:
+	if active and not active.is_out_of_combat():
 		result.append(active)
 	for participant in _session.turn_queue:
-		if not participant.is_defeated and not result.has(participant):
+		if not participant.is_out_of_combat() and not result.has(participant):
 			result.append(participant)
 	var rest: Array[CombatParticipant] = []
 	for participant in _session.participants:
-		if participant.is_defeated or result.has(participant):
+		if participant.is_out_of_combat() or result.has(participant):
 			continue
 		rest.append(participant)
 	rest.sort_custom(func(a: CombatParticipant, b: CombatParticipant) -> bool:
