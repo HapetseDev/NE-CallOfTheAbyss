@@ -52,13 +52,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	super._process(delta)
 	if Input.is_action_just_pressed("Inventar"):
-		_inventory_layer.visible = not _inventory_layer.visible
-		_sync_hud_with_inventory()
+		toggle_inventory()
 	if Input.is_action_just_pressed("Charakterbogen"):
-		_character_sheet_layer.visible = not _character_sheet_layer.visible
-		if _character_sheet_layer.visible:
-			_character_sheet_ui.refresh()
-		_sync_hud_with_overlays()
+		toggle_character_sheet()
 	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		_mouse_lmb_held = false
 	elif _mouse_lmb_held:
@@ -140,6 +136,18 @@ func get_move_direction() -> Vector3:
 			return Vector3.ZERO
 		return to.normalized()
 	return Vector3.ZERO
+
+
+func toggle_inventory() -> void:
+	_inventory_layer.visible = not _inventory_layer.visible
+	_sync_hud_with_inventory()
+
+
+func toggle_character_sheet() -> void:
+	_character_sheet_layer.visible = not _character_sheet_layer.visible
+	if _character_sheet_layer.visible:
+		_character_sheet_ui.refresh()
+	_sync_hud_with_overlays()
 
 
 func _find_party() -> Party:

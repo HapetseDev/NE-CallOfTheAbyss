@@ -42,10 +42,6 @@ project/assembly_name="RPG-SW"
 
 enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg", "res://addons/dialogue_manager/plugin.cfg")
 
-[gui]
-
-theme/custom="res://src/ui/theme/NE_Theme.tres"
-
 [file_customization]
 
 folder_colors={
@@ -58,6 +54,10 @@ folder_colors={
 "res://src/ui/": "purple",
 "res://src/world/": "teal"
 }
+
+[gui]
+
+theme/custom="res://src/ui/theme/NE_Theme.tres"
 
 [input]
 

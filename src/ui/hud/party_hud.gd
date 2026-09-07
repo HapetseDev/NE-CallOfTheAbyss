@@ -28,6 +28,13 @@ func setup(party: Party) -> void:
 		_rebuild_entries()
 
 
+## Baut die Anzeige neu auf, ohne die gebundene Party zu wechseln – z.B.
+## nachdem PartyOrderUI die Marschreihenfolge der Follower geändert hat.
+func rebuild() -> void:
+	if is_node_ready():
+		_rebuild_entries()
+
+
 func _rebuild_entries() -> void:
 	for entry in _entries:
 		entry.queue_free()
