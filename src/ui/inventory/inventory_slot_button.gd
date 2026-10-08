@@ -18,13 +18,18 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	if slot.count > 1:
 		preview.text += " x%d" % slot.count
 	set_drag_preview(preview)
-	return {"type": "inventory_item", "index": slot_index}
+	return {"type": "inventory_item", "index": slot_index, "source": inventory_ui, "item": item}
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	return data is Dictionary and data.get("type") == "equipped_item"
+	if not data is Dictionary or not is_instance_valid(data.get("source")):
+		return false
+	return (data.get("type") == "equipped_item" and data.source == inventory_ui) or inventory_ui.accepts_transfer(data)
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	if inventory_ui:
-		inventory_ui.unequip_to_backpack(data["slot_key"])
+		if inventory_ui.accepts_transfer(data):
+			data.source.transfer_to(data.index, inventory_ui.playable)
+		else:
+			inventory_ui.unequip_to_backpack(data["slot_key"])

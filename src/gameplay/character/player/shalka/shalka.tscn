@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://i0684v4yl00p" path="res://assets/characters/shalka/shalka_sprite.png" id="2_ax5u6"]
 [ext_resource type="Texture2D" uid="uid://c50fdqiuagepc" path="res://assets/characters/shalka/attack.png" id="3_7qxdf"]
 [ext_resource type="Script" uid="uid://tbqs0iuyquhq" path="res://src/gameplay/character/state_machine/player_state_machine.gd" id="3_plxar"]
-[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_follower_idle.gd" id="4_follower_idle"]
+[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_idle.gd" id="4_follower_idle"]
 [ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_wait.gd" id="16_combat_wait"]
 [ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_turn.gd" id="17_combat_turn"]
 [ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_combat_move.gd" id="18_combat_move"]
@@ -16,6 +16,12 @@
 [ext_resource type="Script" uid="uid://su4niq4bx4bp" path="res://src/gameplay/character/state_machine/state_action_menu.gd" id="13_action"]
 [ext_resource type="PackedScene" path="res://assets/characters/models/Quichel_Merged_Animations.glb" id="14_shalka_model"]
 [ext_resource type="Script" uid="uid://ou4q3lgfn1xf" path="res://src/gameplay/character/character_model_animator.gd" id="15_model_anim"]
+
+[ext_resource type="Script" path="res://src/gameplay/character/state_machine/state_party_skills.gd" id="20_skills"]
+[ext_resource type="PackedScene" path="res://src/ui/inventory/InventoryUI.tscn" id="21_inventory"]
+[ext_resource type="PackedScene" path="res://src/ui/character/character_sheet_ui.tscn" id="22_sheet"]
+[ext_resource type="PackedScene" path="res://src/gameplay/character/camera/dialogue_camera_points.tscn" id="23_camera"]
+[ext_resource type="PackedScene" path="res://src/gameplay/character/camera/dialogue_look_targets.tscn" id="24_looks"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hlb18"]
 radius = 0.35
@@ -413,6 +419,17 @@ script = ExtResource("3_plxar")
 [node name="Idle" type="Node" parent="StateMachine"]
 script = ExtResource("4_follower_idle")
 
+[node name="Walk" type="Node" parent="StateMachine"]
+script = ExtResource("5_3fsuu")
+
+[node name="ActionMenu" type="Node" parent="StateMachine"]
+script = ExtResource("13_action")
+action_range = 1.5
+
+[node name="PartySkills" type="Node" parent="StateMachine"]
+script = ExtResource("20_skills")
+action_range = 1.5
+
 [node name="CombatWait" type="Node" parent="StateMachine"]
 script = ExtResource("16_combat_wait")
 
@@ -431,3 +448,17 @@ max_polyphony = 4
 script = ExtResource("12_footstep")
 step_interval = 0.35
 sprint_step_interval = 0.25
+
+[node name="InventoryLayer" type="CanvasLayer" parent="."]
+layer = 25
+
+[node name="InventoryUI" parent="InventoryLayer" instance=ExtResource("21_inventory")]
+
+[node name="CharacterSheetLayer" type="CanvasLayer" parent="."]
+layer = 27
+
+[node name="CharacterSheetUI" parent="CharacterSheetLayer" instance=ExtResource("22_sheet")]
+
+[node name="DialogueCameraPoints" parent="." instance=ExtResource("23_camera")]
+
+[node name="DialogueLookTargets" parent="." instance=ExtResource("24_looks")]

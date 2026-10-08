@@ -1,0 +1,5 @@
+# Erste startbare Regiedemo: läuft auf jeder bereit aufgebauten Karte.
+sequence sequence_mvp version=1 content_version=1 once=false
+wait 2.0
+set flag="sequence_mvp_done" value=true id=mark_demo
+end code="demo_completed"

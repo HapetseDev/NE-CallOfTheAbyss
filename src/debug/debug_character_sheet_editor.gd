@@ -15,6 +15,7 @@ var _selected: Playable
 
 
 func _ready() -> void:
+	add_to_group("ui_sound_window")
 	_close_button.pressed.connect(_on_close_pressed)
 	_character_select.item_selected.connect(_on_character_selected)
 
@@ -213,4 +214,5 @@ func _clear_attributes() -> void:
 
 
 func _on_close_pressed() -> void:
+	hide()
 	closed.emit()

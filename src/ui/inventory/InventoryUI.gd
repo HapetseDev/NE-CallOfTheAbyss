@@ -1,5 +1,6 @@
 class_name InventoryUI extends Control
 
+var embedded := false
 var playable: Playable
 var party: Party
 
@@ -7,7 +8,11 @@ var _menu_hud: PartyHud
 var _inv_slots: Array[Button] = []
 var _equip_buttons: Dictionary = {}
 
-var _inv: InventoryComponent  # neu hinzufügen
+var _inv: InventoryComponent
+var _actions: PopupMenu
+var _action_index := -1
+var _action_item: ItemData
+var _recipients: Array[Playable] = []
 
 @onready var _overlay: ColorRect = %Overlay
 @onready var _window: Window = %Window
@@ -26,6 +31,8 @@ func _ready() -> void:
 
 
 func bind_player(playable_ref: Playable, party_ref: Party) -> void:
+	if is_instance_valid(_inv) and _inv.changed.is_connected(_refresh):
+		_inv.changed.disconnect(_refresh)
 	playable = playable_ref
 	party = party_ref
 	if party:
@@ -37,7 +44,7 @@ func bind_player(playable_ref: Playable, party_ref: Party) -> void:
 
 
 func _on_visibility_changed() -> void:
-	if not is_node_ready():
+	if not is_node_ready() or embedded:
 		return
 	if is_visible_in_tree():
 		_window.visible = true
@@ -63,7 +70,8 @@ func _wire_inventory_slots() -> void:
 		if child is Button:
 			child.inventory_ui = self
 			child.slot_index = index
-			child.pressed.connect(_on_inv_slot_pressed.bind(index))
+			child.pressed.connect(_open_actions.bind(index))
+			child.gui_input.connect(_slot_input.bind(index))
 			_inv_slots.append(child)
 			index += 1
 
@@ -87,6 +95,14 @@ func _refresh() -> void:
 	if not playable:
 		return
 
+	while _inv_slots.size() < playable.inventory.size():
+		var button := preload("res://src/ui/inventory/inventory_slot_button.tscn").instantiate() as Button
+		button.inventory_ui = self
+		button.slot_index = _inv_slots.size()
+		button.pressed.connect(_open_actions.bind(button.slot_index))
+		button.gui_input.connect(_slot_input.bind(button.slot_index))
+		_inv_grid.add_child(button)
+		_inv_slots.append(button)
 	_weight_label.text = "Gewicht: %.1f / %.1f" % [playable.get_total_weight(), playable.get_max_carry_weight()]
 
 	for i in _inv_slots.size():
@@ -98,15 +114,15 @@ func _refresh() -> void:
 				var label := "%s\nx%d" % [item.item_name, slot.count] if item.max_stack > 1 else item.item_name
 				var can_equip := not item.consumable and not item.equipment_slot.is_empty()
 				if can_equip:
-					label += "\n[Ausrüsten]"
+					label += ""
 				btn.text = label
 				btn.icon = item.icon
 				var hint := item.description
 				hint += "\n(Ziehen auf dunklen Bereich: Ablegen)"
 				if item.consumable:
-					hint += "\n(Klicken: Verwenden)"
+					hint += "\n(Auswählen: Aktionsmenü)"
 				elif can_equip:
-					hint += "\n(Klicken: Ausrüsten)"
+					hint += "\n(Auswählen: Aktionsmenü)"
 				btn.tooltip_text = hint
 			else:
 				btn.text = ""
@@ -185,3 +201,83 @@ func unequip_to_backpack(slot_key: String) -> void:
 	var item = playable.unequip(slot_key)
 	if item != null:
 		playable.add_item(item)
+
+
+func _slot_input(event: InputEvent, index: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		_open_actions(index)
+		get_viewport().set_input_as_handled()
+
+
+func _open_actions(index: int) -> void:
+	if not playable or index >= playable.inventory.size() or not playable.inventory[index].item:
+		return
+	_action_index = index
+	_action_item = playable.inventory[index].item
+	if not _actions:
+		_actions = PopupMenu.new()
+		add_child(_actions)
+		_actions.id_pressed.connect(_perform_action)
+	_actions.clear()
+	var item: ItemData = playable.inventory[index].item
+	if item.consumable:
+		_actions.add_item("Verwenden", 0)
+	elif not item.equipment_slot.is_empty():
+		_actions.add_item("Ausrüsten", 0)
+	_actions.add_item("In der Welt ablegen", 1)
+	_recipients.clear()
+	if party:
+		for member in party.get_all_members():
+			if member != playable:
+				_recipients.append(member)
+				_actions.add_item("1 × an %s geben" % member.get_display_name(), _recipients.size() + 1)
+	_actions.position = Vector2i(_inv_slots[index].get_global_rect().end)
+	_actions.popup()
+
+
+func _perform_action(id: int) -> void:
+	if _action_index >= playable.inventory.size() or playable.inventory[_action_index].item != _action_item:
+		return
+	if id == 0:
+		_on_inv_slot_pressed(_action_index)
+	elif id == 1:
+		drop_item_from_slot(_action_index)
+	elif id - 2 < _recipients.size():
+		transfer_to(_action_index, _recipients[id - 2])
+
+
+func transfer_to(index: int, target: Playable) -> bool:
+	if not is_instance_valid(playable) or not is_instance_valid(target) or target == playable:
+		return false
+	if index < 0 or index >= playable.inventory.size():
+		return false
+	var item: ItemData = playable.inventory[index].item
+	if party == null or target not in party.get_all_members():
+		return false
+	if not item or not target.can_carry_additional(item.weight):
+		EventLog.add("Übergabe nicht möglich: Traglast überschritten.")
+		return false
+	var effect := {"type": "transfer_item", "character_id": playable.character.character_id,
+		"target_id": target.character.character_id, "count": 1}
+	if item.world_object_id.is_empty():
+		effect.item_id = item.item_id
+	else:
+		effect.world_object_id = item.world_object_id
+	var success := GameState.apply_effects([effect])
+	EventLog.add("%s: %s an %s." % ["Übergabe" if success else "Übergabe fehlgeschlagen", item.item_name, target.get_display_name()])
+	return success
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_inv) and _inv.changed.is_connected(_refresh):
+		_inv.changed.disconnect(_refresh)
+
+
+func accepts_transfer(data: Variant) -> bool:
+	if not data is Dictionary or data.get("type") != "inventory_item":
+		return false
+	var source: InventoryUI = data.get("source")
+	if not is_instance_valid(source) or source == self or not source.playable:
+		return false
+	var index: int = data.get("index", -1)
+	return index >= 0 and index < source.playable.inventory.size() and source.playable.inventory[index].item == data.get("item")

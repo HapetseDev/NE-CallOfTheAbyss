@@ -1,7 +1,20 @@
-[gd_resource type="Resource" script_class="CharacterResource" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="CharacterResource" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://src/resources/characters/character_sheet.gd" id="1"]
 [ext_resource type="Script" path="res://src/resources/characters/learned_skill.gd" id="2"]
+
+[ext_resource type="Script" path="res://src/gameplay/inventory/inventory.gd" id="3_inventory"]
+[ext_resource type="Script" path="res://src/gameplay/inventory/InventorySlot.gd" id="4_slot"]
+[ext_resource type="Resource" path="res://src/resources/items/messer.tres" id="5_knife"]
+
+[sub_resource type="Resource" id="StartingKnife"]
+script = ExtResource("4_slot")
+item = ExtResource("5_knife")
+count = 1
+
+[sub_resource type="Resource" id="StartingInventory"]
+script = ExtResource("3_inventory")
+slots = Array[ExtResource("4_slot")]([SubResource("StartingKnife")])
 
 [sub_resource type="Resource" id="LearnedSkill_nahkampf"]
 script = ExtResource("2")
@@ -20,6 +33,7 @@ level = 1
 
 [resource]
 script = ExtResource("1")
+character_id = "dannerman"
 character_name = "Dannerman"
 ausbildung = 1
 spezies = 1
@@ -37,3 +51,4 @@ learned_skills = [SubResource("LearnedSkill_nahkampf"), SubResource("LearnedSkil
 active_training_skill_ids = Array[String](["nahkampfwaffen", "meditieren", "schwertkampf_klassisch"])
 erfahrungspunkte = 50
 gold = 50
+inventory = SubResource("StartingInventory")

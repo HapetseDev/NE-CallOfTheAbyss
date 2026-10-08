@@ -15,6 +15,8 @@ const FALLBACK_ABILITY_ID := "fausthieb"
 static func take_turn(session: CombatSession, participant: CombatParticipant) -> void:
 	if session == null or participant == null or participant.playable == null:
 		return
+	if session.state != CombatSession.SessionState.ACTIVE or participant.is_out_of_combat() or not participant.playable.can_participate_in_combat():
+		return
 	var target := _choose_target(session, participant)
 	if target == null:
 		session.end_turn(participant)

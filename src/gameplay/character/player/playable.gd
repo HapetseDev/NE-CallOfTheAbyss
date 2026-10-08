@@ -69,6 +69,8 @@ signal inventar_geaendert
 @export var gravity_enabled: bool = true
 @export var gravity: float = -1.0
 @export var max_fall_speed: float = 28.0
+## 0 deaktiviert die Stufenhilfe (Standard für NPCs).
+@export_range(0.0, 0.6) var step_height: float = 0.0
 @export_group("Sprung")
 @export var jump_velocity: float = 6.5
 ## Zusatzrotation für GLTF-Modelle (Blockbench exportiert oft +Z statt Godot -Z).
@@ -121,7 +123,7 @@ func enter_combat_mode(session: CombatSession) -> void:
 	if machine == null:
 		return
 	# Follower halten ihre State Machine außerhalb des Kampfes deaktiviert
-	# (siehe PartyFollower._ready), sonst würden CombatWait/CombatTurn nie
+	# (siehe Player.set_player_controlled), sonst würden CombatWait/CombatTurn nie
 	# ihre process()/handle_input() bekommen. Für den Leader ist das ein No-Op.
 	machine.process_mode = Node.PROCESS_MODE_INHERIT
 	var wait_state := machine.get_node_or_null("CombatWait") as State
@@ -166,6 +168,10 @@ func bind_character(new_character: CharacterResource, duplicate_runtime: bool = 
 
 
 func _setup_character(duplicate_runtime: bool = true) -> void:
+	# Registrierte Daten gehören der Sitzung und sind bereits initialisiert.
+	# Auch bind_character() darf sie weder kopieren noch bei 0/0 auffüllen.
+	if character != null and GameState.character_registry.get_character(character.character_id) == character:
+		return
 	if character == null:
 		character = _SheetFactory.create_default(name)
 	if duplicate_runtime:
@@ -223,6 +229,8 @@ func _process(_delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_tick_flee(delta)
+	preload("res://src/gameplay/character/player/step_assist.gd").apply(self, delta, step_height)
 	_apply_gravity(delta)
 	move_and_slide()
 
@@ -409,6 +417,8 @@ func consume_item(item: ItemData) -> bool:
 
 
 func drop_item_to_world(item: ItemData) -> bool:
+	if MainGame.instance == null or LevelManager.instance == null:
+		return false
 	if item == null or not remove_item(item, 1):
 		return false
 	_spawn_world_item(item.duplicate_item())
@@ -436,8 +446,63 @@ func _spawn_world_item(item: ItemData) -> void:
 	if _basic_item_scene == null:
 		return
 	var inst := _basic_item_scene.instantiate() as BasicItem
+	var world := GameState.world_state
+	if item.world_object_id.is_empty():
+		item.world_object_id = world.allocate_object_id()
+	item.max_stack = 1
+	inst.world_object_id = item.world_object_id
 	inst.item_data = item
+	world.objects[item.world_object_id] = {"kind": "item", "location": LevelManager.instance.current_level_path, "position": get_drop_spawn_position(), "removed": false, "item": item}
 	parent.add_child(inst)
 	inst.global_position = get_drop_spawn_position()
 	var toss := Vector3(facing_direction.x, 1.2, facing_direction.z).normalized() * 1.8
 	inst.apply_central_impulse(toss)
+
+
+func can_participate_in_combat() -> bool:
+	return character != null and not character.is_defeated and not is_character_dead()
+
+
+var flee_path := PackedVector3Array()
+var _flee_finished := Callable()
+var _flee_stalled := 0.0
+var _flee_previous := Vector3.ZERO
+
+func begin_flee(path: PackedVector3Array, finished: Callable) -> void:
+	flee_path = path
+	_flee_finished = finished
+	_flee_stalled = 0.0
+	_flee_previous = global_position
+
+func _tick_flee(delta: float) -> void:
+	if flee_path.is_empty():
+		return
+	var target := flee_path[0]
+	var offset := target - global_position
+	offset.y = 0
+	if offset.length() < 0.18:
+		flee_path.remove_at(0)
+		if flee_path.is_empty():
+			_finish_flee(true)
+		return
+	if global_position.distance_to(_flee_previous) < 0.005:
+		_flee_stalled += delta
+	else:
+		_flee_stalled = 0.0
+	_flee_previous = global_position
+	if _flee_stalled > 2.0:
+		_finish_flee(false)
+		return
+	direction = offset.normalized()
+	set_direction()
+	set_horizontal_velocity(direction * minf(5.0, offset.length() / delta))
+	update_animation("run")
+
+func _finish_flee(arrived: bool) -> void:
+	flee_path.clear()
+	stop_horizontal_velocity()
+	update_animation("idle")
+	var callback := _flee_finished
+	_flee_finished = Callable()
+	if callback.is_valid():
+		callback.call(arrived)

@@ -15,6 +15,7 @@ level = 1
 
 [resource]
 script = ExtResource("1")
+character_id = "shalka"
 character_name = "Shalka"
 ausbildung = 0
 spezies = 1

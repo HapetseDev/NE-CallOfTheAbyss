@@ -1,7 +1,7 @@
 [remap]
 
 importer="dialogue_manager"
-importer_version=18
+importer_version=15
 type="Resource"
 uid="uid://ddmt4vofkg3go"
 path="res://.godot/imported/test_npc.dialogue-7904527ca7b428fe80ab367558da1d52.tres"

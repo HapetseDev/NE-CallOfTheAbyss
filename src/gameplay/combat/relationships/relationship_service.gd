@@ -57,3 +57,24 @@ static func _strongest_faction_value(observer: CharacterResource, target: Charac
 			strongest_abs = absi(value)
 			strongest = value
 	return strongest
+
+
+## Persönliche Änderung auf Basis der wirksamen Beziehung (inkl. Fraktionsfallback).
+## Die Gegenrichtung bleibt unverändert. Der Aufrufer stellt eine Arbeitskopie bereit.
+static func change_disposition(observer: CharacterResource, target: CharacterResource, amount: int) -> bool:
+	if observer == null or target == null or observer.character_id == target.character_id or target.character_id.is_empty():
+		return false
+	if amount < -2147483647 or amount > 2147483647:
+		return false
+	if amount == 0:
+		return true
+	var value := clampi(get_disposition(observer, target) + amount, CharacterEnums.BEZIEHUNG_MIN, CharacterEnums.BEZIEHUNG_MAX)
+	for entry in observer.beziehungen:
+		if entry and entry.target_type == RelationshipEntry.TargetType.CHARACTER and entry.target_id == target.character_id:
+			entry.wertung = value
+			return true
+	var entry := RelationshipEntry.new()
+	entry.target_id = target.character_id
+	entry.wertung = value
+	observer.beziehungen.append(entry)
+	return true

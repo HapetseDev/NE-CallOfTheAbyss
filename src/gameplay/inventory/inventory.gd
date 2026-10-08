@@ -35,29 +35,58 @@ func add_item(item: ItemData, count: int = 1) -> void:
 	if item == null or count <= 0:
 		return
 	ensure_equipment_slots()
+	if not item.world_object_id.is_empty():
+		# Ein Weltobjekt kann innerhalb eines Inventars nur einmal existieren.
+		for slot in slots:
+			if _same_item(slot.item, item):
+				return
+		for equipped: Variant in equipment.values():
+			if equipped is ItemData and _same_item(equipped, item):
+				return
+		count = 1
+	var remaining := count
+	var capacity := maxi(1, item.max_stack)
 	for slot in slots:
-		if slot.item and slot.item.item_id == item.item_id:
-			slot.count = mini(slot.count + count, item.max_stack)
-			contents_changed.emit()
-			return
-	var new_slot := InventorySlot.new()
-	new_slot.item = item
-	new_slot.count = count
-	slots.append(new_slot)
+		if _same_item(slot.item, item) and slot.count < capacity:
+			var added := mini(remaining, capacity - slot.count)
+			slot.count += added
+			remaining -= added
+	while remaining > 0:
+		var slot := InventorySlot.new()
+		slot.item = item
+		slot.count = mini(remaining, capacity)
+		slots.append(slot)
+		remaining -= slot.count
 	contents_changed.emit()
 
 
 func remove_item(item: ItemData, count: int = 1) -> bool:
 	if item == null or count <= 0:
 		return false
-	for i in slots.size():
-		if slots[i].item and slots[i].item.item_id == item.item_id:
-			slots[i].count -= count
-			if slots[i].count <= 0:
+	var available := 0
+	for slot in slots:
+		if _same_item(slot.item, item):
+			available += slot.count
+	if available < count:
+		return false
+	var remaining := count
+	for i in range(slots.size() - 1, -1, -1):
+		if _same_item(slots[i].item, item):
+			var removed := mini(remaining, slots[i].count)
+			slots[i].count -= removed
+			remaining -= removed
+			if slots[i].count == 0:
 				slots.remove_at(i)
-			contents_changed.emit()
-			return true
-	return false
+	contents_changed.emit()
+	return true
+
+
+func _same_item(a: ItemData, b: ItemData) -> bool:
+	if a == null or b == null:
+		return false
+	if not a.world_object_id.is_empty() or not b.world_object_id.is_empty():
+		return not a.world_object_id.is_empty() and a.world_object_id == b.world_object_id
+	return a.item_id == b.item_id
 
 
 func has_item(item_id: String) -> bool:

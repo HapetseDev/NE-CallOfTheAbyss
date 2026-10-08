@@ -14,8 +14,6 @@ static func load_sheet(character_id: String) -> CharacterResource:
 	var path := SHEETS_DIR + character_id + ".tres"
 	if ResourceLoader.exists(path):
 		var data := load(path) as CharacterResource
-		if data and data.character_id.is_empty():
-			data.character_id = character_id
 		return data
 	return null
 

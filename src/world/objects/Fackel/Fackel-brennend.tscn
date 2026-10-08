@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://d0ywo0oiworll"]
+
+[ext_resource type="PackedScene" uid="uid://dtrriy4nus4le" path="res://assets/environments/dungeon/freedungeon/torch_lit.gltf" id="1_yy3ca"]
+
+[node name="FackelBrennend" type="Node3D" unique_id=1530838376]
+
+[node name="torch_lit2" parent="." unique_id=2107189410 instance=ExtResource("1_yy3ca")]
+
+[node name="AreaLight3D" type="AreaLight3D" parent="." unique_id=99091784]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75555015, -0.0007266998)
+light_color = Color(0.9914332, 0.5488049, 0.4384125, 1)
+light_energy = 1.09
+light_indirect_energy = 1.77
+light_volumetric_fog_energy = 4.37
+light_size = 0.701
+shadow_enabled = true
+area_size = Vector2(1, 0.92103744)

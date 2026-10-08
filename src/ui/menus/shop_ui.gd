@@ -12,6 +12,7 @@ var _info_label: Label
 
 
 func _ready() -> void:
+	add_to_group("ui_sound_window")
 	set_anchors_preset(PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build_ui()
@@ -127,7 +128,7 @@ func _refresh() -> void:
 		if entry.stock >= 0:
 			stock_text = " (x%d)" % entry.stock
 		_shop_list.add_item("%s%s — %d G" % [entry.item.item_name, stock_text, entry.buy_price], null, false)
-		_shop_list.set_item_metadata(i, entry)
+		_shop_list.set_item_metadata(_shop_list.item_count - 1, entry)
 	_player_list.clear()
 	for i in _player.inventory.size():
 		var slot := _player.inventory[i]
@@ -136,18 +137,15 @@ func _refresh() -> void:
 			var count: int = slot.count
 			var sell_price := _get_sell_price(item)
 			_player_list.add_item("%s x%d — %d G" % [item.item_name, count, sell_price], null, false)
-			_player_list.set_item_metadata(i, slot)
+			_player_list.set_item_metadata(_player_list.item_count - 1, slot)
 
 
 func _get_sell_price(item: ItemData) -> int:
-	for entry in _shop.entries:
-		if entry and entry.item and entry.item.item_id == item.item_id:
-			return entry.sell_price
-	return maxi(1, int(item.weight * 10))
+	return preload("res://src/core/world/shop_rules.gd").sell_price(_shop, item)
 
 
 func _on_shop_item_selected(index: int) -> void:
-	if _player == null or _shop == null:
+	if not visible or not is_instance_valid(_player) or _shop == null or index < 0 or index >= _shop_list.item_count:
 		return
 	var entry := _shop_list.get_item_metadata(index) as ShopEntry
 	if entry == null or entry.item == null:
@@ -161,22 +159,33 @@ func _on_shop_item_selected(index: int) -> void:
 	if not _player.can_carry_additional(entry.item.weight):
 		_info_label.text = "Zu schwer, um es zu tragen."
 		return
-	_player.gold -= entry.buy_price
-	_player.add_item(entry.item.duplicate_item(), 1)
-	if entry.stock > 0:
-		entry.stock -= 1
-	_info_label.text = "%s gekauft." % entry.item.item_name
+	if not _shop.entries.has(entry) or not _is_current_context() or not GameState.apply_effects([{"type": "shop_buy", "character_id": _player.character.character_id, "shop_id": _shop.shop_id, "item_id": entry.item.item_id, "count": 1}]):
+		_info_label.text = "Kauf konnte nicht abgeschlossen werden."
+		return
 	_refresh()
+	_info_label.text = "%s gekauft." % entry.item.item_name
 
 
 func _on_player_item_selected(index: int) -> void:
-	if _player == null:
+	if not visible or not is_instance_valid(_player) or index < 0 or index >= _player_list.item_count or not _is_current_context():
 		return
 	var slot = _player_list.get_item_metadata(index)
-	if slot is InventorySlot and slot.item is ItemData:
-		var item := slot.item as ItemData
-		var sell_price := _get_sell_price(item)
-		if _player.remove_item(item, 1):
-			_player.gold += sell_price
-			_info_label.text = "%s verkauft für %d G." % [item.item_name, sell_price]
-			_refresh()
+	if not slot is InventorySlot or slot.item == null or not _player.inventory.has(slot):
+		_refresh()
+		return
+	var item: ItemData = slot.item
+	var price := _get_sell_price(item)
+	var effect := {"type": "shop_sell", "character_id": _player.character.character_id, "shop_id": _shop.shop_id, "count": 1}
+	if item.world_object_id.is_empty():
+		effect.item_id = item.item_id
+	else:
+		effect.world_object_id = item.world_object_id
+	if not GameState.apply_effects([effect]):
+		_info_label.text = "Verkauf konnte nicht abgeschlossen werden."
+		return
+	_refresh()
+	_info_label.text = "%s verkauft für %d G." % [item.item_name, price]
+
+
+func _is_current_context() -> bool:
+	return _shop != null and _player.character != null and GameState.world_state.shops.get(_shop.shop_id) == _shop and GameState.character_registry.get_character(_player.character.character_id) == _player.character

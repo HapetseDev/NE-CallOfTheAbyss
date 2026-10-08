@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://src/ui/menus/map_ui.gd" id="1_ui"]
 
+[ext_resource type="Script" path="res://src/ui/map/papyrus_map.gd" id="2_map"]
+
 [node name="MapUI" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -27,8 +29,9 @@ visible = false
 oversampling_override = 1.0
 title = "Karte"
 initial_position = 2
-size = Vector2i(480, 320)
-wrap_controls = true
+size = Vector2i(960, 680)
+unresizable = true
+wrap_controls = false
 transient = true
 
 [node name="MarginContainer" type="MarginContainer" parent="Window"]
@@ -47,18 +50,44 @@ theme_override_constants/margin_bottom = 16
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="LevelLabel" type="Label" parent="Window/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
+autowrap_mode = 3
 text = "Aktuelles Gebiet: —"
 
-[node name="PlaceholderLabel" type="Label" parent="Window/MarginContainer/VBoxContainer"]
+[node name="MapCanvas" type="Control" parent="Window/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+script = ExtResource("2_map")
+
+[node name="Legend" type="Label" parent="Window/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Blau: Gruppe · Rot: NPCs · Braun: Objekte — zuletzt entdeckter Standort"
 autowrap_mode = 3
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 1)
-text = "Die Kartenansicht ist noch nicht umgesetzt."
+theme_override_font_sizes/font_size = 12
+
+[node name="Actions" type="HBoxContainer" parent="Window/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Hint" type="Label" parent="Window/MarginContainer/VBoxContainer/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mausrad: Zoom · Ziehen: Verschieben · Esc: Schließen"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="ResetView" type="Button" parent="Window/MarginContainer/VBoxContainer/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Übersicht"
+
+[node name="CloseMap" type="Button" parent="Window/MarginContainer/VBoxContainer/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Schließen"

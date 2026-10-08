@@ -3,12 +3,8 @@ extends RefCounted
 
 ## Zentrale Schriftgrößen-Skala des NE-Designsystems.
 ##
-## Bewusste Design-Entscheidung: Es gibt aktuell keine projekteigene
-## Font-Datei (assets/fonts/ ist ein leerer Platzhalter), daher nutzt das
-## gesamte UI weiterhin Godots Standardschrift als gemeinsame Basis.
-## Konsistenz entsteht ausschließlich über diese Größen-Tokens. Sobald eine
-## Wunsch-Schriftart vorliegt, wird sie an genau einer Stelle eingesetzt:
-## hier (SIZE_* bleiben gültig) und als Font-Ressource in NE_Theme.tres.
+## Schriftfamilie: Cuprum, zentral als default_font in NE_Theme.tres.
+## Die Größen-Tokens gelten für alle Schnitte.
 
 const SIZE_DISPLAY := 56 # Titelbildschirm-Logo/Spieltitel
 const SIZE_H1 := 28      # Fenstertitel

@@ -1,6 +1,6 @@
 class_name TopBarHud extends PanelContainer
 
-## Oberer Navigationsstreifen: Zugriff auf Inventar, Charakterbogen, Karte,
+## Untere Spiel-Leiste: Zugriff auf Inventar, Charakterbogen, Karte,
 ## Log, (Pause-)Menü und Debug. Das Rechtsklick-Aktionsmenü
 ## (state_action_menu.gd) bleibt dadurch auf reine Interaktionsaktionen
 ## beschränkt – alle "Fenster öffnen"-Funktionen leben hier.
@@ -23,6 +23,9 @@ signal debug_pressed
 
 
 func _ready() -> void:
+	var row := _party_button.get_parent()
+	for index in 7:
+		row.move_child([_party_button, _character_button, _inventory_button, _map_button, _log_button, _menu_button, _debug_button][index], index)
 	for button in [_inventory_button, _character_button, _party_button, _map_button, _log_button, _menu_button, _debug_button]:
 		(button as Button).custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
 	_inventory_button.pressed.connect(func() -> void: inventory_pressed.emit())

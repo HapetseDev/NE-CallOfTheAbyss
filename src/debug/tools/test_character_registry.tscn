@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/debug/tools/test_character_registry.gd" id="1"]
+
+[node name="CharacterRegistryTests" type="Node"]
+script = ExtResource("1")

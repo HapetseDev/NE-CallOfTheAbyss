@@ -3,9 +3,24 @@
 [ext_resource type="Script" uid="uid://diaivhiqjywxb" path="res://src/resources/characters/npc/npc_data.gd" id="1"]
 [ext_resource type="Resource" uid="uid://csfnwra8aadkw" path="res://src/resources/characters/sheets/quest_giver_01.tres" id="2_sheet"]
 
+[ext_resource type="Script" path="res://src/resources/characters/npc/dialogue_topic.gd" id="3_topic"]
+
+[sub_resource type="Resource" id="Topic_0"]
+script = ExtResource("3_topic")
+label = "Name"
+title = "name"
+required_fact_id = ""
+
+[sub_resource type="Resource" id="Topic_1"]
+script = ExtResource("3_topic")
+label = "Bandit"
+title = "bandit_topic"
+required_fact_id = "bandit_location_west"
+
 [resource]
 script = ExtResource("1")
 npc_id = "quest_giver_01"
 display_name = "Elara"
 character = ExtResource("2_sheet")
 dialogue_file = "res://src/resources/dialogue/quest_giver.dialogue"
+dialogue_topics = Array[ExtResource("3_topic")]([SubResource("Topic_0"), SubResource("Topic_1")])

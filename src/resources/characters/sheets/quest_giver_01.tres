@@ -17,6 +17,7 @@ level = 1
 
 [resource]
 script = ExtResource("1")
+character_id = "quest_giver_01"
 character_name = "Elara"
 ausbildung = 2
 herkunft = 3

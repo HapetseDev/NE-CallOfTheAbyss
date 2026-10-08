@@ -8,6 +8,8 @@ extends Node
 
 signal event_logged(text: String)
 
+var entries: Array[String] = []
+
 
 ## Heißt bewusst nicht "log": GDScript reserviert diesen Namen für die
 ## eingebaute globale Math-Funktion log(x: float) (natürlicher Logarithmus) –
@@ -16,6 +18,9 @@ signal event_logged(text: String)
 func add(text: String) -> void:
 	if text.is_empty():
 		return
+	entries.push_front(text)
+	if entries.size() > 100:
+		entries.resize(100)
 	event_logged.emit(text)
 
 

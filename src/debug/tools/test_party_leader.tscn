@@ -1,0 +1,4 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://src/debug/tools/test_party_leader.gd" id="1"]
+[node name="TestPartyLeader" type="Node"]
+script = ExtResource("1")

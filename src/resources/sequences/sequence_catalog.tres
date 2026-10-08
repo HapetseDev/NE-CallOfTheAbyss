@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SequenceCatalog" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/core/sequences/sequence_catalog.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+sequences = {"sequence_mvp": "res://src/resources/sequences/sequence_mvp.sequence"}
+maps = {"chapter1_outskirts": "res://src/world/levels/regions/Level1Ep1.tscn"}
+flags = PackedStringArray("sequence_mvp_done")

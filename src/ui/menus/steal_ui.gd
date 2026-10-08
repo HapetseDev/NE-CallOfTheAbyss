@@ -20,6 +20,7 @@ var _info_label: Label
 
 
 func _ready() -> void:
+	add_to_group("ui_sound_window")
 	set_anchors_preset(PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build_ui()
@@ -117,20 +118,38 @@ func _refresh() -> void:
 
 
 func _on_item_selected(index: int) -> void:
-	if _thief == null or _victim == null:
+	if not visible or not is_instance_valid(_thief) or not is_instance_valid(_victim):
+		return
+	if _thief == _victim or not _thief.can_participate_in_combat() or not _victim.can_participate_in_combat():
+		return
+	if index < 0 or index >= _item_list.item_count:
 		return
 	var slot = _item_list.get_item_metadata(index)
 	if not (slot is InventorySlot) or not (slot.item is ItemData):
+		return
+	if not _victim.inventory.has(slot):
+		_refresh()
 		return
 	var item: ItemData = slot.item
 	if not _thief.can_carry_additional(item.weight):
 		_info_label.text = "Zu schwer, um es zu tragen."
 		return
 
-	if StealResolver.roll_success(_thief, _victim):
-		if not _victim.remove_item(item, 1):
+	var effect := {"type": "transfer_item", "character_id": _victim.character.character_id, "target_id": _thief.character.character_id, "count": 1}
+	if item.world_object_id.is_empty():
+		effect.item_id = item.item_id
+	else:
+		effect.world_object_id = item.world_object_id
+	# Vor dem Würfelwurf nur auf Arbeitskopien prüfen: ungültige Übergaben
+	# dürfen weder einen Gegenstand kosten noch einen Kampf provozieren.
+	if GameState.character_registry.get_character(effect.character_id) != _victim.character or GameState.character_registry.get_character(effect.target_id) != _thief.character or not preload("res://src/core/world/inventory_rules.gd").apply(GameState.world_state, {}, effect):
+		_info_label.text = "Der Gegenstand kann nicht gestohlen werden."
+		return
+	if _roll_success():
+		effect.type = "steal_item"
+		if not GameState.apply_effects([effect]):
+			_info_label.text = "Der Gegenstand konnte nicht übertragen werden."
 			return
-		_thief.add_item(item, 1)
 		EventLog.add("%s stiehlt unbemerkt %s von %s." % [
 			_thief.get_display_name(), item.item_name, _victim.get_display_name()
 		])
@@ -144,3 +163,8 @@ func _on_item_selected(index: int) -> void:
 	var caught_victim := _victim
 	close()
 	CombatManager.trigger_attack(caught_victim, caught_thief)
+
+
+## Eigener Aufrufpunkt erlaubt deterministische Ablaufprüfungen ohne RNG-Änderung.
+func _roll_success() -> bool:
+	return StealResolver.roll_success(_thief, _victim)

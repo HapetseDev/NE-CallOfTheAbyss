@@ -19,15 +19,14 @@ jede künftige UI-Fläche.
   `*BoxContainer`, `size_flags` — keine magischen Pixelkoordinaten für
   Inhalte, die mitwachsen müssen.
 
-## Warum kein eigenes Font-Asset?
+## Schriftart: Cuprum
 
-Im Projekt lag keine Font-Datei vor (`assets/fonts/` war leer). Statt eine
-Schriftart zu erfinden, nutzt das gesamte UI bewusst **Godots
-Standardschrift** als gemeinsame Basis — Konsistenz entsteht rein über die
-Größen-Tokens in `typography.gd`. Sobald eine Wunsch-Schriftart feststeht,
-wird sie an **einer** Stelle eingesetzt: als `default_font` in
-`NE_Theme.tres` (und optional projektspezifische Preload-Referenzen in
-`typography.gd`).
+Das gesamte Spiel-UI verwendet **Cuprum** aus `assets/font/`.
+`NE_Theme.tres` setzt die reguläre variable Schrift als `default_font`.
+RichTextLabel nutzt ebenfalls Cuprum, einschließlich der kursiven Datei und
+fetter Varianten mit Schriftgewicht 700. Damit bleiben auch formatierte
+Gesprächstexte und künftige UI-Elemente bei derselben Schriftfamilie.
+Die Größen werden weiterhin über `typography.gd` gesteuert.
 
 ## Farbpalette (`colors.gd`)
 
@@ -123,10 +122,9 @@ Klasse, wenn sie einen echten Vorteil bietet:
 
 `addons/dialogue_manager/example_balloon/` bringt eine eigene, lokale
 Theme-Ressource mit (Drittanbieter-Plugin-Code). Diese Datei wurde
-**nicht** verändert. `src/ui/dialogue/` ist aktuell nur ein Platzhalter —
-sobald ein projekteigenes Dialogfenster gebaut wird, gehört es dort hin
-und erbt automatisch `NE_Theme.tres`, da es ein normales
-projekteigenes `Control` sein wird (keine lokale Theme-Ressource setzen!).
+**nicht** verändert. Die projekteigene Vollbildansicht unter `src/ui/dialogue/` ersetzt im Spiel den
+Beispiel-Balloon und erbt `NE_Theme.tres`. Das Addon liefert weiterhin die
+Dialogauswertung und Textdarstellung; seine lokale Beispiel-Theme bleibt unberührt.
 
 ## Regeln für neue UI-Elemente
 
@@ -188,3 +186,30 @@ func _build_ui() -> void:
 
 Kein einziger Farb-, Radius- oder Fontgrößen-Wert wird hier neu erfunden —
 alles kommt aus dem System.
+
+
+### Semantische Kartenfarben
+
+Die Levelkarte verwendet `MAP_PAPER`, `MAP_AGED`, `MAP_INK`, `MAP_NPC`,
+`MAP_OBJECT` und `MAP_PLAYER` aus `colors.gd`. Die ausdrücklich gewünschte
+Papyrusdarstellung gilt nur für die gezeichnete Kartenfläche; Fenster, Buttons
+und übrige Bedienelemente erben weiterhin das globale Theme.
+
+
+## UI-Sounds
+
+`UIAudio` verbindet neue Standard-Buttons automatisch mit den WAV-Dateien unter
+`assets/audio/sfx/ui/`: `select.wav` bei Hover/Tastaturfokus, `ok.wav` beim
+Bestätigen und `back.wav` beim Schließen. Deaktivierte Buttons bleiben stumm.
+ItemList, TabBar, Tree und PopupMenu sind ebenfalls angebunden. Treffen mehrere
+Signale bei einer Eingabe zusammen, gilt Back vor Ok vor Select, damit ein
+Schließbutton nicht zwei Sounds spielt. Der Dienst läuft auch bei Pause.
+
+Godot-`Window`-Fenster werden automatisch erfasst (Dropdown-Popups ausgenommen).
+Eigene Fenster aus `Control`-Nodes fügen in `_ready()` die Gruppe
+`ui_sound_window` hinzu; das vorhandene Shop-, Tausch-, Stehlen-, Pause-,
+Speicher-, Dialog- und Debug-UI tut dies bereits. Beim Schließen `hide()` vor
+`queue_free()` verwenden. Nachträglich registrierte Fenster können explizit
+`UIAudio.watch_window(self)` aufrufen. Interne Unterpanels/HUDs nicht markieren.
+Individuelle Controls können `UIAudio.request(&"select")`, `&"ok"` oder `&"back"`
+verwenden. Ausgegeben wird über den Bus `SFX`, falls vorhanden, sonst `Master`.

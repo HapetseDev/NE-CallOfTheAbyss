@@ -19,7 +19,7 @@ var intro_finished : bool = false
 @onready var main_menu_container: Control = $MainMenuContainer
 @onready var start_button: Button = $MainMenuContainer/VBoxContainer/StartButton
 @onready var quit_button: Button = $MainMenuContainer/VBoxContainer/QuitButton
-@onready var title_label: Label = $MainMenuContainer/TitleLabel
+@onready var title_logo: TextureRect = $MainMenuContainer/TitleLogo
 @onready var fade_rect: ColorRect = $FadeRect
 @onready var skip_hint: Label = $SkipHint
 
@@ -44,6 +44,12 @@ func _ready() -> void:
 	# Button Signale verbinden
 	start_button.pressed.connect(_on_start_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
+	var load_button := Button.new()
+	load_button.text = "Spiel laden"
+	load_button.custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
+	start_button.get_parent().add_child(load_button)
+	start_button.get_parent().move_child(load_button, start_button.get_index() + 1)
+	load_button.pressed.connect(_open_saves)
 
 	# Intro Text Position speichern
 	intro_text_start_y = get_viewport().get_visible_rect().size.y
@@ -158,12 +164,12 @@ func _start_main_menu() -> void:
 	skip_hint.visible = false
 
 	# Titel und Buttons einblenden
-	title_label.modulate.a = 0.0
+	title_logo.modulate.a = 0.0
 	start_button.modulate.a = 0.0
 	quit_button.modulate.a = 0.0
 
 	var tween = create_tween()
-	tween.tween_property(title_label, "modulate:a", 1.0, 1.0)
+	tween.tween_property(title_logo, "modulate:a", 1.0, 1.0)
 	tween.tween_property(start_button, "modulate:a", 1.0, 0.5)
 	tween.tween_property(quit_button, "modulate:a", 1.0, 0.5)
 
@@ -177,6 +183,8 @@ func _on_start_pressed() -> void:
 	tween.tween_property(fade_rect, "modulate:a", 1.0, 1.0)
 	await tween.finished
 
+	# Das Hauptmenü besitzt keine Weltfiguren mehr: neue Spielsitzung beginnen.
+	GameState.reset_session()
 	get_tree().change_scene_to_file(game_scene_path)
 
 
@@ -187,3 +195,11 @@ func _on_quit_pressed() -> void:
 	await tween.finished
 
 	get_tree().quit()
+
+
+func _open_saves() -> void:
+	if get_node_or_null("SaveLoadMenu") != null:
+		return
+	var menu := preload("res://src/ui/menus/save_load_menu.gd").new()
+	menu.name = "SaveLoadMenu"
+	add_child(menu)

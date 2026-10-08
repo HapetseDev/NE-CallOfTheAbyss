@@ -1,0 +1,4 @@
+sequence test_wait version=1 content_version=1 once=false
+wait 0.15
+set flag="sequence_mvp_done" value=true id=mark_test
+end code="tested"

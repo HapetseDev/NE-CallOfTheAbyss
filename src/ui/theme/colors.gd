@@ -9,12 +9,18 @@ extends RefCounted
 ## globale Theme, das sie einsetzt) statt eigene Farbwerte zu erfinden.
 
 # Hintergrundflächen (Vollbild-Ebenen, z.B. Menü-Hintergrund)
+const TRANSITION_BLACK := Color(0.0, 0.0, 0.0, 1.0)
 const BACKGROUND := Color(0.043, 0.043, 0.055, 1.0)
 const BACKGROUND_SECONDARY := Color(0.07, 0.075, 0.09, 1.0)
 
 # Panels (Fenster, HUD-Kacheln, Karten)
 const PANEL := Color(0.086, 0.094, 0.114, 0.88)
 const PANEL_SECONDARY := Color(0.125, 0.125, 0.145, 0.92)
+
+# Interaktionsfeedback: RGB ±20% gegenüber dem normalen Button.
+const BUTTON_NORMAL := Color(0.1, 0.11, 0.135, 0.92)
+const BUTTON_HOVER := Color(0.12, 0.132, 0.162, 0.92)
+const BUTTON_PRESSED := Color(0.08, 0.088, 0.108, 0.92)
 
 # Ränder
 const BORDER := Color(0.35, 0.38, 0.42, 0.9)
@@ -38,3 +44,11 @@ const INFO := Color(0.35, 0.55, 0.85, 1.0)
 
 # Abdunklung hinter modalen Fenstern/Dialogen (einheitlich für alle Popups)
 const SCRIM := Color(0.0, 0.0, 0.0, 0.6)
+
+# Kartografie: Papier, Sepiatinte und unterscheidbare Markierungen.
+const MAP_PAPER := Color("ddc795")
+const MAP_AGED := Color("987345")
+const MAP_INK := Color("59432c")
+const MAP_NPC := Color("874032")
+const MAP_OBJECT := Color("65552c")
+const MAP_PLAYER := Color("254f59")

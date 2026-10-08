@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://src/debug/tools/test_quest_progress.gd" id="1"]
+[node name="QuestProgressTests" type="Node"]
+script = ExtResource("1")

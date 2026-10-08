@@ -19,6 +19,7 @@ var _info_label: Label
 
 
 func _ready() -> void:
+	add_to_group("ui_sound_window")
 	set_anchors_preset(PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build_ui()
@@ -160,8 +161,13 @@ func _transfer(source_list: ItemList, source: Playable, dest: Playable, index: i
 	if not dest.can_carry_additional(item.weight):
 		_info_label.text = "%s kann %s nicht tragen (zu schwer)." % [dest.get_display_name(), item.item_name]
 		return
-	if not source.remove_item(item, 1):
+	var effect := {"type": "transfer_item", "character_id": source.character.character_id, "target_id": dest.character.character_id, "count": 1}
+	if item.world_object_id.is_empty():
+		effect.item_id = item.item_id
+	else:
+		effect.world_object_id = item.world_object_id
+	if not GameState.apply_effects([effect]):
+		_info_label.text = "Der Gegenstand konnte nicht übergeben werden."
 		return
-	dest.add_item(item, 1)
 	EventLog.add("%s gibt %s an %s." % [source.get_display_name(), item.item_name, dest.get_display_name()])
 	_refresh()

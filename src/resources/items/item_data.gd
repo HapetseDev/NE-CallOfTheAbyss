@@ -4,6 +4,8 @@ extends Resource
 ## Statische Item-Definition. Welt-Nodes und Inventar referenzieren diese Resource.
 
 @export var item_id: String = ""
+## Optionale stabile Instanz-ID für persistente Weltgegenstände; Vorlagen leer.
+@export var world_object_id: String = ""
 @export var item_name: String = ""
 @export_multiline var description: String = ""
 @export var icon: Texture2D

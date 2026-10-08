@@ -28,13 +28,13 @@ namespace DialogueManagerRuntime
     public partial class DialogueManager : RefCounted
     {
         public delegate void DialogueStartedEventHandler(Resource dialogueResource);
-        public delegate void PassedCueEventHandler(string cue);
+        public delegate void PassedTitleEventHandler(string title);
         public delegate void GotDialogueEventHandler(DialogueLine dialogueLine);
         public delegate void MutatedEventHandler(Dictionary mutation);
         public delegate void DialogueEndedEventHandler(Resource dialogueResource);
 
         public static DialogueStartedEventHandler? DialogueStarted;
-        public static PassedCueEventHandler? PassedCue;
+        public static PassedTitleEventHandler? PassedTitle;
         public static GotDialogueEventHandler? GotDialogue;
         public static MutatedEventHandler? Mutated;
         public static DialogueEndedEventHandler? DialogueEnded;
@@ -52,7 +52,7 @@ namespace DialogueManagerRuntime
                 {
                     instance = Engine.GetSingleton("DialogueManager");
                     instance.Connect("dialogue_started", Callable.From((Resource dialogueResource) => DialogueStarted?.Invoke(dialogueResource)));
-                    instance.Connect("passed_cue", Callable.From((string cue) => PassedCue?.Invoke(cue)));
+                    instance.Connect("passed_title", Callable.From((string title) => PassedTitle?.Invoke(title)));
                     instance.Connect("got_dialogue", Callable.From((RefCounted line) => GotDialogue?.Invoke(new DialogueLine(line))));
                     instance.Connect("mutated", Callable.From((Dictionary mutation) => Mutated?.Invoke(mutation)));
                     instance.Connect("dialogue_ended", Callable.From((Resource dialogueResource) => DialogueEnded?.Invoke(dialogueResource)));
@@ -186,173 +186,58 @@ namespace DialogueManagerRuntime
 
         public static Array<Dictionary> GetMembersForScript(Script script)
         {
-            string typeName = script.ResourcePath.GetFile().GetBaseName();
-            var matchingType = Assembly.GetExecutingAssembly().GetTypes().FirstOrDefault(t => t.Name == typeName);
-            if (matchingType == null) return new Array<Dictionary>();
-            return GetMembersForType(matchingType);
-        }
-
-
-        public static Array<Dictionary> GetMembersForPropertyChain(Script script, Array<string> chain)
-        {
-            string typeName = script.ResourcePath.GetFile().GetBaseName();
-            var currentType = Assembly.GetExecutingAssembly().GetTypes().FirstOrDefault(t => t.Name == typeName);
-            if (currentType == null) return new Array<Dictionary>();
-
-            foreach (var segment in chain)
-            {
-                currentType = ResolvePropertyType(currentType, segment);
-                if (currentType == null) return new Array<Dictionary>();
-            }
-
-            return GetMembersForType(currentType);
-        }
-
-
-        public static Dictionary GetMethodInfoForPropertyChain(Script script, Array<string> chain, string methodName)
-        {
-            string typeName = script.ResourcePath.GetFile().GetBaseName();
-            var currentType = Assembly.GetExecutingAssembly().GetTypes().FirstOrDefault(t => t.Name == typeName);
-
-            if (currentType == null) return new Dictionary();
-
-            foreach (var segment in chain)
-            {
-                currentType = ResolvePropertyType(currentType, segment);
-                if (currentType == null) return new Dictionary();
-            }
-
-            var methodInfo = currentType
-                .GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                .FirstOrDefault(m => m.Name == methodName && !m.IsSpecialName);
-            if (methodInfo == null) return new Dictionary();
-
-            return BuildMethodDictionary(methodInfo);
-        }
-
-
-        private static Array<Dictionary> GetMembersForType(Type type)
-        {
             Array<Dictionary> members = new Array<Dictionary>();
 
-            if (type.IsEnum)
+            var godotProperties = script.GetScriptPropertyList().Select(p => p["name"].ToString()).ToHashSet();
+
+            string typeName = script.ResourcePath.GetFile().GetBaseName();
+            var matchingTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Name == typeName);
+            foreach (var matchingType in matchingTypes)
             {
-                foreach (var name in type.GetEnumNames())
+                var memberInfos = matchingType.GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                foreach (var memberInfo in memberInfos)
                 {
+                    string type;
+                    switch (memberInfo.MemberType)
+                    {
+                        case MemberTypes.Field:
+                            FieldInfo fieldInfo = memberInfo as FieldInfo;
+
+                            if (fieldInfo.FieldType.ToString().Contains("EventHandler"))
+                            {
+                                type = "signal";
+                            }
+                            else if (fieldInfo.IsLiteral)
+                            {
+                                type = "constant";
+                            }
+                            else
+                            {
+                                type = "property";
+                            }
+                            break;
+                        case MemberTypes.Method:
+                            if ((memberInfo.Name.StartsWith("get_") || memberInfo.Name.StartsWith("set_")) && godotProperties.Contains(memberInfo.Name.Substring(4))) continue;
+
+                            type = "method";
+                            break;
+
+                        case MemberTypes.NestedType:
+                            type = "constant";
+                            break;
+
+                        default:
+                            continue;
+                    }
+
                     members.Add(new Dictionary() {
-                        { "name", name },
-                        { "type", "enum" }
+                        { "name", memberInfo.Name },
+                        { "type", type }
                     });
-                }
-                return members;
-            }
-
-            var memberInfos = type.GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
-            foreach (var memberInfo in memberInfos)
-            {
-                switch (memberInfo.MemberType)
-                {
-                    case MemberTypes.Field:
-                        FieldInfo fieldInfo = (FieldInfo)memberInfo;
-                        string fieldType;
-                        if (fieldInfo.FieldType.ToString().Contains("EventHandler"))
-                        {
-                            fieldType = "signal";
-                        }
-                        else if (fieldInfo.IsLiteral)
-                        {
-                            fieldType = "constant";
-                        }
-                        else
-                        {
-                            fieldType = "property";
-                        }
-                        members.Add(new Dictionary() {
-                            { "name", memberInfo.Name },
-                            { "type", fieldType },
-                            { "class_name", GetFriendlyTypeName(fieldInfo.FieldType) }
-                        });
-                        break;
-
-                    case MemberTypes.Property:
-                        PropertyInfo propInfo = (PropertyInfo)memberInfo;
-                        members.Add(new Dictionary() {
-                            { "name", memberInfo.Name },
-                            { "type", "property" },
-                            { "class_name", GetFriendlyTypeName(propInfo.PropertyType) }
-                        });
-                        break;
-
-                    case MemberTypes.Method:
-                        MethodInfo methodInfo = (MethodInfo)memberInfo;
-                        if (methodInfo.IsSpecialName) continue;
-                        members.Add(BuildMethodDictionary(methodInfo));
-                        break;
-
-                    case MemberTypes.NestedType:
-                        members.Add(new Dictionary() {
-                            { "name", memberInfo.Name },
-                            { "type", "constant" }
-                        });
-                        break;
-
-                    default:
-                        continue;
                 }
             }
 
             return members;
-        }
-
-
-        private static Dictionary BuildMethodDictionary(MethodInfo methodInfo)
-        {
-            var args = new Array<Dictionary>();
-            foreach (var param in methodInfo.GetParameters())
-            {
-                args.Add(new Dictionary() {
-                    { "name", param.Name },
-                    { "type", (int)Variant.Type.Nil },
-                    { "class_name", GetFriendlyTypeName(param.ParameterType) }
-                });
-            }
-            return new Dictionary() {
-                { "name", methodInfo.Name },
-                { "type", "method" },
-                { "args", args }
-            };
-        }
-
-
-        private static Type? ResolvePropertyType(Type type, string memberName)
-        {
-            var field = type.GetField(memberName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
-            if (field != null) return field.FieldType;
-
-            var prop = type.GetProperty(memberName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
-            if (prop != null) return prop.PropertyType;
-
-            var nested = type.GetNestedType(memberName, BindingFlags.Public);
-            if (nested != null) return nested;
-
-            return null;
-        }
-
-
-        private static string GetFriendlyTypeName(Type type)
-        {
-            if (type == typeof(int)) return "int";
-            if (type == typeof(long)) return "long";
-            if (type == typeof(float)) return "float";
-            if (type == typeof(double)) return "double";
-            if (type == typeof(bool)) return "bool";
-            if (type == typeof(string)) return "string";
-            if (type == typeof(void)) return "void";
-            if (type == typeof(byte)) return "byte";
-            if (type == typeof(short)) return "short";
-            if (type == typeof(char)) return "char";
-            if (type == typeof(decimal)) return "decimal";
-            return type.Name;
         }
 
 
@@ -450,135 +335,42 @@ namespace DialogueManagerRuntime
         }
 
 
-        public Array<Dictionary> GetMethodList(GodotObject thing)
-        {
-            var methodList = new Array<Dictionary>();
-
-            if (thing == null) return methodList;
-
-            Type type = thing.GetType();
-            MethodInfo[] methodInfos = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
-
-            foreach (MethodInfo method in methodInfos)
-            {
-                if (method.IsSpecialName) continue;
-
-                var methodInfo = new Dictionary();
-                methodInfo["name"] = method.Name;
-                methodInfo["flags"] = 0;
-                methodInfo["dotnet"] = true;
-
-                var argsList = new Array<Dictionary>();
-                ParameterInfo[] parameters = method.GetParameters();
-
-                foreach (ParameterInfo parameter in parameters)
-                {
-                    var paramInfo = new Dictionary() { };
-                    Variant.Type godotType = ConvertToVariantType(parameter.ParameterType);
-
-                    paramInfo["name"] = parameter.Name;
-                    paramInfo["type"] = (int)godotType;
-                    if (godotType == Variant.Type.Object)
-                    {
-                        paramInfo["class_name"] = parameter.ParameterType.Name;
-                    }
-                    else
-                    {
-                        paramInfo["class_name"] = string.Empty;
-                    }
-
-                    argsList.Add(paramInfo);
-                }
-
-                methodInfo["args"] = argsList;
-                methodList.Add(methodInfo);
-            }
-
-            return methodList;
-        }
-
-
-        private Variant.Type ConvertToVariantType(Type type)
-        {
-            if (type == typeof(void)) return Variant.Type.Nil;
-            if (type == typeof(bool)) return Variant.Type.Bool;
-            if (type == typeof(long) || type == typeof(int) || type == typeof(short) || type == typeof(byte)) return Variant.Type.Int;
-            if (type == typeof(double) || type == typeof(float)) return Variant.Type.Float;
-            if (type == typeof(string)) return Variant.Type.String;
-
-            if (type == typeof(Vector2)) return Variant.Type.Vector2;
-            if (type == typeof(Vector2I)) return Variant.Type.Vector2I;
-            if (type == typeof(Rect2)) return Variant.Type.Rect2;
-            if (type == typeof(Rect2I)) return Variant.Type.Rect2I;
-            if (type == typeof(Vector3)) return Variant.Type.Vector3;
-            if (type == typeof(Vector3I)) return Variant.Type.Vector3I;
-            if (type == typeof(Transform2D)) return Variant.Type.Transform2D;
-            if (type == typeof(Vector4)) return Variant.Type.Vector4;
-            if (type == typeof(Vector4I)) return Variant.Type.Vector4I;
-            if (type == typeof(Plane)) return Variant.Type.Plane;
-            if (type == typeof(Quaternion)) return Variant.Type.Quaternion;
-            if (type == typeof(Aabb)) return Variant.Type.Aabb;
-            if (type == typeof(Basis)) return Variant.Type.Basis;
-            if (type == typeof(Transform3D)) return Variant.Type.Transform3D;
-            if (type == typeof(Projection)) return Variant.Type.Projection;
-
-            if (type == typeof(Color)) return Variant.Type.Color;
-            if (type == typeof(StringName)) return Variant.Type.StringName;
-            if (type == typeof(NodePath)) return Variant.Type.NodePath;
-            if (type == typeof(Rid)) return Variant.Type.Rid;
-
-            if (typeof(GodotObject).IsAssignableFrom(type)) return Variant.Type.Object;
-            if (typeof(Dictionary).IsAssignableFrom(type)) return Variant.Type.Dictionary;
-            if (typeof(Godot.Collections.Array).IsAssignableFrom(type)) return Variant.Type.Array;
-
-            if (type == typeof(byte[])) return Variant.Type.PackedByteArray;
-            if (type == typeof(int[])) return Variant.Type.PackedInt32Array;
-            if (type == typeof(long[])) return Variant.Type.PackedInt64Array;
-            if (type == typeof(float[])) return Variant.Type.PackedFloat32Array;
-            if (type == typeof(double[])) return Variant.Type.PackedFloat64Array;
-            if (type == typeof(string[])) return Variant.Type.PackedStringArray;
-            if (type == typeof(Vector2[])) return Variant.Type.PackedVector2Array;
-            if (type == typeof(Vector3[])) return Variant.Type.PackedVector3Array;
-            if (type == typeof(Color[])) return Variant.Type.PackedColorArray;
-            if (type == typeof(Vector4[])) return Variant.Type.PackedVector4Array;
-
-            return Variant.Type.Nil;
-        }
-
-        private bool IsCompatible(Type expectedType, Type providedType)
-        {
-            if (expectedType.IsAssignableFrom(providedType)) return true;
-
-            Variant.Type expectedVariant = ConvertToVariantType(expectedType);
-            Variant.Type actualVariant = ConvertToVariantType(providedType);
-
-            return expectedVariant == actualVariant && expectedVariant != Variant.Type.Nil;
-        }
-
-
-
         public bool ThingHasMethod(GodotObject thing, string method, Array<Variant> args)
         {
-            return GetMethodInfoFor(thing, method, args) != null;
+            var methodInfos = thing.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            foreach (var methodInfo in methodInfos)
+            {
+                if (methodInfo.Name == method && args.Count >= methodInfo.GetParameters().Where(p => !p.HasDefaultValue).Count())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
 
         public async void ResolveThingMethod(float id, GodotObject thing, string method, Array<Variant> args)
         {
-            // Add a single frame wait in case the method returns before signals can listen
-            await ToSignal(Engine.GetMainLoop(), SceneTree.SignalName.ProcessFrame);
-
-            var methodInfo = GetMethodInfoFor(thing, method, args);
-
-            if (methodInfo == null)
+            MethodInfo? info = null;
+            var methodInfos = thing.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            foreach (var methodInfo in methodInfos)
             {
-                EmitSignal(SignalName.Resolved, id, default);
+                if (methodInfo.Name == method && args.Count >= methodInfo.GetParameters().Count(p => !p.HasDefaultValue))
+                {
+                    info = methodInfo;
+                }
+            }
+
+            if (info == null)
+            {
+                EmitSignal(SignalName.Resolved, id);
                 return;
             }
 
 #nullable disable
             // Convert the method args to something reflection can handle
-            ParameterInfo[] argTypes = methodInfo.GetParameters();
+            ParameterInfo[] argTypes = info.GetParameters();
             object[] _args = new object[argTypes.Length];
             for (int i = 0; i < argTypes.Length; i++)
             {
@@ -601,8 +393,11 @@ namespace DialogueManagerRuntime
                 }
             }
 
+            // Add a single frame wait in case the method returns before signals can listen
+            await ToSignal(Engine.GetMainLoop(), SceneTree.SignalName.ProcessFrame);
+
             // invoke method and handle the result based on return type
-            object result = methodInfo.Invoke(thing, _args);
+            object result = info.Invoke(thing, _args);
 
             if (result is Task taskResult)
             {
@@ -614,7 +409,7 @@ namespace DialogueManagerRuntime
                 }
                 catch (Exception)
                 {
-                    EmitSignal(SignalName.Resolved, id, default);
+                    EmitSignal(SignalName.Resolved, id);
                 }
             }
             else
@@ -623,57 +418,6 @@ namespace DialogueManagerRuntime
             }
         }
 #nullable enable
-
-
-        private MethodInfo? GetMethodInfoFor(GodotObject thing, string method, Array<Variant> args)
-        {
-            return thing.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).Where(m => m.Name == method).FirstOrDefault(m =>
-            {
-                ParameterInfo[] parameters = m.GetParameters();
-
-                if (args.Count > parameters.Length) return false;
-
-                for (int i = args.Count; i < parameters.Length; i++)
-                {
-                    if (!parameters[i].IsOptional) return false;
-                }
-
-                Type[] argTypes = args.Select(arg =>
-                {
-                    // If the item is boxed inside a Godot Variant, extract its actual type.
-                    if (arg is Variant godotVariant)
-                    {
-                        return godotVariant.VariantType switch
-                        {
-                            Variant.Type.Nil => typeof(object),
-                            Variant.Type.Bool => typeof(bool),
-                            Variant.Type.Int => typeof(long), // Godot ints map to C# longs
-                            Variant.Type.Float => typeof(double), // Godot floats map to C# doubles
-                            Variant.Type.String => typeof(string),
-                            Variant.Type.Object => godotVariant.AsGodotObject()?.GetType() ?? typeof(object),
-                            _ => godotVariant.Obj?.GetType() ?? typeof(object)
-                        };
-                    }
-
-                    return arg.GetType();
-                }).ToArray();
-
-                // Check each given parameter type against what the method wants.
-                for (int i = 0; i < argTypes.Length; i++)
-                {
-                    Type expectedType = parameters[i].ParameterType;
-                    Type actualType = argTypes[i];
-
-                    // If a parameter isn't compatible skip this method overload.
-                    if (!IsCompatible(expectedType, actualType))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
 
 
         public static string GetErrorMessage(int error)
@@ -720,11 +464,11 @@ namespace DialogueManagerRuntime
             set => text = value;
         }
 
-        private string static_id = "";
-        public string StaticId
+        private string translation_key = "";
+        public string TranslationKey
         {
-            get => static_id;
-            set => static_id = value;
+            get => translation_key;
+            set => translation_key = value;
         }
 
         private Array<DialogueResponse> responses = new Array<DialogueResponse>();
@@ -776,7 +520,7 @@ namespace DialogueManagerRuntime
             next_id = (string)data.Get("next_id");
             character = (string)data.Get("character");
             text = (string)data.Get("text");
-            static_id = (string)data.Get("static_id");
+            translation_key = (string)data.Get("translation_key");
             speeds = (Dictionary)data.Get("speeds");
             inline_mutations = (Array<Godot.Collections.Array>)data.Get("inline_mutations");
             time = (string)data.Get("time");
@@ -866,11 +610,11 @@ namespace DialogueManagerRuntime
             set => text = value;
         }
 
-        private string static_id = "";
+        private string translation_key = "";
         public string TranslationKey
         {
-            get => static_id;
-            set => static_id = value;
+            get => translation_key;
+            set => translation_key = value;
         }
 
         private Array<string> tags = new Array<string>();
@@ -884,7 +628,7 @@ namespace DialogueManagerRuntime
             next_id = (string)data.Get("next_id");
             is_allowed = (bool)data.Get("is_allowed");
             text = (string)data.Get("text");
-            static_id = (string)data.Get("static_id");
+            translation_key = (string)data.Get("translation_key");
             tags = (Array<string>)data.Get("tags");
         }
 

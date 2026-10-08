@@ -1,355 +1,166 @@
 class_name OcclusionVisual
 extends Node
 
-## Erkennt, ob der Host aus Kamerasicht verdeckt ist, und blendet
-## einen X-Ray-Zweitpass auf dem Modell ein. Keine Gameplay-Logik.
+## dmlarys VisualShader: raycast-gesteuerte Sichtkapseln für die ganze Party.
+## Charaktermaterialien werden niemals verändert; kein X-Ray-/Leuchtpass.
+const MAX_SUBJECTS := 64
+const CUTOUT := preload("res://src/gameplay/character/player/occlusion/party_cutout.tres")
+@export_range(0.5, 4.0) var radius: float = 1.5
+@export var height: float = 0.7
+var _level: BaseLevel
+var _materials: Array[ShaderMaterial] = []
+var _saved: Array[Dictionary] = []
+var _cache: Dictionary = {}
+var _radii: Dictionary = {}
 
-const XRAY_SHADER_PATH := "res://src/gameplay/character/player/occlusion/player_xray.gdshader"
-const XRAY_MATERIAL_PATH := "res://src/gameplay/character/player/occlusion/player_xray_material.tres"
-const FLOOR_NORMAL_Y := 0.65
+func _process(delta: float) -> void:
+	var level: BaseLevel = LevelManager.instance.current_level if LevelManager.instance else null
+	if not is_instance_valid(_level) or level != _level:
+		_restore()
+		_level = level
+		if level:
+			for node in get_tree().get_nodes_in_group("camera_occluder"):
+				if level.is_ancestor_of(node):
+					_prepare(node)
+	var subjects := PackedVector4Array()
+	subjects.resize(MAX_SUBJECTS)
+	var hits := PackedVector4Array()
+	hits.resize(MAX_SUBJECTS)
+	var camera := get_viewport().get_camera_3d()
+	var active_members: Array[int] = []
+	var count := 0
+	var party := get_parent() as Party
+	if party:
+		for member in party.get_all_members():
+			if not is_instance_valid(member) or not member.is_inside_tree() or not member.is_visible_in_tree():
+				continue
+			if count == MAX_SUBJECTS:
+				break
+			var position := member.global_position
+			subjects[count] = Vector4(position.x, position.y + height, position.z, position.y)
+			var id := member.get_instance_id()
+			active_members.append(id)
+			var center := position + Vector3.UP * height
+			var collision := _occlusion_hit(member, camera, center)
+			var target_radius := radius if not collision.is_empty() else 0.0
+			var current_radius := lerpf(float(_radii.get(id, 0.0)), target_radius, clampf(delta * 8.0, 0, 1))
+			_radii[id] = current_radius
+			# Without an occluder no capsule is needed; stale hit positions are not reused.
+			if not collision.is_empty():
+				var hit: Vector3 = collision.position
+				hits[count] = Vector4(hit.x, hit.y, hit.z, current_radius)
+			count += 1
+	for id in _radii.keys():
+		if not active_members.has(id):
+			_radii.erase(id)
+	for material in _materials:
+		material.set_shader_parameter("subjects", subjects)
+		material.set_shader_parameter("subject_count", count)
+		material.set_shader_parameter("cutout_hits", hits)
+		material.set_shader_parameter("cutout_enabled", count > 0)
 
-@export var visual_root: Node3D
-@export_group("Darstellung")
-@export var xray_color := Color(0.78, 0.84, 0.96, 1.0)
-@export_range(0.0, 1.0) var xray_alpha: float = 0.42
-@export_range(0.0, 2.0) var outline_strength: float = 0.7
-@export_range(0.0, 2.0) var glow_strength: float = 0.28
-@export_range(0.05, 0.8) var transition_sec: float = 0.22
-@export_group("Erkennung")
-@export var use_raycast_gate: bool = false
-@export_flags_3d_physics var occlusion_mask: int = 0x7FFFFFFF
-@export var sample_height_chest: float = 1.3
-@export var sample_height_head: float = 1.65
-@export var sample_spread: float = 0.22
-@export var enter_hit_count: int = 2
-@export var exit_hit_count: int = 0
-@export var confirm_frames: int = 2
-@export var clear_frames: int = 4
-@export_group("Debug")
-@export var debug_show_player_occlusion: bool = false
-
-var _host: Node3D
-var _xray_material: ShaderMaterial
-var _applied: Array[Dictionary] = []
-var _xray_amount: float = 1.0
-var _occluded: bool = true
-var _pending_occluded_frames: int = 0
-var _pending_clear_frames: int = 0
-var _last_occluder_name: String = ""
-var _debug_label: Label3D
-var _exclude_rids: Array[RID] = []
-
-
-func _ready() -> void:
-	if OS.has_feature("headless"):
-		set_physics_process(false)
-		return
-	_host = get_parent() as Node3D
-	if visual_root == null and _host:
-		visual_root = _host.get_node_or_null("Model") as Node3D
-		if visual_root == null:
-			visual_root = _host
-	if not use_raycast_gate:
-		_occluded = true
-		_xray_amount = 1.0
-	_setup_material()
-	_apply_xray_pass()
-	_collect_exclude_rids()
-	if LevelManager.instance:
-		if not LevelManager.instance.level_loaded.is_connected(_on_level_changed):
-			LevelManager.instance.level_loaded.connect(_on_level_changed)
-		if not LevelManager.instance.level_unloaded.is_connected(_on_level_unloaded):
-			LevelManager.instance.level_unloaded.connect(_on_level_unloaded)
-	_push_shader_params()
-
+func _occlusion_hit(member: Playable, camera: Camera3D, center: Vector3) -> Dictionary:
+	if not camera:
+		return {}
+	var excluded: Array[RID] = []
+	for actor in get_tree().get_nodes_in_group("combat_reactive"):
+		if actor is CollisionObject3D:
+			excluded.append(actor.get_rid())
+	var end := camera.global_position
+	if camera.projection == Camera3D.PROJECTION_ORTHOGONAL:
+		end = center + camera.global_basis.z * (end - center).dot(camera.global_basis.z)
+	var ray := PhysicsRayQueryParameters3D.create(center, end, 0xFFFFFFFF, excluded)
+	for attempt in 16:
+		var hit := member.get_world_3d().direct_space_state.intersect_ray(ray)
+		if hit.is_empty():
+			return {}
+		var node := hit.collider as Node
+		while node:
+			if node.is_in_group("camera_occluder"):
+				return hit
+			node = node.get_parent()
+		excluded.append(hit.rid)
+		ray.exclude = excluded
+	return {}
 
 func _exit_tree() -> void:
-	_restore_materials()
-	_xray_amount = 0.0
-	_occluded = false
+	# Beim Szenenabbau keine GridMap-Neuberechnung mehr auslösen. Die Kopien
+	# gehören ihren Nodes; beim Wiedereintritt wird aus den Originalen aufgebaut.
+	_restore(false)
 
-
-func _physics_process(delta: float) -> void:
-	if _host == null or not is_instance_valid(_host) or not _host.is_visible_in_tree():
-		_set_occluded(false)
-		_update_amount(delta)
-		_push_shader_params()
-		return
-	if use_raycast_gate:
-		_update_occlusion_from_rays()
-		_update_amount(delta)
-	else:
-		_last_occluder_name = "depth"
-		_occluded = true
-		_xray_amount = 1.0
-	_push_shader_params()
-	_update_debug()
-
-
-func is_occluded() -> bool:
-	return _occluded
-
-
-func get_last_occluder_name() -> String:
-	return _last_occluder_name
-
-
-func reset_occlusion() -> void:
-	_pending_occluded_frames = 0
-	_pending_clear_frames = 0
-	_last_occluder_name = ""
-	if use_raycast_gate:
-		_occluded = false
-		_xray_amount = 0.0
-	else:
-		_occluded = true
-		_xray_amount = 1.0
-	_push_shader_params()
-
-
-func _on_level_changed(_level: BaseLevel) -> void:
-	reset_occlusion()
-	_collect_exclude_rids()
-
-
-func _on_level_unloaded(_path: String) -> void:
-	reset_occlusion()
-
-
-func _setup_material() -> void:
-	var packed := load(XRAY_MATERIAL_PATH) as ShaderMaterial
-	if packed:
-		_xray_material = packed.duplicate() as ShaderMaterial
-	else:
-		_xray_material = ShaderMaterial.new()
-		_xray_material.shader = load(XRAY_SHADER_PATH) as Shader
-	_xray_material.render_priority = 12
-
-
-func _apply_xray_pass() -> void:
-	_restore_materials()
-	if visual_root == null or _xray_material == null:
-		return
-	_collect_meshes(visual_root)
-
-
-func _collect_meshes(node: Node) -> void:
-	if node is MeshInstance3D:
-		var mesh := node as MeshInstance3D
-		if mesh.visible:
-			_attach_next_pass(mesh)
-	elif node is Sprite3D:
-		var sprite := node as Sprite3D
-		if sprite.visible and not _is_shadow_sprite(sprite):
-			_attach_sprite_next_pass(sprite)
-	for child in node.get_children():
-		if child is OcclusionVisual:
+func _restore(restore_nodes: bool = true) -> void:
+	for material in _materials:
+		material.set_shader_parameter("cutout_enabled", false)
+	for entry in _saved:
+		if not restore_nodes or not is_instance_valid(entry.node):
 			continue
-		_collect_meshes(child)
-
-
-func _attach_next_pass(mesh: MeshInstance3D) -> void:
-	if mesh.mesh == null:
-		return
-	var surfaces := mesh.mesh.get_surface_count()
-	for i in surfaces:
-		var source := mesh.get_active_material(i)
-		if source == null:
-			continue
-		var saved := mesh.get_surface_override_material(i)
-		var dup := source.duplicate() as Material
-		if dup is BaseMaterial3D:
-			(dup as BaseMaterial3D).next_pass = _xray_material
-		elif dup is ShaderMaterial:
-			(dup as ShaderMaterial).next_pass = _xray_material
+		if entry.node is GridMap:
+			# GridMap hat beim Verlassen bereits seine Render-RIDs freigegeben.
+			# Beim Rollback/erneuten Eintritt wird aus der Originalbibliothek aufgebaut.
+			if entry.node.is_inside_tree():
+				entry.node.mesh_library = entry.original
+				entry.node.remove_meta("cutout_original_library")
 		else:
-			continue
-		mesh.set_surface_override_material(i, dup)
-		_applied.append({
-			"mesh": mesh,
-			"index": i,
-			"saved": saved,
-		})
+			entry.node.set_surface_override_material(entry.surface, entry.original)
+	_saved.clear()
+	_materials.clear()
+	_cache.clear()
+	_radii.clear()
+	_level = null
 
-
-func _attach_sprite_next_pass(sprite: Sprite3D) -> void:
-	var source := sprite.material_override
-	if source == null:
-		source = sprite.material_overlay
-	if source == null:
-		var generated := StandardMaterial3D.new()
-		generated.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		generated.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		generated.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-		generated.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-		generated.albedo_texture = sprite.texture
-		generated.next_pass = _xray_material
-		sprite.material_override = generated
-		_applied.append({
-			"sprite": sprite,
-			"saved_override": null,
-		})
-		return
-	var saved := sprite.material_override
-	var dup := source.duplicate()
-	if dup is BaseMaterial3D:
-		(dup as BaseMaterial3D).next_pass = _xray_material
-	elif dup is ShaderMaterial:
-		(dup as ShaderMaterial).next_pass = _xray_material
-	sprite.material_override = dup
-	_applied.append({
-		"sprite": sprite,
-		"saved_override": saved,
-	})
-
-
-func _restore_materials() -> void:
-	for entry in _applied:
-		if entry.has("mesh"):
-			var mesh := entry["mesh"] as MeshInstance3D
-			if is_instance_valid(mesh):
-				mesh.set_surface_override_material(int(entry["index"]), entry["saved"] as Material)
-		elif entry.has("sprite"):
-			var sprite := entry["sprite"] as Sprite3D
-			if is_instance_valid(sprite):
-				sprite.material_override = entry["saved_override"] as Material
-	_applied.clear()
-
-
-func _is_shadow_sprite(sprite: Sprite3D) -> bool:
-	var n := String(sprite.name).to_lower()
-	return n.contains("shadow") or n.contains("schatten")
-
-
-func _collect_exclude_rids() -> void:
-	_exclude_rids.clear()
-	if _host == null:
-		return
-	_collect_collision_rids(_host)
-
-
-func _collect_collision_rids(node: Node) -> void:
-	if node is CollisionObject3D:
-		_exclude_rids.append((node as CollisionObject3D).get_rid())
+func _prepare(node: Node) -> void:
+	if node is GridMap:
+		var grid := node as GridMap
+		if grid.mesh_library == null:
+			return
+		var original: MeshLibrary = grid.get_meta("cutout_original_library", grid.mesh_library)
+		var library := original.duplicate() as MeshLibrary
+		for id in library.get_item_list():
+			var mesh := library.get_item_mesh(id)
+			if mesh == null:
+				continue
+			var copy := mesh.duplicate() as Mesh
+			for surface in range(copy.get_surface_count()):
+				var material := _convert(mesh.surface_get_material(surface))
+				if material:
+					copy.surface_set_material(surface, material)
+			library.set_item_mesh(id, copy)
+		_saved.append({"node": grid, "original": original})
+		grid.set_meta("cutout_original_library", original)
+		grid.mesh_library = library
+	elif node is MeshInstance3D:
+		var mesh := node as MeshInstance3D
+		if mesh.mesh:
+			for surface in range(mesh.mesh.get_surface_count()):
+				var material := _convert(mesh.get_active_material(surface))
+				if material:
+					_saved.append({"node": mesh, "surface": surface, "original": mesh.get_surface_override_material(surface)})
+					mesh.set_surface_override_material(surface, material)
 	for child in node.get_children():
-		_collect_collision_rids(child)
+		_prepare(child)
 
-
-func _update_occlusion_from_rays() -> void:
-	var hits := _count_occlusion_hits()
-	if hits >= enter_hit_count:
-		_pending_clear_frames = 0
-		_pending_occluded_frames += 1
-		if _pending_occluded_frames >= confirm_frames:
-			_set_occluded(true)
-	elif hits <= exit_hit_count:
-		_pending_occluded_frames = 0
-		_pending_clear_frames += 1
-		if _pending_clear_frames >= clear_frames:
-			_set_occluded(false)
-	else:
-		_pending_occluded_frames = 0
-		_pending_clear_frames = 0
-
-
-func _count_occlusion_hits() -> int:
-	var camera := _resolve_camera()
-	if camera == null or _host == null:
-		_last_occluder_name = ""
-		return 0
-	var space := _host.get_world_3d().direct_space_state
-	if space == null:
-		return 0
-	var hits := 0
-	_last_occluder_name = ""
-	for sample in _sample_points():
-		if _ray_hits_obstacle(space, camera.global_position, sample):
-			hits += 1
-	return hits
-
-
-func _set_occluded(value: bool) -> void:
-	_occluded = value
-
-
-func _update_amount(delta: float) -> void:
-	var target := 1.0 if _occluded else 0.0
-	var speed := 1.0 / maxf(transition_sec, 0.01)
-	_xray_amount = move_toward(_xray_amount, target, delta * speed)
-
-
-func _push_shader_params() -> void:
-	if _xray_material == null:
-		return
-	_xray_material.set_shader_parameter("xray_amount", _xray_amount)
-	_xray_material.set_shader_parameter("xray_color", xray_color)
-	_xray_material.set_shader_parameter("xray_alpha", xray_alpha)
-	_xray_material.set_shader_parameter("outline_strength", outline_strength)
-	_xray_material.set_shader_parameter("glow_strength", glow_strength)
-	var camera := _resolve_camera()
-	if camera:
-		_xray_material.set_shader_parameter("inv_projection", camera.get_camera_projection().inverse())
-
-
-func _sample_points() -> Array[Vector3]:
-	var origin := _host.global_position
-	var points: Array[Vector3] = [
-		origin + Vector3(0.0, sample_height_chest, 0.0),
-		origin + Vector3(0.0, sample_height_head, 0.0),
-		origin + Vector3(sample_spread, sample_height_chest, 0.0),
-		origin + Vector3(-sample_spread, sample_height_chest, 0.0),
-	]
-	return points
-
-
-func _ray_hits_obstacle(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3) -> bool:
-	var query := PhysicsRayQueryParameters3D.create(from, to)
-	query.collide_with_areas = false
-	query.collide_with_bodies = true
-	query.collision_mask = occlusion_mask
-	query.exclude = _exclude_rids
-	var result := space.intersect_ray(query)
-	if result.is_empty():
-		return false
-	var normal := Vector3.UP
-	var normal_value: Variant = result.get("normal", Vector3.UP)
-	if normal_value is Vector3:
-		normal = normal_value
-	if normal.y > FLOOR_NORMAL_Y:
-		return false
-	var collider_value: Variant = result.get("collider")
-	if collider_value is Node:
-		_last_occluder_name = (collider_value as Node).name
-	return true
-
-
-func _resolve_camera() -> Camera3D:
-	if CameraSystem.instance:
-		var cam := CameraSystem.instance.get_camera()
-		if cam:
-			return cam
-	var viewport := get_viewport()
-	if viewport:
-		return viewport.get_camera_3d()
-	return null
-
-
-func _update_debug() -> void:
-	if not debug_show_player_occlusion:
-		if _debug_label and is_instance_valid(_debug_label):
-			_debug_label.visible = false
-		return
-	if _debug_label == null or not is_instance_valid(_debug_label):
-		_debug_label = Label3D.new()
-		_debug_label.name = "OcclusionDebugLabel"
-		_debug_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		_debug_label.font_size = 28
-		_debug_label.outline_size = 6
-		_debug_label.position = Vector3(0.0, 2.15, 0.0)
-		if _host:
-			_host.add_child(_debug_label)
-	_debug_label.visible = true
-	var state := "XRAY" if _occluded else "NORMAL"
-	var occluder := _last_occluder_name if not _last_occluder_name.is_empty() else "-"
-	_debug_label.text = "%s  %.2f\n%s" % [state, _xray_amount, occluder]
-	_debug_label.modulate = Color(0.85, 0.95, 1.0) if _occluded else Color(0.75, 0.75, 0.75)
+func _convert(source: Material) -> ShaderMaterial:
+	if not source is StandardMaterial3D:
+		return null
+	if _cache.has(source):
+		return _cache[source]
+	var original := source as StandardMaterial3D
+	# Spezielle Shader/Glas nicht stillschweigend in ein anderes Material umwandeln.
+	if original.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED and original.transparency != BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR:
+		return null
+	var material := ShaderMaterial.new()
+	material.shader = CUTOUT
+	material.set_shader_parameter("camera_occlusion_cutout_noise", preload("res://src/gameplay/character/player/occlusion/vendor/dmlary/noise_texture_2d.tres"))
+	material.set_shader_parameter("albedo", original.albedo_color)
+	material.set_shader_parameter("use_texture", original.albedo_texture != null)
+	material.set_shader_parameter("albedo_texture", original.albedo_texture)
+	material.set_shader_parameter("uv_scale", original.uv1_scale)
+	material.set_shader_parameter("uv_offset", original.uv1_offset)
+	material.set_shader_parameter("roughness_value", original.roughness)
+	material.set_shader_parameter("metallic_value", original.metallic)
+	material.set_shader_parameter("specular_value", original.metallic_specular)
+	material.set_shader_parameter("alpha_scissor", original.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR)
+	material.set_shader_parameter("alpha_threshold", original.alpha_scissor_threshold)
+	_cache[source] = material
+	_materials.append(material)
+	return material

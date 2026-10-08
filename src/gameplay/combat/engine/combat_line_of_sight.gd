@@ -4,7 +4,7 @@ class_name CombatLineOfSight
 ## anderer Körper – Wand oder Charakter – steht dazwischen). Nahkampf,
 ## Fernkampf und die meiste Magie sind ohne freie Sicht nicht anwendbar.
 ##
-## Adaptiert das Raycast-Muster aus occlusion_visual.gd (PhysicsRayQueryParameters3D,
+## Verwendet Raycasts zur Sichtprüfung (PhysicsRayQueryParameters3D,
 ## RID-Exclude der eigenen Collider, Boden-Normalen-Filter). Anders als dort zählen
 ## hier andere Charakterkörper selbst als Blocker, nicht nur Wände.
 

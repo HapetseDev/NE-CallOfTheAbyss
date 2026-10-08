@@ -17,6 +17,7 @@ level = 1
 
 [resource]
 script = ExtResource("1")
+character_id = "merchant_01"
 character_name = "Händler"
 ausbildung = 3
 herkunft = 3

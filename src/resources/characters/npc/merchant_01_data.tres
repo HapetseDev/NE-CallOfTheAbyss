@@ -3,6 +3,20 @@
 [ext_resource type="Script" uid="uid://diaivhiqjywxb" path="res://src/resources/characters/npc/npc_data.gd" id="1"]
 [ext_resource type="Resource" uid="uid://b6u12i3gn0c74" path="res://src/resources/characters/sheets/merchant_01.tres" id="2_sheet"]
 
+[ext_resource type="Script" path="res://src/resources/characters/npc/dialogue_topic.gd" id="3_topic"]
+
+[sub_resource type="Resource" id="Topic_0"]
+script = ExtResource("3_topic")
+label = "Name"
+title = "name"
+required_fact_id = ""
+
+[sub_resource type="Resource" id="Topic_1"]
+script = ExtResource("3_topic")
+label = "Job"
+title = "job"
+required_fact_id = ""
+
 [resource]
 script = ExtResource("1")
 npc_id = "merchant_01"
@@ -11,3 +25,4 @@ character = ExtResource("2_sheet")
 dialogue_file = "res://src/resources/dialogue/merchant_01.dialogue"
 shop_id = "haendler_01"
 can_trade = true
+dialogue_topics = Array[ExtResource("3_topic")]([SubResource("Topic_0"), SubResource("Topic_1")])
