@@ -18,7 +18,7 @@ const COMBAT_REACTIVE_GROUP := "combat_reactive"
 ## Verbündete des Angreifers unterstützen ihn, alle anderen bleiben neutral
 ## und schauen zu.
 static func classify(candidate: Playable, attacker: Playable, victim: Playable) -> StringName:
-	if candidate == null or candidate.character == null:
+	if candidate == null or not candidate.can_participate_in_combat():
 		return SIDE_NEUTRAL
 	if candidate == attacker:
 		return SIDE_ATTACKER
@@ -53,6 +53,8 @@ static func scan_candidates(origin: Node3D, radius: float = CombatBalance.AWAREN
 		if node == origin or not (node is Playable):
 			continue
 		var playable := node as Playable
+		if not playable.can_participate_in_combat():
+			continue
 		if playable.global_position.distance_squared_to(origin.global_position) <= radius_sq:
 			result.append(playable)
 	return result

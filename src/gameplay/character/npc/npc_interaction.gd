@@ -11,14 +11,15 @@ func _ready() -> void:
 
 
 func is_defeated() -> bool:
-	if data == null or data.defeated_flag.is_empty():
-		return false
-	return GameState.get_flag(data.defeated_flag, false)
+	return _owner_npc != null and _owner_npc.character != null and _owner_npc.character.is_defeated
 
 
 func mark_defeated() -> void:
+	if _owner_npc and _owner_npc.character:
+		_owner_npc.character.is_defeated = true
+		_owner_npc.refresh_defeated_state()
 	if data != null and not data.defeated_flag.is_empty():
-		GameState.set_flag(data.defeated_flag, true)
+		GameState.apply_effects([{"type": "set_flag", "key": data.defeated_flag, "value": true}])
 
 
 func get_actions(_player: Playable) -> Array[Dictionary]:
@@ -44,7 +45,7 @@ func perform_action(action_id: String, player: Playable) -> void:
 		"talk":
 			DialogueSystem.start_npc_dialogue(data, player, self)
 		"trade":
-			if data.can_trade and not data.shop_id.is_empty():
+			if data.can_trade and not is_defeated() and not data.shop_id.is_empty():
 				ShopManager.open(data.shop_id, player)
 		"fight":
 			if _owner_npc and not is_defeated():

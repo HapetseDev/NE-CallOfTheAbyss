@@ -20,13 +20,13 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	var preview := Label.new()
 	preview.text = (equipped as ItemData).item_name
 	set_drag_preview(preview)
-	return {"type": "equipped_item", "slot_key": slot_key}
+	return {"type": "equipped_item", "slot_key": slot_key, "source": inventory_ui}
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if not (data is Dictionary) or data.get("type") != "inventory_item":
 		return false
-	if inventory_ui == null:
+	if inventory_ui == null or data.get("source") != inventory_ui:
 		return false
 	return inventory_ui.can_equip_from_slot(data["index"], get_meta(&"slot_key", ""))
 

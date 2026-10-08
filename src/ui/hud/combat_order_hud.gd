@@ -36,7 +36,7 @@ func _on_combat_started(session: CombatSession) -> void:
 	_sync_entries()
 
 
-func _on_combat_ended(_session: CombatSession, _outcome: Dictionary) -> void:
+func _on_combat_ended(_ended_session: CombatSession, _outcome: Dictionary) -> void:
 	_session = null
 	visible = false
 	_clear_entries()

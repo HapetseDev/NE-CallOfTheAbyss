@@ -2,6 +2,19 @@
 
 [ext_resource type="Script" uid="uid://vtc2gefqtehu" path="res://src/ui/menus/MainMenu.gd" id="1_menu"]
 
+[ext_resource type="Texture2D" path="res://assets/ui/NE-Cota-Logo.png" id="2_logo"]
+
+[sub_resource type="Shader" id="Shader_logo_ink"]
+code = "shader_type canvas_item;
+uniform vec4 ink : source_color;
+void fragment() {
+    COLOR = vec4(ink.rgb, COLOR.a * ink.a);
+}"
+
+[sub_resource type="ShaderMaterial" id="Material_logo_ink"]
+shader = SubResource("Shader_logo_ink")
+shader_parameter/ink = Color(0.78, 0.68, 0.42, 1)
+
 [node name="MainMenu" type="Control" unique_id=1528858754]
 layout_mode = 3
 anchors_preset = 15
@@ -148,24 +161,19 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.05, 0.05, 0.1, 1)
 
-[node name="TitleLabel" type="Label" parent="MainMenuContainer" unique_id=766644769]
+[node name="TitleLogo" type="TextureRect" parent="MainMenuContainer"]
+material = SubResource("Material_logo_ink")
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -300.0
-offset_top = 100.0
-offset_right = 300.0
-offset_bottom = 200.0
+anchor_left = 0.15
+anchor_top = 0.05
+anchor_right = 0.85
+anchor_bottom = 0.48
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.78, 0.68, 0.42, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_x = 3
-theme_override_constants/shadow_offset_y = 3
-theme_override_font_sizes/font_size = 72
-text = "NECOTA"
-horizontal_alignment = 1
-vertical_alignment = 1
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_logo")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainMenuContainer" unique_id=2127817054]
 layout_mode = 1

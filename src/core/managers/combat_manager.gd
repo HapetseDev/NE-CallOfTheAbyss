@@ -13,8 +13,8 @@ static var instance: CombatManager
 var active_session: CombatSession = null
 
 signal combat_started(session: CombatSession)
-## outcome enthält bisher nur "losing_side" – KEINE Sieg/Niederlage-Konsequenz
-## (Game Over, Loot, …) ist hier verdrahtet. Siehe Plan, "Offene Punkte".
+## outcome enthält bisher nur "losing_side". NPC-Niederlagen setzen ihre
+## konfigurierten Flags; Game Over und Loot sind weiterhin nicht angebunden.
 signal combat_ended(session: CombatSession, outcome: Dictionary)
 
 
@@ -49,6 +49,8 @@ func get_session_for(playable: Playable) -> CombatSession:
 func _trigger_attack(attacker: Playable, victim: Playable) -> void:
 	if attacker == null or victim == null or attacker == victim:
 		return
+	if not attacker.can_participate_in_combat() or not victim.can_participate_in_combat():
+		return
 	if not is_in_combat():
 		_start_session()
 	active_session.admit(attacker, CombatParticipantResolver.SIDE_ATTACKER)
@@ -59,6 +61,7 @@ func _trigger_attack(attacker: Playable, victim: Playable) -> void:
 func _start_session() -> void:
 	active_session = CombatSession.new()
 	add_child(active_session)
+	active_session.participant_defeated.connect(_on_participant_defeated.bind(active_session))
 	active_session.side_wiped.connect(_on_side_wiped.bind(active_session))
 	active_session.turn_started.connect(_on_turn_started)
 	GameState.set_flag("in_combat", true)
@@ -149,3 +152,20 @@ func _on_side_wiped(losing_side: StringName, session: CombatSession) -> void:
 			participant.playable.exit_combat_mode()
 	combat_ended.emit(session, {"losing_side": losing_side})
 	session.queue_free()
+
+
+## Einzelne Niederlage statt Seitenende: Flucht zählt ausdrücklich nicht als Sieg.
+func _on_participant_defeated(participant: CombatParticipant, session: CombatSession) -> void:
+	if session != active_session or participant == null or not session.participants.has(participant):
+		return
+	if not participant.is_defeated or participant.has_fled or not is_instance_valid(participant.playable):
+		return
+	var npc := participant.playable as NPC
+	if npc == null:
+		return
+	var interaction := npc.get_node_or_null("Interaction") as NPCInteraction
+	if interaction:
+		var already_defeated := npc.character.is_defeated
+		interaction.mark_defeated()
+		if not already_defeated and GameState.character_registry.get_character(npc.character.character_id) == npc.character:
+			GameState.world_state.events.append_batch([{"type": "npc_defeated", "data": {"character_id": npc.character.character_id}}])

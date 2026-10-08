@@ -1,9 +1,9 @@
 class_name StateWalk extends State
 
-@export var base_speed: float = 1.0
-@export var sprint_speed: float = 2.5
-@export var acceleration: float = 4.0
-@export var deceleration: float = 6.0
+@export var base_speed: float = 1.5
+@export var sprint_speed: float = 3.75
+@export var acceleration: float = 6.0
+@export var deceleration: float = 9.0
 
 var current_speed: float = 0.0
 var is_sprinting: bool = false

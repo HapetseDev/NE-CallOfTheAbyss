@@ -9,7 +9,7 @@ func _ready() -> void:
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	return data is Dictionary and data.get("type") == "inventory_item"
+	return data is Dictionary and data.get("type") == "inventory_item" and data.get("source") == inventory_ui
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:

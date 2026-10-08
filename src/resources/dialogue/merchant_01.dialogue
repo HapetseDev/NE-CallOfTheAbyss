@@ -1,11 +1,13 @@
 ~ start
-Händler: Willkommen in meinem Laden! [#camera=close,look=eyes]
-Händler: Heiltränke, Proviant und mehr. [#camera=medium,look=head]
-Händler: Was darf's sein? [#camera=profile,look=mouth]
-- Was hast du im Angebot?
-	Händler: Schau selbst — ich öffne mein Sortiment.
-	do open_shop("haendler_01")
-	=> END
-- Auf Wiedersehen.
-	Händler: Bis bald!
-	=> END
+Händler: Willkommen in meinem Laden!
+Händler: Heiltränke, Proviant und mehr.
+Händler: Was möchtest du wissen?
+=> END
+
+~ name
+Händler: Hier kennt man mich einfach als den Händler.
+=> END
+
+~ job
+Händler: Ich handle mit Vorräten und allem, was Reisende unterwegs brauchen.
+=> END

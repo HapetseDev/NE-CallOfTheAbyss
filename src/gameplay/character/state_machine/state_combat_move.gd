@@ -62,8 +62,8 @@ func physics(_delta: float) -> State:
 
 # --- Freie Bewegung im Kreis ---
 # Bewusst direktes Input.get_axis() statt player.get_move_direction():
-# Player und PartyFollower behandeln Bewegungseingabe unterschiedlich
-# (Maus-Klick-Bewegung vs. hart auf ZERO gesetzt, siehe party_follower.gd) –
+# Anführer und Begleiter behandeln Bewegungseingabe unterschiedlich
+# (Maus-Klick-Bewegung vs. hart auf ZERO gesetzt, siehe player.gd) –
 # hier soll aber jedes Partymitglied während des eigenen Kampfzugs gleich
 # funktionieren, unabhängig davon, ob es der Leader oder ein Follower ist.
 

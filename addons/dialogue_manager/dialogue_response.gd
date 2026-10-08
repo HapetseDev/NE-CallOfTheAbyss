@@ -33,7 +33,7 @@ var text_replacements: Array[Dictionary] = []
 var tags: PackedStringArray = []
 
 ## The key to use for translating the text.
-var static_id: String = ""
+var translation_key: String = ""
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -47,7 +47,7 @@ func _init(data: Dictionary = {}) -> void:
 		text = data.text
 		text_replacements = data.text_replacements
 		tags = data.tags
-		static_id = data.static_id
+		translation_key = data.translation_key
 		condition_as_text = data.condition_as_text
 
 
@@ -56,8 +56,8 @@ func _to_string() -> String:
 
 
 func get_tag_value(tag_name: String) -> String:
-	var wrapped: String = "%s=" % tag_name
-	for t: String in tags:
+	var wrapped := "%s=" % tag_name
+	for t in tags:
 		if t.begins_with(wrapped):
 			return t.replace(wrapped, "").strip_edges()
 	return ""

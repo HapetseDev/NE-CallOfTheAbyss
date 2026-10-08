@@ -19,6 +19,8 @@ var participants: Array[CombatParticipant] = []
 var turn_queue: Array[CombatParticipant] = []
 var state: SessionState = SessionState.ACTIVE
 
+var _fleeing: Array[CombatParticipant] = []
+
 var _active_turn: CombatParticipant = null
 var _turned_this_round: Array[CombatParticipant] = []
 
@@ -47,6 +49,8 @@ func _process(delta: float) -> void:
 ## ihn zurück in den Kampf – has_fled wird zurückgesetzt, sonst bekäme er nie
 ## wieder eigene Züge.
 func admit(playable: Playable, side: StringName) -> CombatParticipant:
+	if playable == null or not playable.can_participate_in_combat():
+		return null
 	var existing := get_participant(playable)
 	if existing:
 		existing.side = side
@@ -71,6 +75,17 @@ func admit(playable: Playable, side: StringName) -> CombatParticipant:
 func mark_fled(participant: CombatParticipant) -> void:
 	if participant == null or participant.is_out_of_combat():
 		return
+	var path := PackedVector3Array()
+	for target in preload("res://src/world/combat/flee_area.gd").destinations(participant.playable):
+		path = preload("res://src/world/combat/flee_route.gd").find_path(participant.playable, target)
+		if not path.is_empty():
+			break
+	if path.is_empty():
+		EventLog.add("%s findet keinen freien Fluchtweg." % participant.playable.get_display_name())
+		return
+	EventLog.add("%s rennt zum Fluchtbereich." % participant.playable.get_display_name())
+	_fleeing.append(participant)
+	participant.playable.begin_flee(path, _on_flee_arrived.bind(participant))
 	participant.has_fled = true
 	turn_queue.erase(participant)
 	if _active_turn == participant:
@@ -160,7 +175,19 @@ func _check_round_completed() -> void:
 		round_completed.emit()
 
 
+func _on_flee_arrived(arrived: bool, participant: CombatParticipant) -> void:
+	_fleeing.erase(participant)
+	if arrived:
+		EventLog.add("%s ist entkommen." % participant.playable.get_display_name())
+	if not arrived:
+		participant.has_fled = false
+		EventLog.add("%s wird auf dem Fluchtweg aufgehalten." % participant.playable.get_display_name())
+	_check_side_wipe()
+
+
 func _check_side_wipe() -> void:
+	if not _fleeing.is_empty():
+		return
 	if state != SessionState.ACTIVE:
 		return
 	var attacker_alive := false

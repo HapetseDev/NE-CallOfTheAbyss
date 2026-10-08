@@ -2,6 +2,7 @@ class_name CharacterSheetUI extends Control
 
 const SECTION_HEADER_SCENE := preload("res://src/ui/components/panels/ne_section_header.tscn")
 
+var embedded := false
 var playable: Playable
 
 @onready var _window: Window = %Window
@@ -21,7 +22,7 @@ func bind_player(playable_ref: Playable) -> void:
 
 
 func _on_visibility_changed() -> void:
-	if not is_node_ready():
+	if not is_node_ready() or embedded:
 		return
 	if is_visible_in_tree():
 		_window.visible = true
@@ -66,14 +67,14 @@ func _build_attribute_section(section: Dictionary) -> Control:
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override(&"margin_left", 10)
-	margin.add_theme_constant_override(&"margin_right", 10)
-	margin.add_theme_constant_override(&"margin_top", 8)
-	margin.add_theme_constant_override(&"margin_bottom", 8)
+	margin.add_theme_constant_override(&"margin_left", NEDimensions.PANEL_MARGIN)
+	margin.add_theme_constant_override(&"margin_right", NEDimensions.PANEL_MARGIN)
+	margin.add_theme_constant_override(&"margin_top", NEDimensions.PANEL_MARGIN)
+	margin.add_theme_constant_override(&"margin_bottom", NEDimensions.PANEL_MARGIN)
 	panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override(&"separation", 6)
+	vbox.add_theme_constant_override(&"separation", NEDimensions.SPACING_S)
 	margin.add_child(vbox)
 
 	var header := SECTION_HEADER_SCENE.instantiate() as Label
@@ -82,24 +83,24 @@ func _build_attribute_section(section: Dictionary) -> Control:
 
 	var influence := Label.new()
 	influence.text = section["influence"]
-	influence.add_theme_font_size_override(&"font_size", 12)
+	influence.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
 	influence.add_theme_color_override(&"font_color", NEColors.TEXT_SECONDARY)
 	vbox.add_child(influence)
 
 	var grid := GridContainer.new()
 	grid.columns = 2
-	grid.add_theme_constant_override(&"h_separation", 12)
-	grid.add_theme_constant_override(&"v_separation", 4)
+	grid.add_theme_constant_override(&"h_separation", NEDimensions.SPACING_S)
+	grid.add_theme_constant_override(&"v_separation", NEDimensions.SPACING_XS)
 	vbox.add_child(grid)
 
 	var name_header := Label.new()
 	name_header.text = "Name der Fähigkeit"
-	name_header.add_theme_font_size_override(&"font_size", 11)
+	name_header.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
 	grid.add_child(name_header)
 
 	var level_header := Label.new()
 	level_header.text = "Level"
-	level_header.add_theme_font_size_override(&"font_size", 11)
+	level_header.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
 	grid.add_child(level_header)
 
 	for slot in section["skill_slots"]:
@@ -117,7 +118,7 @@ func _build_attribute_section(section: Dictionary) -> Control:
 	var talents: Array = section["available_talents"]
 	var talent_hint := Label.new()
 	talent_hint.text = "%d Talente im Katalog" % talents.size()
-	talent_hint.add_theme_font_size_override(&"font_size", 11)
+	talent_hint.add_theme_font_size_override(&"font_size", NETypography.SIZE_SMALL)
 	talent_hint.add_theme_color_override(&"font_color", NEColors.TEXT_DISABLED)
 	vbox.add_child(talent_hint)
 

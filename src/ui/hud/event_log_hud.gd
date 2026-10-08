@@ -15,6 +15,8 @@ const MAX_ENTRIES := 100
 
 
 func _ready() -> void:
+	for i in range(EventLog.entries.size() - 1, -1, -1):
+		_push_line(EventLog.entries[i])
 	if not EventLog.event_logged.is_connected(_on_event_logged):
 		EventLog.event_logged.connect(_on_event_logged)
 

@@ -12,6 +12,8 @@ signal inventory_changed
 ## Stabile Referenz für Beziehungen/Fraktionen (RelationshipEntry.target_id).
 ## Wird von CharacterSheetFactory beim Laden/Erzeugen gesetzt, falls leer.
 @export var character_id: String = ""
+## Persistente Niederlage, unabhängig von HP und Tod. Heilung hebt sie nicht auf.
+@export var is_defeated: bool = false
 @export var character_name: String = ""
 @export var ausbildung: CharacterEnums.Ausbildung = CharacterEnums.Ausbildung.KEINE
 @export var spezies: CharacterEnums.Spezies = CharacterEnums.Spezies.MENSCH

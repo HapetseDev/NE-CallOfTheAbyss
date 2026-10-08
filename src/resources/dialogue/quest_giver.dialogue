@@ -1,17 +1,35 @@
 ~ start
+if GameState.meets_condition({"type": "quest_state", "quest_id": "bandit", "state": "completed"})
+	=> quest_done
+if GameState.meets_condition({"type": "relationship_at_least", "character_id": "quest_giver_01", "target_id": player.character.character_id, "minimum": 1})
+	Elara: Schön, dich wiederzusehen. Deine Hilfe bedeutet mir viel. [#camera=close,look=eyes]
+if GameState.meets_condition({"type": "knows_fact", "character_id": player.character.character_id, "fact_id": "bandit_location_west"})
+	Elara: Du erinnerst dich: Der Bandit hält sich westlich von hier auf. [#camera=close,look=eyes]
 Elara: Endlich jemand! Die Kreaturen werden immer aggressiver. [#camera=close,look=eyes]
 Elara: Kannst du mir helfen, den Banditen zu besiegen?
 - Ich kümmere mich darum.
-	Dannerman: Ich kümmere mich darum. [#camera=close,look=eyes]
+	{{player.get_display_name()}}: Ich kümmere mich darum. [#camera=close,look=eyes]
+	do GameState.apply_effects([{"type": "define_fact", "fact_id": "bandit_location_west", "subject": "bandit_01", "predicate": "located_in", "object": "west_of_elara"}, {"type": "learn_fact", "character_id": player.character.character_id, "fact_id": "bandit_location_west"}, {"type": "start_quest", "quest_id": "bandit"}])
 	Elara: Viel Glück! Er hält sich westlich von hier auf. [#camera=over_shoulder,look=eyes]
-	do GameState.set_flag("quest_bandit_started", true)
 	=> END
 - Vielleicht später.
 	Elara: Kein Problem. Ich warte hier.
 	=> END
 
 ~ quest_done
-Elara: Du hast den Bandit besiegt? Danke — hier, nimm etwas Gold. [#camera=medium,look=head]
-do player.gold += 20
-do GameState.set_flag("quest_bandit_done", true)
+if GameState.apply_effects_if([{"type": "quest_state", "quest_id": "bandit", "state": "ready"}], [{"type": "change_gold", "character_id": player.character.character_id, "amount": 20}, {"type": "complete_quest", "quest_id": "bandit", "character_id": player.character.character_id, "flag": "quest_bandit_done"}, {"type": "change_relationship", "character_id": "quest_giver_01", "target_id": player.character.character_id, "amount": 1}])
+	Elara: Du hast den Bandit besiegt? Danke — hier, nimm etwas Gold. [#camera=medium,look=head]
+else
+	if GameState.meets_condition({"type": "event_occurred", "event_type": "quest_completed", "filters": {"quest_id": "bandit"}})
+		Elara: Für deine Hilfe habe ich dich bereits belohnt. Vielen Dank noch einmal!
+	else
+		Elara: Im Moment habe ich keine Belohnung für dich. [#camera=medium,look=head]
+=> END
+
+~ name
+Elara: Ich heiße Elara.
+=> END
+
+~ bandit_topic
+Elara: Der Bandit hält sich westlich von hier auf. Sei vorsichtig.
 => END

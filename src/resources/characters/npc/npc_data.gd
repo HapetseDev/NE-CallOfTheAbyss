@@ -10,3 +10,7 @@ class_name NPCData extends Resource
 @export var can_trade: bool = false
 @export var can_fight: bool = false
 @export var defeated_flag: String = ""
+
+@export_group("Gesprächsfenster")
+@export var portrait: Texture2D
+@export var dialogue_topics: Array[NPCDialogueTopic] = []

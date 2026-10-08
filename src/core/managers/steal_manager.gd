@@ -40,7 +40,11 @@ static func close() -> void:
 
 
 func _open(thief: Playable, victim: Playable) -> void:
-	if thief == null or victim == null:
+	if not is_instance_valid(thief) or not is_instance_valid(victim) or thief == victim:
+		return
+	if not thief.can_participate_in_combat() or not victim.can_participate_in_combat():
+		return
+	if _steal_ui and _steal_ui.visible:
 		return
 	GameState.acquire_input_lock()
 	_ensure_ui()

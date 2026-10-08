@@ -9,7 +9,9 @@ signal shop_opened
 signal shop_closed
 
 var _shop_ui: ShopUI
-var _shops: Dictionary = {}
+var _shops: Dictionary:
+	get:
+		return GameState.world_state.shops
 var _ui_parent: Node
 
 
@@ -43,7 +45,9 @@ static func close() -> void:
 
 
 func _open(shop_id: String, player: Playable) -> void:
-	if player == null:
+	if not is_instance_valid(player):
+		return
+	if _shop_ui and _shop_ui.visible:
 		return
 	var shop := get_shop(shop_id)
 	if shop == null:
@@ -101,7 +105,7 @@ func _load_shops() -> void:
 	while file_name != "":
 		if not dir.current_is_dir() and file_name.ends_with(".tres"):
 			var shop := load("res://src/resources/items/shop/shops/%s" % file_name) as ShopData
-			if shop and not shop.shop_id.is_empty():
-				_shops[shop.shop_id] = shop
+			if shop and not shop.shop_id.is_empty() and not _shops.has(shop.shop_id):
+				_shops[shop.shop_id] = shop.duplicate_deep(Resource.DEEP_DUPLICATE_ALL) as ShopData
 		file_name = dir.get_next()
 	dir.list_dir_end()
