@@ -444,6 +444,12 @@ Die Reihenfolge im Moment ist wie folgt:
 
 Ist also das Fenster "Karte" aufgerufen, wird links angeschrägt von Rechts nach links "Inventar", "Charakter" und "Party" angezeigt, und rechts wird von links nach rechts "Log", "Menü" und "Debug" angezeigt. Es wiederholt sich dabei immer wieder, so dass links von "Party" "Debug" oder "Menü" angezeigt. Um die Fenster zu wechseln muss mit der Maus oder oder mit der Tastatur/Controller-Steuerung der Pfeil nach Links oder Rechts ausgewählt werden.
 
+Beim Fensterwechsel gleitet die gewählte Karte in 0,28 Sekunden aus der
+entsprechenden Richtung in die Mitte. Die seitlichen Karten bewegen sich mit;
+Skalierung und leichte Drehung unterstreichen den Cover-Flow-Eindruck.
+Schnelle Richtungswechsel, Schließen und Größenänderungen beenden den bisherigen
+Übergang sauber. Dies gilt für Maus, Tastatur und Controller gleichermaßen.
+
 ## Party Fenster
 
 Das Partyfenster ist dazu gedacht, den Anführer zu bestimmen und auch die Reihenfolge der Party. 
@@ -459,6 +465,13 @@ Das Charakterfenster zeigt die Charakterblätter aller Charakter in Reihenfolge,
 ![](/Users/hapetse/Dev/NECOTA2D/docs/res/-Charakter.png)
 
 Die Charakterblätter können durchgescrollt werden. Sobald ein Charakterblatt eines Charakters zuende ist, wird das nächste direkt darunter angezeigt.
+
+Umgesetzt: Kopfbereich mit Porträt, Stammdaten und SP-/KP-Balken; darunter
+Körperkraft/Gewandheit, Robustheit/Willenskraft und Verstand/Bewusstsein als
+Attributpaare, anschließend zentrierte Präsenz, Begleiter und Beziehungen.
+Die helle Referenzgestaltung ist auf das Charakterblatt begrenzt; Navigation
+und die gemeinsame vertikale Scrollfläche verwenden die bestehende Architektur.
+
 
 ## Inventar Fenster
 

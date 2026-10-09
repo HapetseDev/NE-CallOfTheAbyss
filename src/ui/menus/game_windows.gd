@@ -3,6 +3,10 @@ extends Control
 
 ## Shared shell. Owns only its input lease; content uses existing domain APIs.
 const PAGES := ["Party", "Charakter", "Inventar", "Karte", "Log", "Menü", "Debug"]
+const PAGE_TURN_DURATION := 0.28
+var _page_turn: Tween
+var _has_page := false
+
 var party: Party
 var active_page := 0
 var _lock_token := 0
@@ -107,6 +111,10 @@ func open_page(index: int) -> void:
 	select_page(index)
 
 func select_page(index: int) -> void:
+	var target := posmod(index, PAGES.size())
+	var direction := _page_direction(index)
+	var animate := visible and _has_page and target != active_page
+	_stop_page_turn()
 	_scroll_positions[active_page] = _scroll.scroll_vertical
 	active_page = posmod(index, PAGES.size())
 	_title.text = PAGES[active_page]
@@ -125,6 +133,46 @@ func select_page(index: int) -> void:
 	_layout()
 	_previous.grab_focus()
 	_restore_scroll.call_deferred()
+	_has_page = true
+	if animate:
+		_animate_page_turn(direction)
+
+# Preserve explicit left/right intent across the cyclic boundary. Direct tab
+# selections take the shortest route through the ring.
+func _page_direction(index: int) -> int:
+	if index == active_page - 1:
+		return -1
+	if index == active_page + 1:
+		return 1
+	var distance := posmod(index - active_page, PAGES.size())
+	return 1 if distance <= PAGES.size() / 2 else -1
+
+func _animate_page_turn(direction: int) -> void:
+	var destination := _panel.position
+	_panel.pivot_offset = _panel.size * 0.5
+	_panel.position.x += direction * _stage.size.x * 0.22
+	_panel.scale = Vector2.ONE * 0.94
+	_panel.rotation = deg_to_rad(direction * 2.0)
+	_panel.modulate.a = 0.35
+	_page_turn = create_tween().set_parallel(true)
+	_page_turn.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_page_turn.tween_property(_panel, "position", destination, PAGE_TURN_DURATION)
+	_page_turn.tween_property(_panel, "scale", Vector2.ONE, PAGE_TURN_DURATION)
+	_page_turn.tween_property(_panel, "rotation", 0.0, PAGE_TURN_DURATION)
+	_page_turn.tween_property(_panel, "modulate:a", 1.0, PAGE_TURN_DURATION)
+	for cover in _covers:
+		var resting_position := cover.position
+		cover.position.x += direction * _stage.size.x * 0.04
+		_page_turn.tween_property(cover, "position", resting_position, PAGE_TURN_DURATION)
+
+func _stop_page_turn() -> void:
+	if _page_turn:
+		_page_turn.kill()
+		_page_turn = null
+	if _panel:
+		_panel.scale = Vector2.ONE
+		_panel.rotation = 0.0
+		_panel.modulate.a = 1.0
 
 func _restore_scroll() -> void:
 	_scroll.scroll_vertical = _scroll_positions.get(active_page, 0)
@@ -140,7 +188,10 @@ func _clear_content() -> void:
 func close() -> void:
 	if not visible:
 		return
+	_stop_page_turn()
+	_has_page = false
 	hide()
+	_layout()
 	_release_lock()
 	_clear_content()
 	if is_instance_valid(_return_focus) and _return_focus.is_visible_in_tree():
@@ -152,11 +203,13 @@ func _release_lock() -> void:
 		_lock_token = 0
 
 func _exit_tree() -> void:
+	_stop_page_turn()
 	_release_lock()
 
 func _layout() -> void:
 	if not _panel:
 		return
+	_stop_page_turn()
 	var available := _stage.size
 	_panel.position = Vector2(available.x * 0.16, NEDimensions.SPACING_M)
 	_panel.size = Vector2(available.x * 0.68, maxf(0, available.y - NEDimensions.SPACING_XL))
