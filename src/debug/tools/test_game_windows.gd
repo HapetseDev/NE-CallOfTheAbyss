@@ -27,6 +27,20 @@ func _run() -> void:
 	check(ui._embedded_views.size() == game.party.get_all_members().size(), "Alle Charakterblätter")
 	check((ui._embedded_views[0] as CharacterSheetUI).playable == follower, "Partyreihenfolge")
 	await get_tree().process_frame
+	var sheet := ui._embedded_views[0] as CharacterSheetUI
+	var document := sheet._attributes_box
+	check(document.get_child_count() == 7, "Kopf, drei Attributpaare, Präsenz und soziale Abschnitte")
+	var expected := ["Körperkraft", "Gewandheit", "Robustheit", "Willenskraft", "Verstand", "Bewusstsein"]
+	for index in expected.size():
+		var pair := document.get_child(1 + floori(index / 2.0))
+		var table := pair.get_child(index % 2)
+		var rows := table.get_child(0).get_child(0)
+		check(rows.get_child(0).text.begins_with(expected[index] + " Level "), "Attributposition " + expected[index])
+		check(rows.get_child_count() == 6, "Fünf Fähigkeitsslots für " + expected[index])
+	check(document.get_child(4).get_child_count() == 3, "Präsenz zwischen zwei flexiblen Abständen zentriert")
+	check(document.get_child(5).get_child(0).get_child(0).get_child(0).text == "Begleiter", "Begleiter unter Attributen")
+	check(document.get_child(6).get_child(0).get_child(0).get_child(0).text == "Beziehungen", "Beziehungen unter Begleitern")
+	check(document.get_parent() == ui._body.get_child(0).get_node("VBoxContainer"), "Kein verschachtelter Scrollbereich")
 	var down := InputEventAction.new()
 	down.action = "ui_down"
 	down.pressed = true
@@ -59,6 +73,25 @@ func _run() -> void:
 		ui.select_page(page)
 		await get_tree().process_frame
 		check(ui.active_page == page and ui._body.get_child_count() > 0, "Seite %d aufgebaut" % page)
+	check(ui._page_direction(1) == -1 and ui._page_direction(3) == 1, "Animationsrichtung links/rechts")
+	ui.select_page(6)
+	check(ui._page_direction(7) == 1, "Rechts über zyklische Grenze")
+	ui.select_page(7)
+	check(ui.active_page == 0 and ui._page_turn.is_running(), "Zyklischer Wechsel animiert")
+	check(ui._panel.position.x > ui._stage.size.x * 0.16, "Nächste Karte kommt von rechts")
+	ui.select_page(-1)
+	check(ui.active_page == 6 and ui._panel.position.x < ui._stage.size.x * 0.16, "Schneller Gegenwechsel kommt von links")
+	await ui._page_turn.finished
+	check(ui._panel.scale.is_equal_approx(Vector2.ONE) and is_zero_approx(ui._panel.rotation), "Animation endet ohne Transformationsreste")
+	check(is_equal_approx(ui._panel.position.x, ui._stage.size.x * 0.16), "Karte endet mittig")
+	ui.select_page(0)
+	ui._layout()
+	check(not ui._page_turn and ui._panel.scale == Vector2.ONE, "Größenanpassung beendet Animation sauber")
+	ui.select_page(1)
+	ui.close()
+	check(not ui._page_turn and not ui.visible, "Schließen während Animation")
+	ui.open_page(2)
+	check(not ui._page_turn and ui._panel.modulate.a == 1.0, "Erneutes Öffnen ohne alte Animation")
 	var controller := InputEventJoypadButton.new()
 	controller.pressed = true
 	controller.button_index = JOY_BUTTON_RIGHT_SHOULDER

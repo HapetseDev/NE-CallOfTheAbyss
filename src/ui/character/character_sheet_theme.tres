@@ -1,0 +1,33 @@
+[gd_resource type="Theme" load_steps=5 format=3]
+
+[ext_resource type="Font" path="res://assets/font/Cuprum-VariableFont_wght.ttf" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="Paper"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.65, 0.68, 0.72, 1)
+
+[sub_resource type="StyleBoxFlat" id="Header"]
+bg_color = Color(0.85, 0.91, 0.99, 1)
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="Identity"]
+bg_color = Color(0.66, 0.78, 0.94, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_left = 10
+corner_radius_bottom_right = 10
+
+[resource]
+default_font = ExtResource("1")
+default_font_size = 15
+Label/colors/font_color = Color(0.25, 0.27, 0.3, 1)
+PanelContainer/styles/panel = SubResource("Paper")
+PanelContainer/styles/identity = SubResource("Identity")
+SheetHeader/base_type = &"Label"
+SheetHeader/colors/font_color = Color(0, 0.49, 0.95, 1)
+SheetHeader/styles/normal = SubResource("Header")
