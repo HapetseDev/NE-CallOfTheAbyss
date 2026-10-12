@@ -12,6 +12,9 @@ const INITIATIVE_SPEED_FACTOR := 6.0
 const EVADE_FACTOR := 3.0
 const EVADE_CAP := 0.6
 
+## Vorläufige Grundstärke für Gegenstände ohne eigene Angriffsart.
+const IMPROVISED_ITEM_POWER := 1
+
 ## Schadensreduktion pro Punkt Robustheit.
 const MITIGATION_FACTOR := 1.0
 

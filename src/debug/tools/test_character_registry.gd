@@ -55,7 +55,7 @@ func _test_nested_isolation() -> void:
 	var second := registry.register_character("guard_02", template)
 	first.inventory.slots[0].count = 1
 	first.inventory.slots[0].item.item_name = "Geändert"
-	first.inventory.equipment["waffe"].weight = 42.0
+	first.inventory.equipment["primaer_hand"].weight = 42.0
 	first.learned_skills[0].level = 9
 	first.beziehungen[0].wertung = -5
 	first.begleiter[0].details = "Geändert"
@@ -64,7 +64,7 @@ func _test_nested_isolation() -> void:
 	for untouched in [template, second]:
 		_check(untouched.inventory.slots[0].count == 3, "Slotmengen sind unabhängig")
 		_check(untouched.inventory.slots[0].item.item_name == "Testgegenstand", "Verschachtelte Items sind unabhängig")
-		_check(untouched.inventory.equipment["waffe"].weight == 0.3, "Dictionary-Resources sind unabhängig")
+		_check(untouched.inventory.equipment["primaer_hand"].weight == 0.3, "Dictionary-Resources sind unabhängig")
 		_check(untouched.learned_skills[0].level == 1, "Skills sind unabhängig")
 		_check(untouched.beziehungen[0].wertung == 2, "Beziehungen sind unabhängig")
 		_check(untouched.begleiter[0].details.is_empty(), "Begleiterdaten sind unabhängig")
@@ -284,7 +284,7 @@ func _make_template() -> CharacterResource:
 	slot.item.item_name = "Testgegenstand"
 	slot.count = 3
 	template.inventory.slots.append(slot)
-	template.inventory.equipment["waffe"] = ItemData.new()
+	template.inventory.equipment["primaer_hand"] = ItemData.new()
 	var skill := LearnedSkill.new()
 	skill.skill_id = "nahkampfwaffen"
 	skill.level = 1

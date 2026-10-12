@@ -66,6 +66,15 @@ func get_portrait() -> Texture2D:
 	return load(path) as Texture2D
 
 
+## Wie beim Portrait: optionale Datei im Asset-Ordner des Charakters.
+func get_paperdoll() -> Texture2D:
+	if character_name.is_empty():
+		return null
+	var key := character_name.to_lower()
+	var path := "res://assets/characters/%s/%s_paperdoll.png" % [key, key]
+	return load(path) as Texture2D if ResourceLoader.exists(path) else null
+
+
 func ensure_initialized() -> void:
 	_ensure_inventory()
 	if staerkepunkte == 0 and konzentrationspunkte == 0:

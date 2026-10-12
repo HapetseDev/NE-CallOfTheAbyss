@@ -2,6 +2,7 @@ class_name GameWindows
 extends Control
 
 ## Shared shell. Owns only its input lease; content uses existing domain APIs.
+const PANEL_WIDTH_RATIO := 0.68
 const PAGES := ["Party", "Charakter", "Inventar", "Karte", "Log", "Menü", "Debug"]
 var party: Party
 var active_page := 0
@@ -159,7 +160,7 @@ func _layout() -> void:
 		return
 	var available := _stage.size
 	_panel.position = Vector2(available.x * 0.16, NEDimensions.SPACING_M)
-	_panel.size = Vector2(available.x * 0.68, maxf(0, available.y - NEDimensions.SPACING_XL))
+	_panel.size = Vector2(available.x * PANEL_WIDTH_RATIO, maxf(0, available.y - NEDimensions.SPACING_XL))
 	var offsets := [-3, -2, -1, 3, 2, 1]
 	for i in _covers.size():
 		var offset: int = offsets[i]
@@ -169,6 +170,9 @@ func _layout() -> void:
 		cover.position = Vector2(available.x * (0.03 + (3 - abs(offset)) * 0.025 if offset < 0 else 0.865 - (3 - abs(offset)) * 0.025), (available.y - cover.size.y) * 0.5)
 		cover.rotation = deg_to_rad(-8 if offset < 0 else 8)
 		cover.scale.x = 0.8
+
+func get_content_width() -> float:
+	return maxf(0.0, _stage.size.x * PANEL_WIDTH_RATIO - NEDimensions.PANEL_MARGIN * 4)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
@@ -248,12 +252,13 @@ func _build_inventories() -> void:
 	if not party:
 		return
 	for member in party.get_all_members():
-		_label(_body, member.get_display_name())
 		var view := preload("res://src/ui/inventory/InventoryUI.tscn").instantiate() as InventoryUI
 		var content := _embed(view)
+		var card := PanelContainer.new()
+		card.size_flags_horizontal = SIZE_EXPAND_FILL
+		_body.add_child(card)
+		content.reparent(card)
 		view.bind_player(member, party)
-		view._menu_hud.hide()
-		content.get_node("VBoxContainer/DropHint").text = "Auswählen: Aktionsmenü · Ziehen auf Ausrüstung: ausrüsten · Ziehen in anderen Rucksack: 1 Stück übergeben"
 
 func _build_map() -> void:
 	var view := preload("res://src/ui/menus/map_ui.tscn").instantiate() as MapUI

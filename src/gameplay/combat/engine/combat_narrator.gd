@@ -32,7 +32,10 @@ static func _describe_item(actor: CombatParticipant, action: CombatAction, resul
 	var means := "%s (%s)" % [item_name, verb]
 	var lines: Array[String] = []
 	for outcome in result.outcomes:
-		lines.append(_describe_outcome(actor, means, outcome))
+		if action.item and action.item.consumable and action.item_usage_mode == null:
+			lines.append("%s verwendet %s bei %s." % [actor.playable.get_display_name(), item_name, outcome.target.playable.get_display_name()])
+		else:
+			lines.append(_describe_outcome(actor, means, outcome))
 	return lines
 
 

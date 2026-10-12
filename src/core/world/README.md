@@ -29,6 +29,22 @@ stellt es sie und aktive abgelegte Gegenstände wieder her. Ein ungültiges Ziel
 wird vor dem Abbau des bisherigen Levels abgelehnt. Während Kampf oder
 Eingabesperre findet kein Levelwechsel statt.
 
+### Ausrüstungsplätze im Inventar
+
+`Inventory.EQUIPMENT_SLOTS` enthält Körperplätze einschließlich `schmuck` und
+neun Schnellplätze mit den kompatiblen Keys `guertel_1` bis `guertel_9`.
+Diese bleiben Werte im vorhandenen Ausrüstungs-Dictionary; Resourcefelder und
+JSON-Struktur ändern sich nicht, das Speicherformat bleibt Version 8.
+`CharacterRegistry.restore_character()` ergänzt über `ensure_equipment_slots()`
+fehlende Plätze alter Spielstände mit `null`, ohne vorhandene Belegungen zu
+überschreiben. Der alte Platz `waffe` wird beim Initialisieren und Laden in `primaer_hand`
+überführt und entfernt. Ist die rechte Hand schon belegt, wird die zusätzliche
+Waffe verlustfrei im Rucksack verstaut. Die Migration ist idempotent; ungültige
+Slot-Werte werden weiterhin abgelehnt. Writer, Reader und Validierung verwenden
+dieselbe Slot-Liste.
+Der Roundtrip neuer Plätze und das Ergänzen alter Inventare werden durch
+`test_inventory_layout.tscn` geprüft.
+
 ## Speichervertrag Version 8
 
 `LevelManager.instance.save_world(path)` erfasst den Zustand im freien Gameplay

@@ -30,5 +30,5 @@ item_name = "Messer"
 description = "Zum Schneiden von Pflanzen und anderem. Kann gestochen oder geworfen werden."
 weight = 0.3
 max_stack = 1
-equipment_slot = "waffe"
+equipment_slot = "primaer_hand"
 usage_modes = Array[ExtResource("2_usage")]([SubResource("ItemUsageMode_stechen"), SubResource("ItemUsageMode_werfen")])

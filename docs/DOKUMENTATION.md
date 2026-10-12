@@ -640,7 +640,7 @@ Bricht ein Kampf aus, sammelt `CombatParticipantResolver.scan_candidates()` alle
 
 Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 
-- **Gegenstand**: nur was in der Hand oder am Gürtel getragen wird (`Inventory.get_combat_usable_items()`, Slots `primaer_hand`/`nebenhand`/`waffe`/`guertel_1-3`), mit den am Gegenstand definierten Nutzungsarten (`ItemData.usage_modes`, z.B. Messer: stechen/werfen; Stein: schlagen/werfen).
+- **Gegenstand**: nur was in der Hand oder in der Schnellausrüstung getragen wird (`Inventory.get_combat_usable_items()`, Slots `primaer_hand`/`nebenhand`/`guertel_1-9`), mit den am Gegenstand definierten Nutzungsarten (`ItemData.usage_modes`, z.B. Messer: stechen/werfen; Stein: schlagen/werfen).
 - **Fähigkeit**: `AbilityCatalog.get_available_for(character)` filtert `AbilityDefinition`-Ressourcen danach, ob das zugehörige RPG-Talent (`source_skill_id`, z.B. `magiekunde`, `bardenkunst`) gelernt und hoch genug ist – die Brücke zwischen dem bestehenden Talentsystem und nutzbaren Kampf-Fähigkeiten. Nur `DAMAGE`/`HEAL` sind implementiert; `BUFF`/`DEBUFF`/`UTILITY` melden ehrlich `"effect_not_implemented"` (kein Status-Effekt-System vorhanden).
 - **Bewegen**: wechselt in einen eigenen State (`state_combat_move.gd`) statt sofort aufzulösen – siehe eigener Abschnitt unten.
 - **Reden**: öffnet den vorhandenen Dialog des Ziels (`NPCInteraction.perform_action("talk", …)`), falls vorhanden.
@@ -700,6 +700,55 @@ Die Kamera folgt während eines Kampfes keinem einzelnen Charakter mehr (weder L
 Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Niederlage der ganzen Party (nur `CombatSession.side_wiped`-Signal als Hook, keine Logik dahinter), Fernkampf-Reichweite über Sichtlinie hinaus, welche Magie explizit keine Sichtlinie braucht, mehrere gleichzeitige Kämpfe (aktuell: eine globale Sitzung), ob sich der "Erstschlag außerhalb der Zugreihenfolge" bei Party-Fähigkeiten gegen Fremde richtig anfühlt oder eine reguläre Zug-Einreihung besser wäre. Kampfkamera bewusst rein prozedural (kein eigenes Marker-Set analog `DialogueCameraPoints`) – als spätere Verfeinerung offen.
 
 ---
+
+## Inventaransicht
+
+Das Inventar in `GameWindows` zeigt pro Partymitglied eine eigene Karte in
+`Party.get_all_members()`-Reihenfolge. Ein gemeinsamer äußerer Scrollbereich
+führt durch alle Karten. Oben stehen Portrait, Name und Traglast. Links liegen
+Schmuck, rechte Hand und Beine; über der Paperdoll liegt der Kopfplatz,
+rechts Brust, linke Hand und Füße. Es gibt genau zwei Handplätze: `primaer_hand` (rechts) und `nebenhand` (links).
+Der ehemalige separate Platz `waffe` entfällt.
+
+Die Paperdoll wird wie das Portrait über den Charakternamen gefunden:
+`assets/characters/<name>/<name>_paperdoll.png`. Fehlende Bilder zeigen einen
+Hinweis; sie verhindern nicht das Öffnen des Inventars.
+
+Rechts zeigt **Stats des Gegenstands** bei Hover, Tastaturfokus oder Auswahl
+Name, Beschreibung, Gewicht und die bereits vorhandenen Heil-/Konzentrations-
+werte sowie Kampf-Verwendungsarten. Es werden keine neuen Gegenstandswerte
+angenommen. **Weitere Infos** bleibt absichtlich leer.
+
+Unter der Körperansicht liegen neun Plätze **Schnellausrüstung**, danach der
+Rucksack als wachsendes Raster. Die bisherigen Keys `guertel_1` bis `guertel_3`
+bleiben erhalten; `guertel_4` bis `guertel_9` und `schmuck` ergänzen sie.
+In Schnellplätze passt jeweils ein Gegenstand, auch aus einem Stapel. Er wird
+aus dem Rucksack entnommen; beim Tauschen wird der bisherige Inhalt verstaut.
+Beide Hände und alle Schnellplätze akzeptieren jeden Gegenstand, einschließlich
+Heiltränken. Die übrigen Körperplätze prüfen weiterhin
+`ItemData.equipment_slot`.
+
+Klicken/Rechtsklicken auf Gegenstände öffnet Aktionen für beide Hände und alle
+Schnellplätze. Ein leerer Ausrüstungsplatz öffnet eine Liste passender
+Rucksackgegenstände. Drag-and-drop rüstet aus, verschiebt direkt zwischen Händen
+und Schnellplätzen, tauscht deren Inhalt, verstaut und übergibt zwischen den
+Rucksäcken der Partymitglieder. Passt der verdrängte Gegenstand nicht in den
+Quellplatz, wird er im Rucksack verstaut. Eigenschaften sind auch
+für ausgerüstete Gegenstände einsehbar, ohne sie dabei abzulegen.
+Hand-/Schnellplätze liefern die Gegenstände für das Kampfmenü. Heiltränke sind
+bei Verbündeten einsetzbar; Werfen/Verbrauchen entfernt das ausgewählte Exemplar
+aus dem Ausrüstungsplatz, nicht aus einem gleichnamigen Rucksackstapel.
+Gegenstände ohne eigene `usage_modes` bieten **Schlagen (improvisiert)** an.
+Die vorläufige Grundstärke steht in `CombatBalance.IMPROVISED_ITEM_POWER` (1);
+Ausweichen und Robustheit werden wie bei anderen Angriffen angewendet.
+Vorhandene eigene Verwendungsarten bleiben unverändert.
+Ein Messer in Hand oder Schnellausrüstung erlaubt weiterhin Pflanzen schneiden.
+
+`test_inventory_input.tscn` prüft mit echten GUI-Mausereignissen das Ziehen von
+Messer/Trank aus dem Rucksack, zwischen Händen und Schnellplätzen sowie die
+Platzauswahl per Klick und das Tauschen belegter Plätze.
+`test_inventory_layout.tscn` prüft Bilder, Partyreihenfolge, Ausrüstungstausch,
+Schnellplätze, Eigenschaften, Verbrauch im Kampf und Speicherkompatibilität.
 
 ## Hauptmenü
 

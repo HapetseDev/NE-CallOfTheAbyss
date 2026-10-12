@@ -24,11 +24,13 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if not data is Dictionary or not is_instance_valid(data.get("source")):
 		return false
-	return (data.get("type") == "equipped_item" and data.source == inventory_ui) or inventory_ui.accepts_transfer(data)
+	if data.get("type") == "equipped_item" and data.source == inventory_ui:
+		return inventory_ui.playable != null and data.get("item") != null and inventory_ui.playable.equipment.get(data.get("slot_key", "")) == data.get("item")
+	return inventory_ui.accepts_transfer(data)
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	if inventory_ui:
+	if inventory_ui and _can_drop_data(_at_position, data):
 		if inventory_ui.accepts_transfer(data):
 			data.source.transfer_to(data.index, inventory_ui.playable)
 		else:
