@@ -117,14 +117,24 @@ func _render_item_menu() -> void:
 	_add_label("Gegenstand wählen")
 	var items := player.get_combat_usable_items()
 	if items.is_empty():
-		_add_label("Nichts in der Hand/am Gürtel.")
+		_add_label("Nichts in der Hand oder Schnellausrüstung.")
 	for item in items:
-		for mode in item.usage_modes:
+		if item.consumable:
+			_add_button("%s – Verwenden" % item.item_name, _render_consumable_targets.bind(item))
+		for mode in item.get_combat_usage_modes():
 			_add_button(
 				"%s – %s" % [item.item_name, mode.label],
 				_render_item_target_menu.bind(item, mode)
 			)
 	_add_button("Zurück", _render_root)
+
+
+func _render_consumable_targets(item: ItemData) -> void:
+	_clear_vbox()
+	_add_label("Verwenden bei")
+	for target in _targets_on_side(_participant.side):
+		_add_button(target.playable.get_display_name(), _on_item_target_chosen.bind(item, null, target))
+	_add_button("Zurück", _render_item_menu)
 
 
 func _render_item_target_menu(item: ItemData, mode: ItemUsageMode) -> void:

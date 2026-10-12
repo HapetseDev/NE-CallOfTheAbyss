@@ -6,25 +6,48 @@ extends Resource
 
 signal contents_changed
 
-const EQUIPMENT_SLOTS: Array[String] = [
-	"kopf", "rumpf", "primaer_hand", "nebenhand", "beine", "fuesse", "waffe",
-	"guertel_1", "guertel_2", "guertel_3",
+const QUICK_EQUIPMENT_SLOTS: Array[String] = [
+	"guertel_1", "guertel_2", "guertel_3", "guertel_4", "guertel_5",
+	"guertel_6", "guertel_7", "guertel_8", "guertel_9",
 ]
 
+const EQUIPMENT_SLOTS: Array[String] = [
+	"kopf", "rumpf", "primaer_hand", "nebenhand", "beine", "fuesse",
+	"schmuck",
+] + QUICK_EQUIPMENT_SLOTS
+
 ## Slots, deren Inhalt im Kampf als "Gegenstand verwenden" wählbar ist –
-## was in der Hand gehalten oder am Gürtel getragen wird, nicht das ganze Inventar.
+## was in der Hand gehalten oder in der Schnellausrüstung getragen wird, nicht das ganze Inventar.
 const COMBAT_USABLE_SLOTS: Array[String] = [
-	"primaer_hand", "nebenhand", "waffe", "guertel_1", "guertel_2", "guertel_3",
-]
+	"primaer_hand", "nebenhand",
+] + QUICK_EQUIPMENT_SLOTS
 
 @export var slots: Array[InventorySlot] = []
 @export var equipment: Dictionary = {}
+
+
+static func can_place_item(item: ItemData, key: String) -> bool:
+	if item == null or not EQUIPMENT_SLOTS.has(key):
+		return false
+	if key in ["primaer_hand", "nebenhand"] or QUICK_EQUIPMENT_SLOTS.has(key):
+		return true
+	return not item.consumable and item.equipment_slot == key
 
 
 func ensure_equipment_slots() -> void:
 	for slot in EQUIPMENT_SLOTS:
 		if not equipment.has(slot):
 			equipment[slot] = null
+	# Legacy-Saves: der frühere Waffenplatz ist die rechte Hand.
+	# Bei einer bereits belegten Hand bleibt das zusätzliche Exemplar im Rucksack.
+	if equipment.has("waffe") and (equipment["waffe"] == null or equipment["waffe"] is ItemData):
+		var legacy: Variant = equipment["waffe"]
+		equipment.erase("waffe")
+		if legacy is ItemData:
+			if equipment.primaer_hand == null:
+				equipment.primaer_hand = legacy
+			else:
+				add_item(legacy)
 
 
 func is_empty() -> bool:
@@ -116,7 +139,7 @@ func unequip(slot_key: String) -> ItemData:
 	return item
 
 
-## Gegenstände, die in der Hand oder am Gürtel getragen werden – die im
+## Gegenstände, die in der Hand oder in der Schnellausrüstung getragen werden – die im
 ## Kampf tatsächlich einsetzbare Teilmenge des Besitzes (nicht der Rucksack).
 func get_combat_usable_items() -> Array[ItemData]:
 	ensure_equipment_slots()
@@ -126,3 +149,17 @@ func get_combat_usable_items() -> Array[ItemData]:
 		if item and not result.has(item):
 			result.append(item)
 	return result
+
+
+## Verbraucht genau das ausgewählte Exemplar aus Hand/Schnellausrüstung.
+## Der Rucksack wird dabei nicht berührt, selbst wenn dort dieselbe Vorlage liegt.
+func consume_combat_item(item: ItemData) -> bool:
+	if item == null:
+		return false
+	ensure_equipment_slots()
+	for key in COMBAT_USABLE_SLOTS:
+		if equipment.get(key) == item:
+			equipment[key] = null
+			contents_changed.emit()
+			return true
+	return false

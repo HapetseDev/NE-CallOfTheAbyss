@@ -68,7 +68,5 @@ static func _build_attack_action(participant: CombatParticipant, target: CombatP
 
 static func _first_usable_item(playable: Playable) -> Dictionary:
 	for item in playable.get_combat_usable_items():
-		if item.usage_modes.is_empty():
-			continue
-		return {"item": item, "mode": item.usage_modes[0]}
+		return {"item": item, "mode": item.get_combat_usage_modes()[0]}
 	return {}

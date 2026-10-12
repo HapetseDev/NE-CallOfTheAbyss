@@ -46,6 +46,10 @@ func get_combat_usable_items() -> Array[ItemData]:
 	_ensure_character()
 	return character.get_combat_usable_items()
 
+func consume_combat_item(item: ItemData) -> bool:
+	_ensure_character()
+	return character.inventory.consume_combat_item(item)
+
 # --- Welt-Avatar (Bewegung, Animation, Kollision) ---
 var cardinal_direction: Vector3 = Vector3(0, 0, 1)  # Nächste Kardinalrichtung (Legacy / Sprites)
 var facing_direction: Vector3 = Vector3(0, 0, 1)  # Normalisierte Blickrichtung (XZ)

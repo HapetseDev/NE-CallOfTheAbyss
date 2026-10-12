@@ -43,3 +43,10 @@ const PANEL_MARGIN := 16
 
 # Mindesthöhe der Porträts in der Vollbild-Gesprächsansicht.
 const DIALOGUE_PORTRAIT_SIZE := 144
+
+# Inventar: Körperansicht, Portrait und Gegenstandsplätze.
+const INVENTORY_SLOT_SIZE := 64
+const INVENTORY_PORTRAIT_SIZE := 64
+const PAPERDOLL_WIDTH := 160
+const PAPERDOLL_HEIGHT := 224
+const INVENTORY_DETAILS_WIDTH := 224

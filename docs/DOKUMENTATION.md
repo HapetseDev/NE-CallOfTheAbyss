@@ -640,7 +640,7 @@ Bricht ein Kampf aus, sammelt `CombatParticipantResolver.scan_candidates()` alle
 
 Das Kampfmenü (`state_combat_turn.gd`) bietet fünf Aktionen:
 
-- **Gegenstand**: nur was in der Hand oder am Gürtel getragen wird (`Inventory.get_combat_usable_items()`, Slots `primaer_hand`/`nebenhand`/`waffe`/`guertel_1-3`), mit den am Gegenstand definierten Nutzungsarten (`ItemData.usage_modes`, z.B. Messer: stechen/werfen; Stein: schlagen/werfen).
+- **Gegenstand**: nur was in der Hand oder in der Schnellausrüstung getragen wird (`Inventory.get_combat_usable_items()`, Slots `primaer_hand`/`nebenhand`/`guertel_1-9`), mit den am Gegenstand definierten Nutzungsarten (`ItemData.usage_modes`, z.B. Messer: stechen/werfen; Stein: schlagen/werfen).
 - **Fähigkeit**: `AbilityCatalog.get_available_for(character)` filtert `AbilityDefinition`-Ressourcen danach, ob das zugehörige RPG-Talent (`source_skill_id`, z.B. `magiekunde`, `bardenkunst`) gelernt und hoch genug ist – die Brücke zwischen dem bestehenden Talentsystem und nutzbaren Kampf-Fähigkeiten. Nur `DAMAGE`/`HEAL` sind implementiert; `BUFF`/`DEBUFF`/`UTILITY` melden ehrlich `"effect_not_implemented"` (kein Status-Effekt-System vorhanden).
 - **Bewegen**: wechselt in einen eigenen State (`state_combat_move.gd`) statt sofort aufzulösen – siehe eigener Abschnitt unten.
 - **Reden**: öffnet den vorhandenen Dialog des Ziels (`NPCInteraction.perform_action("talk", …)`), falls vorhanden.
@@ -701,89 +701,79 @@ Bewusst noch nicht entschieden (siehe Implementierungsplan): Konsequenz bei Nied
 
 ---
 
+## Inventaransicht
+
+Das Inventar in `GameWindows` zeigt pro Partymitglied eine eigene Karte in
+`Party.get_all_members()`-Reihenfolge. Ein gemeinsamer äußerer Scrollbereich
+führt durch alle Karten. Oben stehen Portrait, Name und Traglast. Links liegen
+Schmuck, rechte Hand und Beine; über der Paperdoll liegt der Kopfplatz,
+rechts Brust, linke Hand und Füße. Es gibt genau zwei Handplätze: `primaer_hand` (rechts) und `nebenhand` (links).
+Der ehemalige separate Platz `waffe` entfällt.
+
+Die Paperdoll wird wie das Portrait über den Charakternamen gefunden:
+`assets/characters/<name>/<name>_paperdoll.png`. Fehlende Bilder zeigen einen
+Hinweis; sie verhindern nicht das Öffnen des Inventars.
+
+Rechts zeigt **Stats des Gegenstands** bei Hover, Tastaturfokus oder Auswahl
+Name, Beschreibung, Gewicht und die bereits vorhandenen Heil-/Konzentrations-
+werte sowie Kampf-Verwendungsarten. Es werden keine neuen Gegenstandswerte
+angenommen. **Weitere Infos** bleibt absichtlich leer.
+
+Unter der Körperansicht liegen neun Plätze **Schnellausrüstung**, danach der
+Rucksack als wachsendes Raster. Die bisherigen Keys `guertel_1` bis `guertel_3`
+bleiben erhalten; `guertel_4` bis `guertel_9` und `schmuck` ergänzen sie.
+In Schnellplätze passt jeweils ein Gegenstand, auch aus einem Stapel. Er wird
+aus dem Rucksack entnommen; beim Tauschen wird der bisherige Inhalt verstaut.
+Beide Hände und alle Schnellplätze akzeptieren jeden Gegenstand, einschließlich
+Heiltränken. Die übrigen Körperplätze prüfen weiterhin
+`ItemData.equipment_slot`.
+
+Klicken/Rechtsklicken auf Gegenstände öffnet Aktionen für beide Hände und alle
+Schnellplätze. Ein leerer Ausrüstungsplatz öffnet eine Liste passender
+Rucksackgegenstände. Drag-and-drop rüstet aus, verschiebt direkt zwischen Händen
+und Schnellplätzen, tauscht deren Inhalt, verstaut und übergibt zwischen den
+Rucksäcken der Partymitglieder. Passt der verdrängte Gegenstand nicht in den
+Quellplatz, wird er im Rucksack verstaut. Eigenschaften sind auch
+für ausgerüstete Gegenstände einsehbar, ohne sie dabei abzulegen.
+Hand-/Schnellplätze liefern die Gegenstände für das Kampfmenü. Heiltränke sind
+bei Verbündeten einsetzbar; Werfen/Verbrauchen entfernt das ausgewählte Exemplar
+aus dem Ausrüstungsplatz, nicht aus einem gleichnamigen Rucksackstapel.
+Gegenstände ohne eigene `usage_modes` bieten **Schlagen (improvisiert)** an.
+Die vorläufige Grundstärke steht in `CombatBalance.IMPROVISED_ITEM_POWER` (1);
+Ausweichen und Robustheit werden wie bei anderen Angriffen angewendet.
+Vorhandene eigene Verwendungsarten bleiben unverändert.
+Ein Messer in Hand oder Schnellausrüstung erlaubt weiterhin Pflanzen schneiden.
+
+`test_inventory_input.tscn` prüft mit echten GUI-Mausereignissen das Ziehen von
+Messer/Trank aus dem Rucksack, zwischen Händen und Schnellplätzen sowie die
+Platzauswahl per Klick und das Tauschen belegter Plätze.
+`test_inventory_layout.tscn` prüft Bilder, Partyreihenfolge, Ausrüstungstausch,
+Schnellplätze, Eigenschaften, Verbrauch im Kampf und Speicherkompatibilität.
+
 ## Hauptmenü
 
-### Übersicht
+Die Startszene `src/ui/menus/MainMenu.tscn` folgt der Titelmenü-Skizze des
+Design-Dokuments: Logo oben, drei Optionen mittig und bewegte 3D-Hintergründe.
+Das frühere Logo-/Textintro entfällt.
 
-Das Hauptmenü ist im Final Fantasy-Stil mit:
-1. Logo-Einblendungen (überspringbar)
-2. Intro-Text (scrollt von unten nach oben)
-3. Hauptmenü mit Buttons
+`src/world/levels/title/` enthält drei eigenständig ausführbare, leere Räume:
+`pale_yellow_room.tscn`, `red_room.tscn` und `dark_blue_room.tscn`.
+Diese vertreten vorläufig Wald, Thronraum und erstes Dungeon-Level in dieser
+Reihenfolge; die echte Levelgestaltung ist nicht Bestandteil dieser Platzhalter.
+Jeder Raum hat sechs Begrenzungsflächen, eigene Maße, Nebel und Beleuchtung.
+Die Titelkamera fährt langsam von oben nach unten. Nach 24 Sekunden folgen
+3 Sekunden Schwarzblende, Szenentausch und 3 Sekunden Einblenden; Logo und
+Bedienelemente bleiben dabei sichtbar. Zeiten sind im Inspector einstellbar.
 
-### Dateien
+Neues Spiel setzt die Sitzung zurück und öffnet MainGame. Spiel laden verwendet
+die bestehende SaveLoadMenu-Oberfläche; beim Schließen kehrt der Fokus zurück.
+Beenden blendet aus und schließt das Spiel. Maus, Pfeiltasten, W/S und Godots
+Standard-Controller-Navigation sind nutzbar; Feedback liefert UIAudio.
 
-| Datei | Beschreibung |
-|-------|--------------|
-| `src/ui/menus/MainMenu.tscn` | Hauptszene |
-| `src/ui/menus/MainMenu.gd` | Steuerungslogik |
+Die Musik wird automatisch aus `assets/audio/music/Main_Theme_Reprise.mp3`
+geladen und wiederholt. Die Datei wird noch vom Nutzer bereitgestellt; bis dahin
+bleibt der Player stumm. `background_music` erlaubt einen Inspector-Override.
 
-### Parameter (MainMenu.gd)
-
-| Parameter | Typ | Standard | Beschreibung |
-|-----------|-----|----------|--------------|
-| `logo_display_time` | float | 2.0 | Anzeigedauer pro Logo |
-| `logo_fade_time` | float | 1.0 | Ein-/Ausblendzeit |
-| `intro_scroll_speed` | float | 30.0 | Scroll-Geschwindigkeit |
-| `game_scene_path` | String | "res://src/core/main_game/main_game.tscn" | Spielszene |
-
-### Anpassen
-
-#### Logos ändern
-
-1. `LogosContainer/Logo1` und `Logo2` sind TextureRect Nodes
-2. Ersetze die Label-Kinder durch eigene Texturen
-3. Oder ändere den Text in `Logo1Text` / `Logo2Text`
-
-#### Intro-Text ändern
-
-1. Öffne `MainMenu.tscn`
-2. Wähle `IntroContainer/IntroText`
-3. Ändere den `text` im Inspector
-
-#### Buttons hinzufügen
-
-```gdscript
-# In MainMenu.gd
-
-@onready var options_button: Button = $MainMenuContainer/VBoxContainer/OptionsButton
-
-func _ready():
-    # ... existing code ...
-    options_button.pressed.connect(_on_options_pressed)
-
-func _on_options_pressed():
-    # Options-Menü öffnen
-    pass
-```
-
-### Ablauf
-
-```
-┌─────────────────────────────────────────┐
-│           MenuState.LOGOS               │
-│  ┌─────────────────────────────────┐    │
-│  │ Fade aus Schwarz                │    │
-│  │ Logo 1: ein → warten → aus      │    │
-│  │ Logo 2: ein → warten → aus      │    │
-│  └─────────────────────────────────┘    │
-│              ↓ (oder Skip)              │
-├─────────────────────────────────────────┤
-│           MenuState.INTRO               │
-│  ┌─────────────────────────────────┐    │
-│  │ Text scrollt von unten nach oben│    │
-│  └─────────────────────────────────┘    │
-│              ↓ (oder Skip)              │
-├─────────────────────────────────────────┤
-│         MenuState.MAIN_MENU             │
-│  ┌─────────────────────────────────┐    │
-│  │ Titel einblenden                │    │
-│  │ Buttons einblenden              │    │
-│  │ Warten auf Eingabe              │    │
-│  └─────────────────────────────────┘    │
-└─────────────────────────────────────────┘
-```
-
----
 
 ## Tipps & Best Practices
 
@@ -833,4 +823,4 @@ print(state_machine.current_state.name)
 - Mode7-Kamera mit goldenem Schnitt
 - Sprint-System mit Anlaufzeit
 - Schrittgeräusche-System
-- Final Fantasy-Stil Hauptmenü
+- Titelmenü mit Logo, drei Optionen und wechselnden 3D-Räumen

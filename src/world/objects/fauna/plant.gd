@@ -30,11 +30,12 @@ func take_damage(_damage: int) -> void:
 func can_schneiden(player: Playable) -> bool:
 	if not is_schneidbar:
 		return false
-	var w = player.equipment.get("waffe")
-	if w == "Messer":
-		return true
-	if w is ItemData and (w as ItemData).item_id == "Messer":
-		return true
+	for key in Inventory.COMBAT_USABLE_SLOTS:
+		var item: Variant = player.equipment.get(key)
+		if item is ItemData and item.item_id == "Messer":
+			return true
+		if item is String and item == "Messer":
+			return true
 	return player.has_item("Messer")
 
 

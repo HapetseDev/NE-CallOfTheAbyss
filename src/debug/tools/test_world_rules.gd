@@ -182,10 +182,10 @@ func _test_inventory_rules() -> void:
 	item.weight = 100000
 	check(not Rules.apply(world, [transfer]) and a.inventory.slots[0].count == 2 and b.inventory.slots.is_empty(), "Traglastfehler verliert keinen Gegenstand")
 	item.weight = 0.1
-	b.inventory.equipment.waffe = item
+	b.inventory.equipment.primaer_hand = item
 	condition.count = 1
 	check(not Rules.meets(world, condition), "Ausrüstung ist kein Rucksackbestand")
-	b.inventory.equipment.waffe = null
+	b.inventory.equipment.primaer_hand = null
 	var unique := ItemData.new()
 	unique.item_id = "test_stack"
 	unique.world_object_id = "unique_test"

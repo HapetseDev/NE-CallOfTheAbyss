@@ -12,13 +12,13 @@ extends Resource
 @export var world_texture: Texture2D
 @export var weight: float = 0.3
 @export var max_stack: int = 99
-## Leer = nicht ausrüstbar. Sonst Slot-Key wie "waffe".
+## Bevorzugter Körper-/Handplatz. Hände/Schnellausrüstung nehmen jedes Item auf.
 @export var equipment_slot: String = ""
 @export var consumable: bool = false
 @export var heal_amount: int = 0
 @export var mana_amount: int = 0
 ## Wie dieser Gegenstand im Kampf eingesetzt werden kann (stechen, schlagen,
-## werfen, …). Leer = im Kampf nicht als Waffe nutzbar (nur konsumierbar/passiv).
+## werfen, …). Ohne eigene Modi ist ein improvisierter Schlag möglich.
 @export var usage_modes: Array[ItemUsageMode] = []
 
 
@@ -31,3 +31,14 @@ func apply_effects(target: Playable) -> void:
 
 func duplicate_item() -> ItemData:
 	return duplicate(true) as ItemData
+
+
+## Keine zusätzliche gespeicherte Resource: allgemeiner Angriff zur Laufzeit.
+func get_combat_usage_modes() -> Array[ItemUsageMode]:
+	if not usage_modes.is_empty():
+		return usage_modes
+	var improvised := ItemUsageMode.new()
+	improvised.mode_id = "improvisiert_schlagen"
+	improvised.label = "Schlagen (improvisiert)"
+	improvised.power = CombatBalance.IMPROVISED_ITEM_POWER
+	return [improvised]

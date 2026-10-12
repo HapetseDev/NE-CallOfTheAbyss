@@ -56,7 +56,13 @@ static func _roll_damage(actor: CombatParticipant, target: CombatParticipant, ra
 static func _resolve_item(action: CombatAction) -> CombatActionResult:
 	var result := CombatActionResult.new()
 	var mode := action.item_usage_mode
+	if action.item != null and action.item.consumable and mode == null:
+		return _resolve_consumable(action)
 	if action.item == null or mode == null:
+		result.success = false
+		result.failed_reason = "invalid_item"
+		return result
+	if mode.consumes_item and not action.actor.playable.consume_combat_item(action.item):
 		result.success = false
 		result.failed_reason = "invalid_item"
 		return result
@@ -71,8 +77,30 @@ static func _resolve_item(action: CombatAction) -> CombatActionResult:
 		result.outcomes.append(outcome)
 		if outcome.defeated:
 			result.defeated_targets.append(target)
-	if mode.consumes_item:
-		action.actor.playable.remove_item(action.item, 1)
+	return result
+
+
+static func _resolve_consumable(action: CombatAction) -> CombatActionResult:
+	var result := CombatActionResult.new()
+	if action.targets.size() != 1 or action.targets[0] == null:
+		result.success = false
+		result.failed_reason = "invalid_item"
+		return result
+	var target := action.targets[0]
+	if target.playable == null or target.is_out_of_combat() or target.side != action.actor.side:
+		result.success = false
+		result.failed_reason = "invalid_item"
+		return result
+	if not action.actor.playable.consume_combat_item(action.item):
+		result.success = false
+		result.failed_reason = "invalid_item"
+		return result
+	var health_before := target.playable.health
+	action.item.apply_effects(target.playable)
+	var outcome := CombatActionOutcome.new()
+	outcome.target = target
+	outcome.healed = maxi(0, target.playable.health - health_before)
+	result.outcomes.append(outcome)
 	return result
 
 

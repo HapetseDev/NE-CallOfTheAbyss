@@ -213,3 +213,13 @@ Speicher-, Dialog- und Debug-UI tut dies bereits. Beim Schließen `hide()` vor
 `UIAudio.watch_window(self)` aufrufen. Interne Unterpanels/HUDs nicht markieren.
 Individuelle Controls können `UIAudio.request(&"select")`, `&"ok"` oder `&"back"`
 verwenden. Ausgegeben wird über den Bus `SFX`, falls vorhanden, sonst `Master`.
+
+
+## Inventar-Körperansicht
+
+`InventoryUI` verwendet Standard-Controls und das globale Theme. Größen für
+Gegenstandsplätze, Portrait, Paperdoll und Detailspalte stehen als
+`INVENTORY_SLOT_SIZE`, `INVENTORY_PORTRAIT_SIZE`, `PAPERDOLL_WIDTH`,
+`PAPERDOLL_HEIGHT` und `INVENTORY_DETAILS_WIDTH` in `dimensions.gd`.
+Bei schmaler Ansicht wandert die Detailspalte unter die Körperansicht;
+Schnellausrüstung und Rucksack passen ihre Spaltenzahl der verfügbaren Breite an.
