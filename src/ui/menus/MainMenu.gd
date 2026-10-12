@@ -1,205 +1,130 @@
 class_name MainMenu extends Control
 
-enum MenuState { LOGOS, INTRO, MAIN_MENU }
+@export_range(1.0, 120.0) var scene_duration := 24.0
+@export_range(0.1, 10.0) var fade_duration := 3.0
+@export var game_scene_path := "res://src/core/main_game/main_game.tscn"
+## Optional Inspector override; otherwise load the agreed asset path.
+@export var background_music: AudioStream
+@export_file("*.mp3", "*.ogg", "*.wav") var music_path := "res://assets/audio/music/Main_Theme_Reprise.mp3"
 
-var current_state : MenuState = MenuState.LOGOS
-var current_logo_index : int = 0
-var intro_finished : bool = false
-
-@export var logo_display_time : float = 2.0
-@export var logo_fade_time : float = 1.0
-@export var intro_scroll_speed : float = 30.0
-@export var game_scene_path : String = "res://src/core/main_game/main_game.tscn"
-
-@onready var logos_container: Control = $LogosContainer
-@onready var logo_1: TextureRect = $LogosContainer/Logo1
-@onready var logo_2: TextureRect = $LogosContainer/Logo2
-@onready var intro_container: Control = $IntroContainer
-@onready var intro_text: Label = $IntroContainer/IntroText
-@onready var main_menu_container: Control = $MainMenuContainer
-@onready var start_button: Button = $MainMenuContainer/VBoxContainer/StartButton
-@onready var quit_button: Button = $MainMenuContainer/VBoxContainer/QuitButton
-@onready var title_logo: TextureRect = $MainMenuContainer/TitleLogo
+const BACKGROUNDS: Array[PackedScene] = [
+	preload("res://src/world/levels/title/pale_yellow_room.tscn"),
+	preload("res://src/world/levels/title/red_room.tscn"),
+	preload("res://src/world/levels/title/dark_blue_room.tscn"),
+]
+@onready var world: Node3D = $BackgroundViewport/Viewport/World
+@onready var background_fade: ColorRect = $BackgroundFade
 @onready var fade_rect: ColorRect = $FadeRect
-@onready var skip_hint: Label = $SkipHint
-
-var logo_textures : Array[Texture2D] = []
-var intro_text_start_y : float = 0.0
-
+@onready var start_button: Button = $MainMenuContainer/VBoxContainer/StartButton
+@onready var load_button: Button = $MainMenuContainer/VBoxContainer/LoadButton
+@onready var quit_button: Button = $MainMenuContainer/VBoxContainer/QuitButton
+var background_index := 0
+var room: Node3D
+var camera: Camera3D
+var elapsed := 0.0
+var cycling := false
+var busy := false
+var cycle_tween: Tween
 
 func _ready() -> void:
-	# Alle Container verstecken
-	logos_container.visible = true
-	intro_container.visible = false
-	main_menu_container.visible = false
-
-	# Logos unsichtbar machen
-	logo_1.modulate.a = 0.0
-	logo_2.modulate.a = 0.0
-
-	# Fade Rect setup
-	fade_rect.visible = true
-	fade_rect.modulate.a = 1.0
-
-	# Button Signale verbinden
+	background_fade.color = NEColors.TRANSITION_BLACK
+	fade_rect.color = NEColors.TRANSITION_BLACK
+	fade_rect.modulate.a = 0.0
 	start_button.pressed.connect(_on_start_pressed)
-	quit_button.pressed.connect(_on_quit_pressed)
-	var load_button := Button.new()
-	load_button.text = "Spiel laden"
-	load_button.custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
-	start_button.get_parent().add_child(load_button)
-	start_button.get_parent().move_child(load_button, start_button.get_index() + 1)
 	load_button.pressed.connect(_open_saves)
+	quit_button.pressed.connect(_on_quit_pressed)
+	_show_background()
+	start_button.grab_focus()
+	if background_music == null and ResourceLoader.exists(music_path):
+		background_music = load(music_path) as AudioStream
+	if background_music != null:
+		$Music.stream = background_music
+		$Music.finished.connect(func() -> void: $Music.play())
+		$Music.play()
 
-	# Intro Text Position speichern
-	intro_text_start_y = get_viewport().get_visible_rect().size.y
-
-	# Skip Hint sichtbar machen
-	skip_hint.visible = true
-	skip_hint.modulate.a = 0.0
-
-	# Starte mit Logo-Sequenz
-	_start_logo_sequence()
-
+func _show_background() -> void:
+	if is_instance_valid(room):
+		world.remove_child(room)
+		room.queue_free()
+	room = BACKGROUNDS[background_index].instantiate()
+	world.add_child(room)
+	camera = room.get_node("Camera3D")
+	elapsed = 0.0
 
 func _process(delta: float) -> void:
-	if current_state == MenuState.INTRO:
-		_process_intro(delta)
-
-
-func _input(event: InputEvent) -> void:
-	# Skip mit beliebiger Taste während Logos oder Intro
-	if event is InputEventKey or event is InputEventMouseButton:
-		if event.is_pressed():
-			match current_state:
-				MenuState.LOGOS:
-					_skip_to_intro()
-				MenuState.INTRO:
-					_skip_to_main_menu()
-
-
-func _start_logo_sequence() -> void:
-	current_state = MenuState.LOGOS
-
-	# Fade aus Schwarz
-	var fade_tween = create_tween()
-	fade_tween.tween_property(fade_rect, "modulate:a", 0.0, logo_fade_time)
-	fade_tween.parallel().tween_property(skip_hint, "modulate:a", 1.0, logo_fade_time * 2)
-	await fade_tween.finished
-
-	# Logo 1 einblenden
-	await _show_logo(logo_1)
-
-	# Logo 2 einblenden
-	await _show_logo(logo_2)
-
-	# Weiter zum Intro
-	_start_intro()
-
-
-func _show_logo(logo: TextureRect) -> void:
-	if current_state != MenuState.LOGOS:
+	if busy:
 		return
+	elapsed += delta
+	camera.position.y = lerpf(22.0, 8.0, minf(elapsed / (scene_duration + fade_duration), 1.0))
+	if elapsed >= scene_duration and not cycling:
+		_cycle_background()
 
-	# Einblenden
-	var fade_in = create_tween()
-	fade_in.tween_property(logo, "modulate:a", 1.0, logo_fade_time)
-	await fade_in.finished
+func _cycle_background() -> void:
+	cycling = true
+	cycle_tween = create_tween()
+	cycle_tween.tween_property(background_fade, "modulate:a", 1.0, fade_duration)
+	cycle_tween.tween_callback(func() -> void:
+		background_index = (background_index + 1) % BACKGROUNDS.size()
+		_show_background())
+	cycle_tween.tween_property(background_fade, "modulate:a", 0.0, fade_duration)
+	cycle_tween.tween_callback(func() -> void: cycling = false)
 
-	if current_state != MenuState.LOGOS:
+func _unhandled_input(event: InputEvent) -> void:
+	if busy or get_node_or_null("SaveLoadMenu") != null:
 		return
+	if event.is_action_pressed("Up") or event.is_action_pressed("Down"):
+		var buttons := [start_button, load_button, quit_button]
+		var index := buttons.find(get_viewport().gui_get_focus_owner())
+		index = posmod(index + (-1 if event.is_action_pressed("Up") else 1), buttons.size())
+		buttons[index].grab_focus()
+		get_viewport().set_input_as_handled()
 
-	# Warten
-	await get_tree().create_timer(logo_display_time).timeout
-
-	if current_state != MenuState.LOGOS:
-		return
-
-	# Ausblenden
-	var fade_out = create_tween()
-	fade_out.tween_property(logo, "modulate:a", 0.0, logo_fade_time)
-	await fade_out.finished
-
-
-func _skip_to_intro() -> void:
-	current_state = MenuState.INTRO
-
-	# Alle laufenden Tweens stoppen
-	logo_1.modulate.a = 0.0
-	logo_2.modulate.a = 0.0
-	fade_rect.modulate.a = 0.0
-
-	_start_intro()
-
-
-func _start_intro() -> void:
-	current_state = MenuState.INTRO
-
-	logos_container.visible = false
-	intro_container.visible = true
-
-	# Text nach unten positionieren (außerhalb des Bildschirms)
-	intro_text.position.y = intro_text_start_y
-
-
-func _process_intro(delta: float) -> void:
-	# Text nach oben scrollen
-	intro_text.position.y -= intro_scroll_speed * delta
-
-	# Prüfen ob Text komplett durchgescrollt ist
-	var text_end_y = intro_text.position.y + intro_text.size.y
-	if text_end_y < 0:
-		_start_main_menu()
-
-
-func _skip_to_main_menu() -> void:
-	_start_main_menu()
-
-
-func _start_main_menu() -> void:
-	current_state = MenuState.MAIN_MENU
-
-	intro_container.visible = false
-	main_menu_container.visible = true
-	skip_hint.visible = false
-
-	# Titel und Buttons einblenden
-	title_logo.modulate.a = 0.0
-	start_button.modulate.a = 0.0
-	quit_button.modulate.a = 0.0
-
-	var tween = create_tween()
-	tween.tween_property(title_logo, "modulate:a", 1.0, 1.0)
-	tween.tween_property(start_button, "modulate:a", 1.0, 0.5)
-	tween.tween_property(quit_button, "modulate:a", 1.0, 0.5)
-
-	# Focus auf Start Button
-	start_button.grab_focus()
-
+func _begin_transition() -> bool:
+	if busy or get_node_or_null("SaveLoadMenu") != null:
+		return false
+	busy = true
+	for button in [start_button, load_button, quit_button]:
+		button.disabled = true
+	fade_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+	return true
 
 func _on_start_pressed() -> void:
-	# Fade zu Schwarz und Spiel laden
-	var tween = create_tween()
+	if not _begin_transition():
+		return
+	var tween := create_tween()
 	tween.tween_property(fade_rect, "modulate:a", 1.0, 1.0)
 	await tween.finished
-
-	# Das Hauptmenü besitzt keine Weltfiguren mehr: neue Spielsitzung beginnen.
-	GameState.reset_session()
-	get_tree().change_scene_to_file(game_scene_path)
-
+	if ResourceLoader.exists(game_scene_path):
+		GameState.reset_session()
+		var error := get_tree().change_scene_to_file(game_scene_path)
+		if error == OK:
+			return
+	push_error("Spielszene konnte nicht geöffnet werden: " + game_scene_path)
+	busy = false
+	fade_rect.modulate.a = 0.0
+	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for button in [start_button, load_button, quit_button]:
+		button.disabled = false
+	start_button.grab_focus()
 
 func _on_quit_pressed() -> void:
-	# Fade zu Schwarz und beenden
-	var tween = create_tween()
+	if not _begin_transition():
+		return
+	var tween := create_tween()
 	tween.tween_property(fade_rect, "modulate:a", 1.0, 0.5)
 	await tween.finished
-
 	get_tree().quit()
 
-
 func _open_saves() -> void:
-	if get_node_or_null("SaveLoadMenu") != null:
+	if busy or get_node_or_null("SaveLoadMenu") != null:
 		return
 	var menu := preload("res://src/ui/menus/save_load_menu.gd").new()
 	menu.name = "SaveLoadMenu"
+	menu.tree_exited.connect(func() -> void:
+		if is_inside_tree() and not busy:
+			load_button.grab_focus())
 	add_child(menu)
+
+func _exit_tree() -> void:
+	if cycle_tween != null and cycle_tween.is_valid():
+		cycle_tween.kill()

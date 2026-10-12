@@ -752,87 +752,28 @@ Schnellplätze, Eigenschaften, Verbrauch im Kampf und Speicherkompatibilität.
 
 ## Hauptmenü
 
-### Übersicht
+Die Startszene `src/ui/menus/MainMenu.tscn` folgt der Titelmenü-Skizze des
+Design-Dokuments: Logo oben, drei Optionen mittig und bewegte 3D-Hintergründe.
+Das frühere Logo-/Textintro entfällt.
 
-Das Hauptmenü ist im Final Fantasy-Stil mit:
-1. Logo-Einblendungen (überspringbar)
-2. Intro-Text (scrollt von unten nach oben)
-3. Hauptmenü mit Buttons
+`src/world/levels/title/` enthält drei eigenständig ausführbare, leere Räume:
+`pale_yellow_room.tscn`, `red_room.tscn` und `dark_blue_room.tscn`.
+Diese vertreten vorläufig Wald, Thronraum und erstes Dungeon-Level in dieser
+Reihenfolge; die echte Levelgestaltung ist nicht Bestandteil dieser Platzhalter.
+Jeder Raum hat sechs Begrenzungsflächen, eigene Maße, Nebel und Beleuchtung.
+Die Titelkamera fährt langsam von oben nach unten. Nach 24 Sekunden folgen
+3 Sekunden Schwarzblende, Szenentausch und 3 Sekunden Einblenden; Logo und
+Bedienelemente bleiben dabei sichtbar. Zeiten sind im Inspector einstellbar.
 
-### Dateien
+Neues Spiel setzt die Sitzung zurück und öffnet MainGame. Spiel laden verwendet
+die bestehende SaveLoadMenu-Oberfläche; beim Schließen kehrt der Fokus zurück.
+Beenden blendet aus und schließt das Spiel. Maus, Pfeiltasten, W/S und Godots
+Standard-Controller-Navigation sind nutzbar; Feedback liefert UIAudio.
 
-| Datei | Beschreibung |
-|-------|--------------|
-| `src/ui/menus/MainMenu.tscn` | Hauptszene |
-| `src/ui/menus/MainMenu.gd` | Steuerungslogik |
+Die Musik wird automatisch aus `assets/audio/music/Main_Theme_Reprise.mp3`
+geladen und wiederholt. Die Datei wird noch vom Nutzer bereitgestellt; bis dahin
+bleibt der Player stumm. `background_music` erlaubt einen Inspector-Override.
 
-### Parameter (MainMenu.gd)
-
-| Parameter | Typ | Standard | Beschreibung |
-|-----------|-----|----------|--------------|
-| `logo_display_time` | float | 2.0 | Anzeigedauer pro Logo |
-| `logo_fade_time` | float | 1.0 | Ein-/Ausblendzeit |
-| `intro_scroll_speed` | float | 30.0 | Scroll-Geschwindigkeit |
-| `game_scene_path` | String | "res://src/core/main_game/main_game.tscn" | Spielszene |
-
-### Anpassen
-
-#### Logos ändern
-
-1. `LogosContainer/Logo1` und `Logo2` sind TextureRect Nodes
-2. Ersetze die Label-Kinder durch eigene Texturen
-3. Oder ändere den Text in `Logo1Text` / `Logo2Text`
-
-#### Intro-Text ändern
-
-1. Öffne `MainMenu.tscn`
-2. Wähle `IntroContainer/IntroText`
-3. Ändere den `text` im Inspector
-
-#### Buttons hinzufügen
-
-```gdscript
-# In MainMenu.gd
-
-@onready var options_button: Button = $MainMenuContainer/VBoxContainer/OptionsButton
-
-func _ready():
-    # ... existing code ...
-    options_button.pressed.connect(_on_options_pressed)
-
-func _on_options_pressed():
-    # Options-Menü öffnen
-    pass
-```
-
-### Ablauf
-
-```
-┌─────────────────────────────────────────┐
-│           MenuState.LOGOS               │
-│  ┌─────────────────────────────────┐    │
-│  │ Fade aus Schwarz                │    │
-│  │ Logo 1: ein → warten → aus      │    │
-│  │ Logo 2: ein → warten → aus      │    │
-│  └─────────────────────────────────┘    │
-│              ↓ (oder Skip)              │
-├─────────────────────────────────────────┤
-│           MenuState.INTRO               │
-│  ┌─────────────────────────────────┐    │
-│  │ Text scrollt von unten nach oben│    │
-│  └─────────────────────────────────┘    │
-│              ↓ (oder Skip)              │
-├─────────────────────────────────────────┤
-│         MenuState.MAIN_MENU             │
-│  ┌─────────────────────────────────┐    │
-│  │ Titel einblenden                │    │
-│  │ Buttons einblenden              │    │
-│  │ Warten auf Eingabe              │    │
-│  └─────────────────────────────────┘    │
-└─────────────────────────────────────────┘
-```
-
----
 
 ## Tipps & Best Practices
 
@@ -882,4 +823,4 @@ print(state_machine.current_state.name)
 - Mode7-Kamera mit goldenem Schnitt
 - Sprint-System mit Anlaufzeit
 - Schrittgeräusche-System
-- Final Fantasy-Stil Hauptmenü
+- Titelmenü mit Logo, drei Optionen und wechselnden 3D-Räumen

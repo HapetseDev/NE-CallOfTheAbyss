@@ -1,0 +1,60 @@
+[gd_scene format=3]
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.88, 0.83, 0.58, 1)
+background_energy_multiplier = 0.12
+ambient_light_source = 3
+ambient_light_color = Color(0.88, 0.83, 0.58, 1)
+ambient_light_energy = 0.35
+fog_enabled = true
+fog_light_color = Color(0.88, 0.83, 0.58, 1)
+fog_light_energy = 0.4
+fog_density = 0.006
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.24, 0.25, 0.27, 1)
+roughness = 0.95
+[sub_resource type="BoxMesh" id="Floor"]
+material = SubResource("Stone")
+size = Vector3(64, 1, 80)
+[sub_resource type="BoxMesh" id="Side"]
+material = SubResource("Stone")
+size = Vector3(1, 32, 80)
+[sub_resource type="BoxMesh" id="End"]
+material = SubResource("Stone")
+size = Vector3(64, 32, 1)
+[node name="PaleYellowRoom" type="Node3D"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Floor")
+[node name="Ceiling" type="MeshInstance3D" parent="."]
+position = Vector3(0, 32, 0)
+mesh = SubResource("Floor")
+[node name="LeftWall" type="MeshInstance3D" parent="."]
+position = Vector3(-32.0, 16.0, 0)
+mesh = SubResource("Side")
+[node name="RightWall" type="MeshInstance3D" parent="."]
+position = Vector3(32.0, 16.0, 0)
+mesh = SubResource("Side")
+[node name="BackWall" type="MeshInstance3D" parent="."]
+position = Vector3(0, 16.0, -40.0)
+mesh = SubResource("End")
+[node name="FrontWall" type="MeshInstance3D" parent="."]
+position = Vector3(0, 16.0, 40.0)
+mesh = SubResource("End")
+[node name="Light" type="OmniLight3D" parent="."]
+position = Vector3(-12, 16, -12)
+light_color = Color(0.88, 0.83, 0.58, 1)
+light_energy = 4.0
+omni_range = 65.0
+[node name="FillLight" type="OmniLight3D" parent="."]
+position = Vector3(18, 8, -25)
+light_color = Color(0.88, 0.83, 0.58, 1)
+light_energy = 2.0
+omni_range = 50.0
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(0, 22, 26)
+rotation_degrees = Vector3(-18, 0, 0)
+current = true
+fov = 65.0

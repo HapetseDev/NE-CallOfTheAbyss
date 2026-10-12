@@ -1,242 +1,86 @@
 [gd_scene format=3 uid="uid://c26781n4c5ve4"]
-
-[ext_resource type="Script" uid="uid://vtc2gefqtehu" path="res://src/ui/menus/MainMenu.gd" id="1_menu"]
-
-[ext_resource type="Texture2D" path="res://assets/ui/NE-Cota-Logo.png" id="2_logo"]
-
-[sub_resource type="Shader" id="Shader_logo_ink"]
+[ext_resource type="Script" path="res://src/ui/menus/MainMenu.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/NE-Cota-Logo.png" id="2"]
+[sub_resource type="Shader" id="LogoInk"]
 code = "shader_type canvas_item;
 uniform vec4 ink : source_color;
-void fragment() {
-    COLOR = vec4(ink.rgb, COLOR.a * ink.a);
-}"
-
-[sub_resource type="ShaderMaterial" id="Material_logo_ink"]
-shader = SubResource("Shader_logo_ink")
+void fragment() { COLOR = vec4(ink.rgb, COLOR.a * ink.a); }"
+[sub_resource type="ShaderMaterial" id="LogoMaterial"]
+shader = SubResource("LogoInk")
 shader_parameter/ink = Color(0.78, 0.68, 0.42, 1)
-
-[node name="MainMenu" type="Control" unique_id=1528858754]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_menu")
-
-[node name="Background" type="ColorRect" parent="." unique_id=825998505]
+[node name="MainMenu" type="Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1")
+[node name="BackgroundViewport" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+[node name="Viewport" type="SubViewport" parent="BackgroundViewport"]
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+own_world_3d = true
+[node name="World" type="Node3D" parent="BackgroundViewport/Viewport"]
+[node name="BackgroundFade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 1)
-
-[node name="LogosContainer" type="Control" parent="." unique_id=1525886152]
+modulate = Color(1, 1, 1, 0)
+[node name="MainMenuContainer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Logo1" type="TextureRect" parent="LogosContainer" unique_id=1835053142]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -100.0
-offset_right = 200.0
-offset_bottom = 100.0
-grow_horizontal = 2
-grow_vertical = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Logo1Text" type="Label" parent="LogosContainer/Logo1" unique_id=1192132288]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "HaProMa"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Logo2" type="TextureRect" parent="LogosContainer" unique_id=1091652103]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -100.0
-offset_right = 200.0
-offset_bottom = 100.0
-grow_horizontal = 2
-grow_vertical = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Logo2Text" type="Label" parent="LogosContainer/Logo2" unique_id=1106142774]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "PRESENTS"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="IntroContainer" type="Control" parent="." unique_id=942827029]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="StarField" type="ColorRect" parent="IntroContainer" unique_id=215229228]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.02, 0.02, 0.05, 1)
-
-[node name="IntroText" type="Label" parent="IntroContainer" unique_id=1435181254]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -400.0
-offset_top = 600.0
-offset_right = 400.0
-offset_bottom = 1400.0
-grow_horizontal = 2
-text = "In einer Zeit, als Dunkelheit die Welt bedeckte...
-
-Als die alten Königreiche fielen und die Hoffnung
-schwand, erhob sich ein einsamer Held.
-
-Die Prophezeiung sprach von einem Auserwählten,
-der das Gleichgewicht wiederherstellen würde.
-
-Nun beginnt die Reise...
-
-Eine Reise durch vergessene Länder,
-gegen uralte Mächte,
-für das Schicksal aller.
-
-
-
-NECOTA"
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="MainMenuContainer" type="Control" parent="." unique_id=1712402940]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MenuBackground" type="ColorRect" parent="MainMenuContainer" unique_id=1240832876]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.05, 0.05, 0.1, 1)
-
+mouse_filter = 2
 [node name="TitleLogo" type="TextureRect" parent="MainMenuContainer"]
-material = SubResource("Material_logo_ink")
+material = SubResource("LogoMaterial")
 layout_mode = 1
 anchor_left = 0.15
 anchor_top = 0.05
 anchor_right = 0.85
-anchor_bottom = 0.48
-grow_horizontal = 2
-grow_vertical = 2
+anchor_bottom = 0.42
 mouse_filter = 2
-texture = ExtResource("2_logo")
+texture = ExtResource("2")
 expand_mode = 1
 stretch_mode = 5
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MainMenuContainer" unique_id=2127817054]
+[node name="VBoxContainer" type="VBoxContainer" parent="MainMenuContainer"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
+anchor_left = 0.35
 anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = 50.0
-offset_right = 120.0
-offset_bottom = 170.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 20
-
-[node name="StartButton" type="Button" parent="MainMenuContainer/VBoxContainer" unique_id=2146594925]
-custom_minimum_size = Vector2(240, 50)
+anchor_right = 0.65
+anchor_bottom = 0.85
+theme_override_constants/separation = 16
+alignment = 1
+[node name="StartButton" type="Button" parent="MainMenuContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+custom_minimum_size = Vector2(160, 44)
 text = "Neues Spiel"
-
-[node name="QuitButton" type="Button" parent="MainMenuContainer/VBoxContainer" unique_id=1995356574]
-custom_minimum_size = Vector2(240, 50)
+[node name="LoadButton" type="Button" parent="MainMenuContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+custom_minimum_size = Vector2(160, 44)
+text = "Spiel laden"
+[node name="QuitButton" type="Button" parent="MainMenuContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 44)
 text = "Beenden"
-
-[node name="VersionLabel" type="Label" parent="MainMenuContainer" unique_id=261668795]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -150.0
-offset_top = -40.0
-offset_right = -20.0
-offset_bottom = -10.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.48, 0.49, 0.52, 1)
-text = "v0.1 Alpha"
-horizontal_alignment = 2
-
-[node name="SkipHint" type="Label" parent="." unique_id=915286701]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -150.0
-offset_top = -50.0
-offset_right = 150.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.75, 0.78, 0.82, 0.8)
-text = "Drücke eine Taste zum Überspringen"
-horizontal_alignment = 1
-
-[node name="FadeRect" type="ColorRect" parent="." unique_id=311738007]
+[node name="FadeRect" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -245,3 +89,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
+modulate = Color(1, 1, 1, 0)
+[node name="Music" type="AudioStreamPlayer" parent="."]
+volume_db = -16.0
