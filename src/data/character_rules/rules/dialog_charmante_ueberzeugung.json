@@ -1,0 +1,14 @@
+{
+  "format_version": 1,
+  "id": "dialog_charmante_ueberzeugung",
+  "name": "Charmante Dialogoption anbieten",
+  "description": "Die Dialogzeile selbst gehört weiterhin in die Dialogdatei.",
+  "status": "example_draft",
+  "scope": "dialog_options",
+  "condition_id": "charmante_ueberzeugung",
+  "priority": 10,
+  "effect": {
+    "type": "offer_dialog_option",
+    "option_id": "beispiel_charmante_antwort"
+  }
+}

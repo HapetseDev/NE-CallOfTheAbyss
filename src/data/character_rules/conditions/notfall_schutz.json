@@ -1,0 +1,33 @@
+{
+  "format_version": 1,
+  "id": "notfall_schutz",
+  "name": "Notfall-Schutz",
+  "description": "Niedrige Stärkepunkte, Konzentration vorhanden, keine bereits aktive Schutzwirkung.",
+  "status": "example_draft",
+  "condition": {
+    "all": [
+      {
+        "type": "resource_ratio",
+        "subject": "actor",
+        "resource": "staerkepunkte",
+        "basis": "staerkepunkte_basis",
+        "operator": "<=",
+        "value": 0.25
+      },
+      {
+        "type": "resource_value",
+        "subject": "actor",
+        "resource": "konzentrationspunkte",
+        "operator": ">=",
+        "value": 4
+      },
+      {
+        "not": {
+          "type": "has_status",
+          "subject": "actor",
+          "status_id": "beispiel_eiserner_wille"
+        }
+      }
+    ]
+  }
+}

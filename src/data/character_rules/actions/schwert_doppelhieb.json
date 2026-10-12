@@ -1,0 +1,35 @@
+{
+  "format_version": 1,
+  "id": "schwert_doppelhieb",
+  "name": "Doppelhieb",
+  "description": "Zwei einzeln verteidigte Treffer gegen dasselbe Ziel; zweiter entfällt bei ausgeschiedenem Ziel.",
+  "status": "example_draft",
+  "target_type": "single_enemy",
+  "requires_line_of_sight": true,
+  "range": {
+    "type": "distance",
+    "maximum": 2.0
+  },
+  "cost": {
+    "turns": 1,
+    "konzentrationspunkte": 0
+  },
+  "requires_condition_id": "schwert_doppelhieb_bereit",
+  "stop_when_target_out_of_combat": true,
+  "steps": [
+    {
+      "type": "damage",
+      "target": "selected_enemy",
+      "power": 4,
+      "accuracy_attribute_id": "koerperkraft",
+      "defense": "current_evade_and_robustness"
+    },
+    {
+      "type": "damage",
+      "target": "selected_enemy",
+      "power": 4,
+      "accuracy_attribute_id": "koerperkraft",
+      "defense": "current_evade_and_robustness"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "format_version": 1,
+  "id": "flirten",
+  "name": "Flirten",
+  "description": "Experimentierbares Talent; die Höchststufe 20 ist ein Vorschlag.",
+  "status": "example_draft",
+  "attribute_id": "praesenz",
+  "max_level": 20,
+  "xp_per_level": 100,
+  "attribute_bonus_per_level": 1
+}

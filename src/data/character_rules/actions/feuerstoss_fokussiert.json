@@ -1,0 +1,27 @@
+{
+  "format_version": 1,
+  "id": "feuerstoss_fokussiert",
+  "name": "Fokussierter Feuerstoß",
+  "description": "Beispiel für eine zusätzliche freigeschaltete Aktion mit Kosten und Distanz.",
+  "status": "example_draft",
+  "requires_condition_id": "arkaner_fokus",
+  "target_type": "single_enemy",
+  "requires_line_of_sight": true,
+  "range": {
+    "type": "distance",
+    "maximum": 8.0
+  },
+  "cost": {
+    "turns": 1,
+    "konzentrationspunkte": 8
+  },
+  "steps": [
+    {
+      "type": "damage",
+      "target": "selected_enemy",
+      "power": 16,
+      "accuracy_attribute_id": "verstand",
+      "defense": "current_evade_and_robustness"
+    }
+  ]
+}
