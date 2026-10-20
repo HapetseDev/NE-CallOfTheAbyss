@@ -28,5 +28,6 @@ item_id = "Stein"
 item_name = "Stein"
 description = "Ein handlicher Stein. Kann geworfen oder als improvisierte Waffe genutzt werden."
 weight = 0.5
+combat_value = 4
 max_stack = 5
 usage_modes = Array[ExtResource("2_usage")]([SubResource("ItemUsageMode_schlagen"), SubResource("ItemUsageMode_werfen")])

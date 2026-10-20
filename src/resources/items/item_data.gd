@@ -12,6 +12,14 @@ extends Resource
 @export var world_texture: Texture2D
 @export var weight: float = 0.3
 @export var max_stack: int = 99
+## Grundwert; Werte unter 1 werden auch bei alten/externen Daten begrenzt.
+@export_range(1, 999) var combat_value: int = 1
+## Zusätzlich zur Körperkraft auf den Schaden addiertes Talent.
+@export var combat_skill_id: String = ""
+## Kennzeichnung für Mindestschaden, noch keine eigene Rüstungsabsorption.
+@export var is_armor: bool = false
+## Bruch nach ausgeführtem Angriff, auch beim Ausweichen; 0 = unzerbrechlich.
+@export_range(0.0, 1.0) var break_chance: float = 0.0
 ## Bevorzugter Körper-/Handplatz. Hände/Schnellausrüstung nehmen jedes Item auf.
 @export var equipment_slot: String = ""
 @export var consumable: bool = false
@@ -40,5 +48,14 @@ func get_combat_usage_modes() -> Array[ItemUsageMode]:
 	var improvised := ItemUsageMode.new()
 	improvised.mode_id = "improvisiert_schlagen"
 	improvised.label = "Schlagen (improvisiert)"
-	improvised.power = CombatBalance.IMPROVISED_ITEM_POWER
+	improvised.power = get_combat_value()
 	return [improvised]
+
+
+func get_combat_value(mode: ItemUsageMode = null) -> int:
+	# Bestehende Modi behalten ihre individuellen Werte, z.B. Messerwurf.
+	return maxi(1, mode.power if mode != null and mode.power > 0 else combat_value)
+
+
+func get_combat_skill_id(mode: ItemUsageMode = null) -> String:
+	return combat_skill_id if not combat_skill_id.is_empty() else (mode.related_skill_id if mode != null else "")

@@ -16,6 +16,8 @@ const TYPES := {
 }
 var failed: bool = false
 var migrate_legacy_character_state: bool = false
+var migrate_legacy_combat_items: bool = false
+var migrate_legacy_armor_items: bool = false
 
 
 func encode(value: Variant) -> Variant:
@@ -91,11 +93,35 @@ func decode(value: Variant, depth: int = 0) -> Variant:
 	if migrate_legacy_character_state and kind == "CharacterResource" and not data.has("is_defeated"):
 		data = data.duplicate()
 		data.is_defeated = false
+	if migrate_legacy_armor_items and kind == "ItemData" and not data.has("is_armor"):
+		data = data.duplicate()
+		data.is_armor = false
+	if migrate_legacy_combat_items and kind == "ItemData":
+		data = data.duplicate()
+		if not data.has("combat_value"):
+			data.combat_value = 6 if data.get("item_id") == "Messer" else (4 if data.get("item_id") == "Stein" else 1)
+		if not data.has("break_chance"):
+			data.break_chance = 0.0
+		if not data.has("combat_skill_id"):
+			data.combat_skill_id = "kurze_klingen" if data.get("item_id") == "Messer" else ""
 	var resource: Resource = load(TYPES[kind]).new()
 	var properties: Dictionary = {}
 	for property in resource.get_property_list():
 		if _stored(property):
 			properties[property.name] = property
+	if kind == "ItemData":
+		if not data.get("is_armor") is bool:
+			failed = true
+			return null
+		if not data.get("combat_value") is float and not data.get("combat_value") is int:
+			failed = true
+			return null
+		if not is_finite(data.combat_value) or data.combat_value < 1 or data.combat_value != floor(data.combat_value) or not data.get("combat_skill_id") is String:
+			failed = true
+			return null
+	if kind == "ItemData" and (not (data.get("break_chance") is float or data.get("break_chance") is int) or not is_finite(data.break_chance) or data.break_chance < 0.0 or data.break_chance > 1.0):
+		failed = true
+		return null
 	if data.size() != properties.size():
 		failed = true
 		return null

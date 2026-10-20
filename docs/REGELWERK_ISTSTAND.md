@@ -1,6 +1,10 @@
 # Nascent Eternity: Call of the Abyss – aktuelles Regelwerk
 
-Stand: 9. Oktober 2026. Aus dem Quellcode des aktuellen Arbeitsverzeichnisses abgeleitet, einschließlich der noch nicht eingecheckten Inventaränderungen. Ausgangscommit: `4b501da`.
+Historischer Stand: 9. Oktober 2026.
+
+**Nachtrag vom 13. Oktober:** Die Schadensregeln K-06 bis K-09 wurden inzwischen erweitert: Schlag verwendet effektive Körperkraft plus den zusätzlichen Waffenlos-Bonus; Gegenstände addieren Körperkraft, Kampfwert und einen passenden Talentbonus. Dieser Zusatzbonus zählt nach der Folgeentscheidung nur mit abgerundeter halber Stufe. Erfolgreiche Treffer mit positiver Rohstärke auf ungerüstete Ziele verursachen mindestens 1 Schaden; Rüstungs-/Trefferzonenregeln befinden sich im Übergang. Gegenstandsbruch und Level-/Kampfmusik sind hinzugekommen. Die aktuellen Details stehen im Abschnitt [Angriffe und Musik](DOKUMENTATION.md#angriffe-und-musik-13-oktober-2026). Die folgenden ursprünglichen Zahlen beschreiben den Stand vor dieser Änderung.
+
+Stand der ursprünglichen Auswertung: 9. Oktober 2026. Aus dem Quellcode des aktuellen Arbeitsverzeichnisses abgeleitet, einschließlich der noch nicht eingecheckten Inventaränderungen. Ausgangscommit: `4b501da`.
 
 Dieses Dokument beschreibt das gegenwärtige Verhalten. Es ist kein Vorschlag für das endgültige Spielsystem. **Wirksam** bezeichnet ausgeführte Regeln; **vorbereitet** bezeichnet vorhandene Daten oder Funktionen ohne vollständige Einbindung; **offen** bezeichnet fehlendes Verhalten oder auffällige Grenzen. Die Regelnummern ermöglichen konkrete Rückmeldungen, beispielsweise: „K-04: Nahkampf soll höchstens zwei Meter Reichweite haben.“
 

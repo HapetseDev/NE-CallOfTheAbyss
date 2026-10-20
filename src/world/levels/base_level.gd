@@ -1,6 +1,9 @@
 @abstract class_name BaseLevel
 extends Node3D
 
+@export_file("*.mp3", "*.ogg", "*.wav") var music_path: String = ""
+@export var music_loop: bool = true
+
 ## Gemeinsame Schnittstelle aller austauschbaren Level.
 ## Der Player liegt nicht im Level, sondern unter MainGame/EntityRoot.
 

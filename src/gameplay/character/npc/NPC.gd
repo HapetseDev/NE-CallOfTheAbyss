@@ -3,6 +3,8 @@ class_name NPC extends Playable
 ## Alle vorhandenen NPCs verwenden persistente Charakterdaten.
 ## Benötigt NPCData.npc_id und eine explizite CharacterResource-Vorlage.
 @export var use_character_registry: bool = true
+## Priorität steigt mit Kategorie. Zuordnung der Lieder im MusicSystem.
+@export_enum("Normal", "Boss", "Superboss", "Final") var battle_music_category: int = 0
 
 @onready var state_machine: PlayerStateMachine = get_node_or_null("StateMachine") as PlayerStateMachine
 

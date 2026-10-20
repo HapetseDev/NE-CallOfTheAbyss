@@ -34,6 +34,8 @@ ambient_light_energy = 0.5
 
 [node name="Level1Ep1" type="Node3D" unique_id=1863077889]
 script = ExtResource("1_level")
+music_path = "res://assets/audio/music/itcc.mp3"
+music_loop = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2130785140]
 environment = SubResource("Environment_env")

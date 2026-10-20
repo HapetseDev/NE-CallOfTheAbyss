@@ -34,7 +34,7 @@ Eingabesperre findet kein Levelwechsel statt.
 `Inventory.EQUIPMENT_SLOTS` enthält Körperplätze einschließlich `schmuck` und
 neun Schnellplätze mit den kompatiblen Keys `guertel_1` bis `guertel_9`.
 Diese bleiben Werte im vorhandenen Ausrüstungs-Dictionary; Resourcefelder und
-JSON-Struktur ändern sich nicht, das Speicherformat bleibt Version 8.
+JSON-Struktur ändern sich nicht, diese Slot-Erweiterung benötigte keine Formatänderung.
 `CharacterRegistry.restore_character()` ergänzt über `ensure_equipment_slots()`
 fehlende Plätze alter Spielstände mit `null`, ohne vorhandene Belegungen zu
 überschreiben. Der alte Platz `waffe` wird beim Initialisieren und Laden in `primaer_hand`
@@ -45,7 +45,7 @@ dieselbe Slot-Liste.
 Der Roundtrip neuer Plätze und das Ergänzen alter Inventare werden durch
 `test_inventory_layout.tscn` geprüft.
 
-## Speichervertrag Version 8
+## Speichervertrag Version 10
 
 `LevelManager.instance.save_world(path)` erfasst den Zustand im freien Gameplay
 und schreibt JSON. Während Kampf/Dialog/anderer Eingabesperre liefert es
@@ -82,7 +82,7 @@ sollte sie keinen notwendigen Code nach dem `await` besitzen. Der Autoload führ
 den Ablauf unabhängig von diesem Aufrufer zu Ende. Isolierte Daten-Snapshots ohne
 aktive Welt bleiben mit `WorldSaveStore.read` lesbar, sind aber keine ladbaren
 Spielsitzungen. `install_world` bleibt eine niedrige Daten-API für Tests/Bootstrap.
-Das aktuelle Speicherformat ist Version 8; siehe Kartenabschnitt.
+Das aktuelle Speicherformat ist Version 10; Version 8 führte die Kartendaten ein.
 
 `test_world_loader.tscn` prüft Datei-/Versionsfehler, Sperren, parallele Aufrufe,
 Änderungen während der Vorbereitung, Rückkehr nach Aufbaufehler, Werte/Positionen,
@@ -116,7 +116,7 @@ getrennter gleichnamiger Slots, großer Listen, Suche und Schreibfehlern.
 
 Automatisches Speichern sowie Überschreiben, Umbenennen und Löschen über die
 Oberfläche sind nicht Bestandteil dieses Schritts. Bestehende Speicherdateien
-bleiben erhalten. Das aktuelle Speicherformat ist Version 8; siehe Kartenabschnitt.
+bleiben erhalten. Das aktuelle Speicherformat ist Version 10; Version 8 führte die Kartendaten ein.
 
 ## Bewusste Grenzen
 
@@ -606,3 +606,24 @@ weiterlaufen und blendet wieder ein. Einrichtung und Zeitparameter stehen in
 NPC-/Objektmarkierungen. Versionen 1–7 erhalten bei der Migration eine leere Karte.
 Version 8 verlangt gültige Kartendaten; Levelwechsel erhalten sie, ein neues Spiel
 leert sie. Details und Grenzen: [Levelkarte](../../ui/map/README.md).
+
+
+### Version 9: Kampfwerte von Gegenständen
+
+`ItemData` speichert zusätzlich `combat_value` (Ganzzahl ≥ 1),
+`combat_skill_id` (String) und `break_chance` (endliche Zahl von 0 bis 1).
+Writer und Reader verwenden weiterhin den gemeinsamen Resource-Codec.
+Spielstände der Versionen 1–8 ergänzen beim Lesen fehlende Felder: Kampfwert 1,
+kein Talent, Bruchchance 0; Messer erhält Kampfwert 6 und `kurze_klingen`, Stein
+Kampfwert 4. Bestehende Verwendungsarten bleiben erhalten. Version 9 muss alle
+Felder enthalten; ungültige Werte werden vor Installation abgelehnt.
+Levelmusik und NPC-Musikkategorie sind Szenenkonfiguration, laufende Player und
+Abspielpositionen sind kein persistenter Charakterzustand.
+
+
+### Version 10: Rüstungskennzeichnung
+
+`ItemData.is_armor` ist ein gespeicherter Boolescher Wert. Beim Lesen der Versionen
+1–9 wird nur ein fehlender Wert mit `false` ergänzt; vorhandene Angaben bleiben
+erhalten. Kleidung wird nicht anhand ihres Namens oder Platzes automatisch als
+Rüstung eingeordnet. Version 10 verlangt das Feld und dessen korrekten Typ.

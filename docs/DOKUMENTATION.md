@@ -824,3 +824,129 @@ print(state_machine.current_state.name)
 - Sprint-System mit Anlaufzeit
 - Schrittgeräusche-System
 - Titelmenü mit Logo, drei Optionen und wechselnden 3D-Räumen
+
+## Angriffe und Musik (13. Oktober 2026)
+
+Der waffenlose **Schlag** ist bei einer freien Hand direkt im Kampfmenü verfügbar
+und weiterhin unter Fähigkeiten zu finden (stabile Aktions-ID `fausthieb`).
+Rohschaden = effektive Körperkraft + abgerundete halbe Stufe `waffenloser_kampf`.
+Gegenstandsangriffe verwenden effektive Körperkraft + Kampfwert + abgerundete halbe Stufe des passenden Talents.
+Ausweichen und Robustheit werden anschließend wie bisher angewendet. Ein Talent
+wirkt somit über die effektive Körperkraft und zusätzlich als ausdrücklich
+gewünschter Angriffsbonus, seit der Folgeentscheidung nur noch mit halber Stufe.
+
+`ItemData.combat_value` ist mindestens 1; bestehende Verwendungsarten können
+über `ItemUsageMode.power` eigene Kampfwerte haben (Messer: Stechen 6, Werfen 8).
+`combat_skill_id` ist das passende Schadenstalent, beim Messer `kurze_klingen`
+(Körperkraft), für beide Verwendungsarten. Ohne Gegenstandstalent wird das
+optionale Talent der Verwendungsart verwendet. Kein Talent bedeutet Bonus 0.
+Kampfwert 1 erscheint nicht in den Inventareigenschaften. `break_chance` liegt
+zwischen 0 und 1 (0 = nie, 1 = immer). Einmal pro ausgeführtem Angriff wird nach
+Auflösung auf Bruch geprüft, auch bei ausgewichenem Angriff. Ohne gültige
+Zielauflösung wird nicht auf Bruch gewürfelt. Verbrauch/Wurf und Bruch entfernen
+das tatsächlich ausgerüstete Exemplar, niemals einen Ersatz aus dem Rucksack.
+Alle vorhandenen Gegenstände sind zunächst unzerbrechlich; die Bruchchance kann
+am jeweiligen Item im Inspector gesetzt werden.
+
+`MainGame/Systems/MusicSystem` besitzt die Musikplayer. `BaseLevel.music_path`
+bestimmt das Levelstück; `music_loop` schaltet zwischen einmaliger Wiedergabe
+und Wiederholung um. `Level1Ep1` und `MonsterLair-Level1` spielen
+`res://assets/audio/music/itcc.mp3` im Loop.
+
+Am NPC ist `battle_music_category` als **Normal / Boss / Superboss / Final**
+einstellbar. Die vier zugeordneten Dateipfade stehen am MusicSystem im Inspector;
+aktuell verwenden alle Kategorien das bereitgestellte `boss_battle.mp3`.
+Bei mehreren Gegnern gewinnt die höchste Kategorie. Gleiches Lied wird beim
+Wechsel der Kategorie oder Lautstärke nicht neu gestartet.
+
+Level- und Kampfmusik überblenden sich standardmäßig in 0,35 Sekunden. Die
+Levelmusik wird nach dem Ausblenden an ihrer tatsächlichen Wiedergabeposition
+pausiert und nach Ende der Bedrohung fortgesetzt. Während eines aktiven Kampfes
+beträgt die Musiklautstärke −6 dB, nach Party-Flucht −14 dB. Überlebende Gegner
+halten die leise Kampfmusik auch nach Ende der Kampfsitzung am Laufen. Tod,
+Niederlage oder abgeschlossene Gegnerflucht entfernen diese Bedrohung. Nach dem
+letzten solchen Gegner kehrt die Levelmusik zurück. Ein Levelwechsel verwirft
+alle Bedrohungen und startet die Musik des neuen Levels; ein neues Levelstück
+beginnt bei 0. Musikposition und Bedrohungen sind temporärer Sitzungszustand und
+werden nicht im Spielstand gespeichert.
+
+`test_combat_equipment_music.tscn` prüft Schaden, Talentboni, Bruch, Anzeige,
+Spielstandmigration sowie Start, Pause, Fortsetzen, Kategorien und Levelwechsel
+der Musik. Hörprüfung der tatsächlichen Lautstärkewirkung bleibt eine manuelle
+Aufgabe. Die Werte sind am MusicSystem einstellbar.
+
+## Textuelle Kampfsimulation (Hauptmenü)
+
+**Kampfsimulation** im Hauptmenü öffnet einen isolierten Testbereich mit den
+Tabs **Charaktere** und **Kampfprotokoll**. Für zwei Figuren lassen sich Name,
+sieben Basisattribute und beliebige Talente des aktuellen Katalogs einstellen.
+Vorlagen: Dannerman, Shalka oder eine leere Testfigur. Die Übersicht zeigt die
+effektiven körperlichen Attribute, Stärke-Basis/Todesgrenze, Konzentration und
+Tragkraft. Talentstufen bis 30 dienen ausschließlich Experimenten; das Spiellimit
+wird nicht geändert. Definitionen gelten für die geöffnete Oberfläche und werden
+nicht als Spielstand gespeichert. Das bisherige JSON-Beispielformat bleibt inaktiv.
+
+Angriffsstrategien: Schlag, Messer stechen/werfen, Stein schlagen/werfen,
+ein eigener Gegenstand mit Kampfwert und optionalem Talent oder Feuerstoß.
+Bruchchance ist einstellbar. Nach Wurf/Bruch sowie bei fehlender Freischaltung
+oder Konzentration fällt die Strategie auf Schlag zurück. Jeder Kampf startet
+mit vollen Stärke-/Konzentrationspunkten und frischer Ausrüstung.
+
+**Nächste Aktion** führt einen Zug aus; **Einzelkampf** läuft bis zum Ergebnis.
+**Serie vergleichen** führt 1–500 Kämpfe aus und zeigt Siege, Kämpfe ohne Sieger,
+durchschnittliche Aktionszahl/simulierte Zeit, Gesamtschaden und Ausweichereignisse.
+Das Protokoll gehört zum letzten Serienkampf. Der Zufallsstart ist reproduzierbar;
+Serien verwenden Startwert plus Kampfindex. **Zurücksetzen / Abbrechen** beendet
+eine Serie oder verwirft einen Schrittverlauf; Charaktereingaben bleiben erhalten.
+Auch Änderungen einer Figur beenden den bisherigen Verlauf. Escape schließt.
+
+`src/debug/simulation/combat_text_simulation.gd` verwendet eigene Kopien von
+CharacterResource, Inventory und Playable sowie die bestehende CombatSession-
+Initiative und CombatResolver-Auflösung. Es startet keinen MainGame-Kampf und
+verändert weder Registry, Weltzustand, Vorlagen noch globale Zufallsfolge.
+CombatResolver akzeptiert optional einen separaten Zufallsgenerator und eine
+Abschaltung der Bruchmeldung im globalen Ereignislog. Gewöhnliche Spielaufrufe
+verwenden weiterhin ihre bisherige globale Zufallsquelle und Meldungen.
+
+Die Simulation setzt freie Sicht voraus und entscheidet Züge sofort. Sie
+simuliert weder Weltgeometrie, Bewegung, Flucht, Dialoge, Heilstrategie noch
+menschliche Denkzeiten. Die Initiative wird in 0,05-Sekunden-Schritten ausgewertet;
+simulierte Zeiten sind daher Näherungen, keine Laufzeitmessung des Spiels.
+Bei gleicher Initiative entscheidet wie im aktuellen Spiel die Teilnehmerreihenfolge,
+hier A vor B. Serien entfernen diesen Reihenfolgevorteil nicht automatisch.
+Ohne Sieger endet ein Versuch nach 300 Aktionen oder 600 simulierten Sekunden.
+Solche Ergebnisse werden separat ausgewiesen, nicht als Sieg gezählt. Gegenstände
+mit Kampfwert 1 und hohe Robustheit können gegen gerüstete Figuren Nullschadenskämpfe erzeugen.
+
+`test_combat_simulation.tscn` prüft Kopien/Isolation, Reproduzierbarkeit, globalen
+Zufall, Nullschaden, Gewandheit 0, Wurf/Bruch, Menüeinstieg, Bearbeiten, Einzelzug,
+Serienabbruch und Rückkehr/Fokus. `--visual-smoke` erstellt Ansichtsprüfungen.
+
+
+### Folgeentscheidung: Talentbonus und Mindestschaden
+
+Der zusätzliche Schadensbonus eines passenden Talents beträgt
+`floor(Talentstufe / 2)`: Stufe 1 → 0, Stufe 2/3 → 1, Stufe 10 → 5.
+Der bestehende vollständige Beitrag von Talenten zu effektiven Attributen bleibt
+unverändert. Angriffsstärken der festen Magiefähigkeiten werden nicht umgebaut.
+
+Ein erfolgreicher Angriff mit positiver Rohstärke verursacht mindestens 1 Schaden,
+wenn die Trefferstelle ungerüstet ist. Ausweichen, ungültige Ziele und Rohstärke 0
+verursachen weiterhin keinen Schaden. Gerüstete Treffer dürfen durch Robustheit
+vollständig abgefangen werden. `ItemData.is_armor` kennzeichnet Rüstung ausdrücklich;
+normale Kleidung, Rucksackinhalt und Schnellplätze gelten nicht automatisch als
+angelegte Rüstung. Diese Kennzeichnung gibt noch keinen zusätzlichen Rüstungswert.
+
+**Übergang ohne Trefferzonen:** Mindestens ein gekennzeichnetes Item auf Kopf,
+Rumpf, Beinen, Füßen oder Schmuck lässt die ganze Figur als gerüstet gelten.
+Das ist keine fertige örtliche Rüstungs- oder Schwachpunktregel. Der direkte
+Schadensaufruf besitzt bereits einen optionalen `armored_hit`-Parameter, mit dem
+später eine konkrete ungerüstete oder gerüstete Stelle angegeben werden kann.
+Die normale Zielwahl verwendet vorerst die globale Übergangsprüfung.
+
+In der textuellen Simulation schaltet **Gerüstet** diese Übergangsregel für die
+Figur ein. Schwachpunkte, Trefferzonen, Angriffsradien und Bewegungsregeln bleiben
+spätere Erweiterungen. Eine feste gewünschte Kampflänge und neue taktische
+Angriffsarten wurden nicht umgesetzt; sie sind noch Designentscheidungen.
+`test_combat_damage_rules.tscn` prüft Rundung, Mindestschaden, Ausweichen,
+Rüstung/Kleidung/Aufbewahrung, örtlichen Override und Speicherung.
