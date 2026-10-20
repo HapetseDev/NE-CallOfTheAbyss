@@ -1,0 +1,26 @@
+{
+  "format_version": 1,
+  "id": "schwert_normal",
+  "name": "Normaler Schwertangriff",
+  "description": "Beispielaktion; Reichweite 2 und Stärke 6 sind vorgeschlagene Werte.",
+  "status": "example_draft",
+  "target_type": "single_enemy",
+  "requires_line_of_sight": true,
+  "range": {
+    "type": "distance",
+    "maximum": 2.0
+  },
+  "cost": {
+    "turns": 1,
+    "konzentrationspunkte": 0
+  },
+  "steps": [
+    {
+      "type": "damage",
+      "target": "selected_enemy",
+      "power": 6,
+      "accuracy_attribute_id": "koerperkraft",
+      "defense": "current_evade_and_robustness"
+    }
+  ]
+}

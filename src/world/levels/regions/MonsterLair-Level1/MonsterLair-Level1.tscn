@@ -30,6 +30,8 @@ ambient_light_energy = 0.5
 
 [node name="MonsterLairLevel1" type="Node3D" unique_id=1356176666]
 script = ExtResource("6_level")
+music_path = "res://assets/audio/music/itcc.mp3"
+music_loop = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=647634821]
 environment = SubResource("Environment_famde")

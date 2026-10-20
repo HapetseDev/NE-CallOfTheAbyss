@@ -76,6 +76,10 @@ text = "Neues Spiel"
 layout_mode = 2
 custom_minimum_size = Vector2(160, 44)
 text = "Spiel laden"
+[node name="SimulationButton" type="Button" parent="MainMenuContainer/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 44)
+text = "Kampfsimulation"
 [node name="QuitButton" type="Button" parent="MainMenuContainer/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(160, 44)

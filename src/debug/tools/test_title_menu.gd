@@ -16,7 +16,7 @@ func _run() -> void:
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("/tmp/necota-title-menu.png")
 	check(menu.start_button.has_focus(), "Initialer Fokus")
-	check(menu.load_button.text == "Spiel laden", "Drei Menüoptionen")
+	check(menu.load_button.text == "Spiel laden", "Laden bleibt verfügbar")
 	var old_y: float = menu.camera.position.y
 	menu._process(1.0)
 	check(menu.camera.position.y < old_y, "Kamera bewegt sich abwärts")

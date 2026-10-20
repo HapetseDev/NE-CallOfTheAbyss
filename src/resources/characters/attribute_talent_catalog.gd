@@ -4,6 +4,12 @@ class_name AttributeTalentCatalog
 
 const ENTRIES: Array[Dictionary] = [
 	{
+		"skill_id": "kurze_klingen",
+		"skill_name": "Kurze Klingen",
+		"beschreibung": "Körperkraft-Talent für Angriffe mit kurzen Klingen.",
+		"attribute": CharacterEnums.Attribute.KOERPERKRAFT,
+	},
+	{
 		"skill_id": "waffenloser_kampf",
 		"skill_name": "Waffenloser Kampf",
 		"beschreibung": "Talent der Körperkraft. Steigert das zugehörige Attribut durch Training.",

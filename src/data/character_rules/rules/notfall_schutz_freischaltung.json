@@ -1,0 +1,14 @@
+{
+  "format_version": 1,
+  "id": "notfall_schutz_freischaltung",
+  "name": "Notfall-Schutz zusätzlich anbieten",
+  "description": "Bietet eine Aktion an; löst sie nicht automatisch aus und zahlt beim Prüfen keine Kosten.",
+  "status": "example_draft",
+  "scope": "combat_action_selection",
+  "condition_id": "notfall_schutz",
+  "priority": 10,
+  "effect": {
+    "type": "offer_action",
+    "action_id": "eiserner_wille"
+  }
+}

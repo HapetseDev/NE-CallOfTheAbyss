@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cmaingameroot01"]
+[gd_scene load_steps=13 format=3 uid="uid://cmaingameroot01"]
 
 [ext_resource type="Script" path="res://src/core/main_game/main_game.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://c8partyroot01" path="res://src/gameplay/character/party/party.tscn" id="2_party"]
@@ -12,6 +12,8 @@
 [ext_resource type="Script" path="res://src/core/managers/steal_manager.gd" id="10_steal"]
 
 [ext_resource type="Script" path="res://src/core/sequences/sequence_manager.gd" id="11_sequence"]
+
+[ext_resource type="Script" path="res://src/core/systems/music_system.gd" id="12_music"]
 
 [node name="MainGame" type="Node3D"]
 script = ExtResource("1_main")
@@ -41,6 +43,9 @@ current = true
 
 [node name="CombatManager" type="Node" parent="Systems"]
 script = ExtResource("5b_combat")
+
+[node name="MusicSystem" type="Node" parent="Systems"]
+script = ExtResource("12_music")
 
 [node name="ShopManager" type="Node" parent="Systems"]
 script = ExtResource("6_shop")

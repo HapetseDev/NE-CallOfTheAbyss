@@ -112,7 +112,13 @@ func _build_layout() -> void:
 	var details := _box(_upper)
 	details.size_flags_horizontal = SIZE_EXPAND_FILL
 	details.custom_minimum_size.x = NEDimensions.INVENTORY_DETAILS_WIDTH
-	_stats = _label(_section(details, "Stats des Gegenstands"), "Gegenstand auswählen.")
+	var stats_scroll := ScrollContainer.new()
+	stats_scroll.custom_minimum_size.y = NEDimensions.INVENTORY_SLOT_SIZE
+	stats_scroll.size_flags_vertical = SIZE_EXPAND_FILL
+	stats_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_section(details, "Stats des Gegenstands").add_child(stats_scroll)
+	_stats = _label(stats_scroll, "Gegenstand auswählen.")
+	_stats.size_flags_horizontal = SIZE_EXPAND_FILL
 	_stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_stats.size_flags_vertical = SIZE_EXPAND_FILL
 	_more_info = _label(_section(details, "Weitere Infos"), "")
@@ -188,6 +194,10 @@ func _inspect_item(item: ItemData) -> void:
 		_stats.text = "Gegenstand auswählen."
 		return
 	var lines: PackedStringArray = [item.item_name, "Gewicht: %.2f" % item.weight]
+	if item.is_armor:
+		lines.append("Rüstung")
+	if item.get_combat_value() > 1:
+		lines.append("Kampfwert: %d" % item.get_combat_value())
 	if not item.description.is_empty():
 		lines.append(item.description)
 	if item.heal_amount != 0:
@@ -196,7 +206,8 @@ func _inspect_item(item: ItemData) -> void:
 		lines.append("Konzentrationspunkte: %+d" % item.mana_amount)
 	for mode in item.usage_modes:
 		if mode:
-			lines.append("%s · Stärke %d · %s" % [mode.label, mode.power, "Fernkampf" if mode.range_type == ItemUsageMode.RangeType.THROWN else "Nahkampf"])
+			var value_text := " · Kampfwert %d" % item.get_combat_value(mode) if item.get_combat_value(mode) > 1 else ""
+			lines.append("%s%s · %s" % [mode.label, value_text, "Fernkampf" if mode.range_type == ItemUsageMode.RangeType.THROWN else "Nahkampf"])
 	_stats.text = "\n".join(lines)
 
 

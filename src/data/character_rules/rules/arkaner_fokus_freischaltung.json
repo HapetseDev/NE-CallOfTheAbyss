@@ -1,0 +1,14 @@
+{
+  "format_version": 1,
+  "id": "arkaner_fokus_freischaltung",
+  "name": "Fokussierten Feuerstoß zusätzlich anbieten",
+  "description": "",
+  "status": "example_draft",
+  "scope": "combat_action_selection",
+  "condition_id": "arkaner_fokus",
+  "priority": 10,
+  "effect": {
+    "type": "offer_action",
+    "action_id": "feuerstoss_fokussiert"
+  }
+}

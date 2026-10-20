@@ -1,0 +1,53 @@
+{
+  "format_version": 1,
+  "id": "arkaner_fokus",
+  "name": "Arkaner Fokus",
+  "description": "Verschachtelte Alternative aus Talentkombination oder Talent plus Figurenwissen.",
+  "status": "example_draft",
+  "condition": {
+    "all": [
+      {
+        "type": "skill_level",
+        "subject": "actor",
+        "skill_id": "magiekunde",
+        "operator": ">=",
+        "value": 8
+      },
+      {
+        "any": [
+          {
+            "all": [
+              {
+                "type": "skill_level",
+                "subject": "actor",
+                "skill_id": "meditieren",
+                "operator": ">=",
+                "value": 6
+              },
+              {
+                "type": "attribute_value",
+                "subject": "actor",
+                "attribute_id": "bewusstsein",
+                "value_source": "effective",
+                "operator": ">=",
+                "value": 8
+              }
+            ]
+          },
+          {
+            "type": "knows_fact",
+            "subject": "actor",
+            "fact_id": "beispiel_arkaner_lehrsatz"
+          }
+        ]
+      },
+      {
+        "not": {
+          "type": "has_status",
+          "subject": "actor",
+          "status_id": "beispiel_verwirrt"
+        }
+      }
+    ]
+  }
+}

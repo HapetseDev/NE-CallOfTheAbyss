@@ -1,0 +1,42 @@
+{
+  "format_version": 1,
+  "id": "schwert_doppelhieb_bereit",
+  "name": "Doppelhieb bereit",
+  "description": "Ab Talentstufe 10, Gewandheit über 5 und ein Schwert in einer Hand.",
+  "status": "example_draft",
+  "condition": {
+    "all": [
+      {
+        "type": "skill_level",
+        "subject": "actor",
+        "skill_id": "schwertkampf",
+        "operator": ">=",
+        "value": 10
+      },
+      {
+        "type": "attribute_value",
+        "subject": "actor",
+        "attribute_id": "gewandheit",
+        "value_source": "effective",
+        "operator": ">",
+        "value": 5
+      },
+      {
+        "any": [
+          {
+            "type": "equipped_item_tag",
+            "subject": "actor",
+            "slot": "primaer_hand",
+            "tag": "schwert"
+          },
+          {
+            "type": "equipped_item_tag",
+            "subject": "actor",
+            "slot": "nebenhand",
+            "tag": "schwert"
+          }
+        ]
+      }
+    ]
+  }
+}

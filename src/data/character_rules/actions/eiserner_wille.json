@@ -1,0 +1,38 @@
+{
+  "format_version": 1,
+  "id": "eiserner_wille",
+  "name": "Eiserner Wille",
+  "description": "Zeitweiliger Attributbonus; Statussystem und dessen Zeitbasis müssen erst implementiert werden.",
+  "status": "example_draft",
+  "requires_condition_id": "notfall_schutz",
+  "target_type": "self",
+  "requires_line_of_sight": false,
+  "range": {
+    "type": "self"
+  },
+  "cost": {
+    "turns": 1,
+    "konzentrationspunkte": 4
+  },
+  "steps": [
+    {
+      "type": "apply_status",
+      "target": "actor",
+      "status": {
+        "id": "beispiel_eiserner_wille",
+        "duration": {
+          "unit": "owner_turns",
+          "count": 2
+        },
+        "stacking": "refresh_duration",
+        "modifiers": [
+          {
+            "type": "attribute_add",
+            "attribute_id": "robustheit",
+            "value": 2
+          }
+        ]
+      }
+    }
+  ]
+}

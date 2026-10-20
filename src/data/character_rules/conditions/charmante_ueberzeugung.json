@@ -1,0 +1,33 @@
+{
+  "format_version": 1,
+  "id": "charmante_ueberzeugung",
+  "name": "Charmante Überzeugung",
+  "description": "Beide sozialen Talente über 10 und effektive Präsenz über 5.",
+  "status": "example_draft",
+  "condition": {
+    "all": [
+      {
+        "type": "skill_level",
+        "subject": "actor",
+        "skill_id": "flirten",
+        "operator": ">",
+        "value": 10
+      },
+      {
+        "type": "skill_level",
+        "subject": "actor",
+        "skill_id": "ueberzeugen",
+        "operator": ">",
+        "value": 10
+      },
+      {
+        "type": "attribute_value",
+        "subject": "actor",
+        "attribute_id": "praesenz",
+        "value_source": "effective",
+        "operator": ">",
+        "value": 5
+      }
+    ]
+  }
+}

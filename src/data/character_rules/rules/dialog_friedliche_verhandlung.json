@@ -1,0 +1,14 @@
+{
+  "format_version": 1,
+  "id": "dialog_friedliche_verhandlung",
+  "name": "Friedliche Verhandlung anbieten",
+  "description": "",
+  "status": "example_draft",
+  "scope": "dialog_options",
+  "condition_id": "friedliche_verhandlung",
+  "priority": 20,
+  "effect": {
+    "type": "offer_dialog_option",
+    "option_id": "beispiel_friedlich_verhandeln"
+  }
+}

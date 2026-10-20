@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "id": "friedliche_verhandlung",
+  "name": "Friedliche Verhandlung",
+  "description": "Alternative soziale Wege, aber keine Verhandlung bei Alarm oder feindlicher Beziehung des Gegenübers.",
+  "status": "example_draft",
+  "condition": {
+    "all": [
+      {
+        "any": [
+          {
+            "type": "condition_ref",
+            "condition_id": "charmante_ueberzeugung"
+          },
+          {
+            "all": [
+              {
+                "type": "skill_level",
+                "subject": "actor",
+                "skill_id": "ueberzeugen",
+                "operator": ">=",
+                "value": 8
+              },
+              {
+                "type": "knows_fact",
+                "subject": "actor",
+                "fact_id": "beispiel_geheimes_passwort"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "not": {
+          "type": "flag_equals",
+          "key": "beispiel_alarm_aktiv",
+          "value": true
+        }
+      },
+      {
+        "type": "relationship_value",
+        "subject": "target",
+        "toward": "actor",
+        "operator": ">=",
+        "value": 0
+      }
+    ]
+  }
+}

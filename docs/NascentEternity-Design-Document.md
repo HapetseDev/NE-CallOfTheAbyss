@@ -4,7 +4,7 @@
 
 ## Design Dokument
 
-Version: 1
+Version: 2
 
 (Wird bei jeder Bearbeitung inkrementiert)
 
@@ -480,6 +480,96 @@ Von der Bedienung ist das Inventar-Fenster genauso zu behandeln wie das Charakte
 ![](/Users/hapetse/Dev/NECOTA2D/docs/res/-Inventar.png)
 
 Gegenstände können über Kontextmenü oder über Drag and Drop an andere Charakter weitergegeben werden, da ein Inventar eines Charakters überhalb des Inventars eines anderes Charakters durchgescrollt werden kann.
+
+## Angriffe, Gegenstandseigenschaften und Musik
+
+### Waffenlose Angriffe
+
+Ein Charakter kann auch ohne Gegenstand angreifen. Bei mindestens einer freien Hand erscheint im Kampfmenü die Aktion **Schlag**. Sie ist außerdem über das Fähigkeitenmenü verfügbar.
+
+Die Angriffsstärke berechnet sich aus:
+
+**Effektive Körperkraft + abgerundete Hälfte der Fertigkeitsstufe „Waffenloser Kampf“**
+
+Die effektive Körperkraft enthält weiterhin die vollständigen Attributboni gelernter Fertigkeiten. Nur der zusätzliche, unmittelbar auf den Angriff angerechnete Fertigkeitsbonus wird halbiert.
+
+Beispiele für den zusätzlichen Bonus:
+
+- Fertigkeitsstufe 1: +0
+- Fertigkeitsstufe 2 oder 3: +1
+- Fertigkeitsstufe 10: +5
+
+### Angriffe mit Gegenständen
+
+Jeder Gegenstand kann als Angriffsgegenstand verwendet werden. Für die Kampfnutzung muss er in einer Hand oder einem Platz der Schnellausrüstung liegen. Gegenstände ohne eigene Angriffsart bieten einen improvisierten Schlag an.
+
+Die Angriffsstärke berechnet sich aus:
+
+**Effektive Körperkraft + Kampfwert des Gegenstands + abgerundete Hälfte der passenden Fertigkeitsstufe**
+
+Jeder Gegenstand besitzt mindestens den **Kampfwert 1**. Fehlt eine passende gelernte Fertigkeit, beträgt der zusätzliche Fertigkeitsbonus 0.
+
+Beim Messer wird die Körperkraftfertigkeit **Kurze Klingen** angerechnet. Gegenstände können unterschiedliche Kampfwerte für ihre Verwendungsarten besitzen. Das Messer verwendet derzeit Kampfwert 6 beim Stechen und Kampfwert 8 beim Werfen.
+
+### Verteidigung, Mindestschaden und Rüstung
+
+Nach Berechnung der Angriffsstärke werden Ausweichen und Schadensminderung durch Robustheit angewendet.
+
+Ein erfolgreicher Treffer mit positiver Angriffsstärke verursacht **mindestens 1 Schaden, wenn die getroffene Stelle ungerüstet ist**. Ein ausgewichener Angriff verursacht weiterhin 0 Schaden.
+
+Bei einer gerüsteten Trefferstelle darf der Schaden vollständig abgefangen werden. Nullschäden bleiben damit ein gewollter Bestandteil des Kampfsystems. Schwachpunkte sollen später Möglichkeiten schaffen, wirksame Angriffe gegen ansonsten gut geschützte Gegner auszuführen.
+
+**Vorläufige Umsetzung:** Trefferzonen werden noch nicht ausgewertet. Sobald mindestens ein ausdrücklich als Rüstung gekennzeichneter Gegenstand an einem Körperplatz getragen wird, gilt vorerst die gesamte Figur als gerüstet. Normale Kleidung sowie Rüstung im Rucksack oder in der Schnellausrüstung zählen nicht automatisch als angelegte Rüstung.
+
+Die Rüstungskennzeichnung gewährt derzeit keinen zusätzlichen eigenen Schadensminderungswert. Sie entscheidet zunächst darüber, ob der Mindestschaden gilt. Die ortsbezogene Prüfung wird mit Trefferzonen und Schwachpunkten ergänzt.
+
+### Inventaranzeige und Gegenstandsbruch
+
+Ein Kampfwert von 1 wird in den Gegenstandseigenschaften nicht angezeigt. Höhere Kampfwerte und unterschiedliche Werte einzelner Verwendungsarten werden ausgewiesen.
+
+Für jeden Gegenstand kann eine **Bruchchance zwischen 0 und 100 Prozent** festgelegt werden. Standardmäßig beträgt sie 0 Prozent.
+
+Die Bruchchance wird einmal nach einem ausgeführten Gegenstandsangriff geprüft, auch wenn das Ziel ausgewichen ist. Wird kein gültiges Ziel angegriffen, findet keine Bruchprüfung statt.
+
+Zerbricht ein Gegenstand, wird das verwendete Exemplar aus dem Ausrüstungsplatz entfernt. Gleichartige Gegenstände im Rucksack bleiben erhalten. Geworfene oder anderweitig verbrauchte Gegenstände werden nicht zusätzlich auf Bruch geprüft.
+
+Damit lassen sich beispielsweise Glasflaschen als verwendbare, aber zerbrechliche Angriffsgegenstände definieren.
+
+### Levelmusik
+
+Für jedes Level werden ein Musikstück und dessen Wiedergabeverhalten festgelegt: einmalige Wiedergabe oder fortlaufende Wiederholung.
+
+Die beiden derzeit verfügbaren Level, **Level1Ep1** und **MonsterLair-Level1**, verwenden **itcc.mp3** im Loop. Beim Betreten eines neuen Levels beginnt dessen Musik bei Position 0.
+
+### Kampfmusik und Gegnerkategorien
+
+Gegner erhalten eine Musikkategorie: **Normal, Boss, Superboss oder Final**. Jeder Kategorie kann ein eigenes Kampfmusikstück zugeordnet werden. Bei mehreren Gegnern bestimmt die höchste Kategorie das Musikstück.
+
+Aktuell verwenden alle Kategorien vorläufig **boss_battle.mp3**. Kampfmusik läuft im Loop. Wird dasselbe Stück weiterhin benötigt, startet es bei einem Kategorie- oder Lautstärkewechsel nicht erneut.
+
+Beim Kampfbeginn wird die Levelmusik ausgeblendet und an ihrer aktuellen Abspielposition pausiert. Die Kampfmusik wird eingeblendet.
+
+Sind sämtliche betreffenden Gegner tot, besiegt oder erfolgreich geflüchtet, setzt die Levelmusik an ihrer unterbrochenen Position fort.
+
+### Musik nach eigener Flucht
+
+Die Flucht der Party beendet die Kampfmusik nicht, solange ein beteiligter Gegner als Bedrohung im Level verbleibt. Ohne aktiven Kampf läuft sie leiser weiter; die Levelmusik bleibt pausiert.
+
+Verlässt die Party das Level, endet die bisherige Kampfmusik und die Musik des neuen Levels übernimmt.
+
+Musikwechsel erfolgen mit einer kurzen Überblendung, derzeit **0,35 Sekunden**. Die vorläufigen Lautstärken betragen **−6 dB** für Levelmusik und aktive Kampfmusik sowie **−14 dB** für weiterlaufende Kampfmusik nach eigener Flucht.
+
+Abspielpositionen und verbleibende Musikbedrohungen werden derzeit nicht im Spielstand gespeichert.
+
+### Weitere Entwicklung und Balanceprüfung
+
+Schwachpunkte, Trefferzonen, Angriffsradien und die stärkere Einbindung von Bewegung werden später ergänzt.
+
+Eine feste Zielvorgabe für die Kampflänge ist noch nicht beschlossen. Stärkevorräte und Angriffswerte werden deshalb vorerst nicht auf eine bestimmte Trefferzahl abgestimmt.
+
+Weitere taktische Angriffsarten sollen über Fähigkeiten und Fertigkeiten gestaltet werden. Dafür werden derzeit noch keine neuen Mechaniken festgelegt.
+
+Die textuelle Kampfsimulation im Hauptmenü dient zur Prüfung der aktuellen Regeln. Sie erlaubt einstellbare Charaktere, einzelne Kampfschritte und Serienvergleiche. Räumliche Faktoren und zukünftige Schwachpunktregeln sind darin noch nicht enthalten.
 
 # Weiterführende Dokumentation
 

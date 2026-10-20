@@ -103,6 +103,8 @@ func _add_button(text: String, callback: Callable, disabled: bool = false) -> vo
 func _render_root() -> void:
 	_clear_vbox()
 	_add_label("%s ist am Zug" % player.get_display_name())
+	if player.equipment.get("primaer_hand") == null or player.equipment.get("nebenhand") == null:
+		_add_button("Schlag", _on_unarmed_pressed)
 	_add_button("Gegenstand", _render_item_menu)
 	_add_button("Fähigkeit", _render_ability_menu)
 	_add_button("Bewegen", _on_move_pressed)
@@ -111,6 +113,10 @@ func _render_root() -> void:
 
 
 # --- Gegenstand ---
+
+func _on_unarmed_pressed() -> void:
+	_on_ability_chosen(AbilityCatalog.get_definition("fausthieb"))
+
 
 func _render_item_menu() -> void:
 	_clear_vbox()

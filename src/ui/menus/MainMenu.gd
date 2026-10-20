@@ -18,6 +18,7 @@ const BACKGROUNDS: Array[PackedScene] = [
 @onready var start_button: Button = $MainMenuContainer/VBoxContainer/StartButton
 @onready var load_button: Button = $MainMenuContainer/VBoxContainer/LoadButton
 @onready var quit_button: Button = $MainMenuContainer/VBoxContainer/QuitButton
+@onready var simulation_button: Button = $MainMenuContainer/VBoxContainer/SimulationButton
 var background_index := 0
 var room: Node3D
 var camera: Camera3D
@@ -33,6 +34,7 @@ func _ready() -> void:
 	start_button.pressed.connect(_on_start_pressed)
 	load_button.pressed.connect(_open_saves)
 	quit_button.pressed.connect(_on_quit_pressed)
+	simulation_button.pressed.connect(_open_simulation)
 	_show_background()
 	start_button.grab_focus()
 	if background_music == null and ResourceLoader.exists(music_path):
@@ -52,7 +54,7 @@ func _show_background() -> void:
 	elapsed = 0.0
 
 func _process(delta: float) -> void:
-	if busy:
+	if busy or get_node_or_null("CombatSimulationMenu") != null:
 		return
 	elapsed += delta
 	camera.position.y = lerpf(22.0, 8.0, minf(elapsed / (scene_duration + fade_duration), 1.0))
@@ -70,20 +72,20 @@ func _cycle_background() -> void:
 	cycle_tween.tween_callback(func() -> void: cycling = false)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if busy or get_node_or_null("SaveLoadMenu") != null:
+	if busy or (get_node_or_null("SaveLoadMenu") != null or get_node_or_null("CombatSimulationMenu") != null):
 		return
 	if event.is_action_pressed("Up") or event.is_action_pressed("Down"):
-		var buttons := [start_button, load_button, quit_button]
+		var buttons := [start_button, load_button, simulation_button, quit_button]
 		var index := buttons.find(get_viewport().gui_get_focus_owner())
 		index = posmod(index + (-1 if event.is_action_pressed("Up") else 1), buttons.size())
 		buttons[index].grab_focus()
 		get_viewport().set_input_as_handled()
 
 func _begin_transition() -> bool:
-	if busy or get_node_or_null("SaveLoadMenu") != null:
+	if busy or (get_node_or_null("SaveLoadMenu") != null or get_node_or_null("CombatSimulationMenu") != null):
 		return false
 	busy = true
-	for button in [start_button, load_button, quit_button]:
+	for button in [start_button, load_button, simulation_button, quit_button]:
 		button.disabled = true
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 	return true
@@ -103,7 +105,7 @@ func _on_start_pressed() -> void:
 	busy = false
 	fade_rect.modulate.a = 0.0
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for button in [start_button, load_button, quit_button]:
+	for button in [start_button, load_button, simulation_button, quit_button]:
 		button.disabled = false
 	start_button.grab_focus()
 
@@ -116,7 +118,7 @@ func _on_quit_pressed() -> void:
 	get_tree().quit()
 
 func _open_saves() -> void:
-	if busy or get_node_or_null("SaveLoadMenu") != null:
+	if busy or (get_node_or_null("SaveLoadMenu") != null or get_node_or_null("CombatSimulationMenu") != null):
 		return
 	var menu := preload("res://src/ui/menus/save_load_menu.gd").new()
 	menu.name = "SaveLoadMenu"
@@ -128,3 +130,14 @@ func _open_saves() -> void:
 func _exit_tree() -> void:
 	if cycle_tween != null and cycle_tween.is_valid():
 		cycle_tween.kill()
+
+
+func _open_simulation() -> void:
+	if busy or get_node_or_null("CombatSimulationMenu") != null or get_node_or_null("SaveLoadMenu") != null:
+		return
+	var menu := preload("res://src/ui/menus/combat_simulation_menu.gd").new()
+	menu.name = "CombatSimulationMenu"
+	menu.tree_exited.connect(func() -> void:
+		if is_inside_tree() and not busy:
+			simulation_button.grab_focus())
+	add_child(menu)

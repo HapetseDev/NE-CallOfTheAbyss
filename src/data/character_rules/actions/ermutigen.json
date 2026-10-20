@@ -1,0 +1,38 @@
+{
+  "format_version": 1,
+  "id": "ermutigen",
+  "name": "Ermutigen",
+  "description": "Ein Verbündeter erhält zeitweise Präsenz; benötigt später einen Status-Effektpfad.",
+  "status": "example_draft",
+  "target_type": "single_ally",
+  "requires_line_of_sight": false,
+  "range": {
+    "type": "distance",
+    "maximum": 6.0
+  },
+  "cost": {
+    "turns": 1,
+    "konzentrationspunkte": 3
+  },
+  "steps": [
+    {
+      "type": "apply_status",
+      "target": "selected_ally",
+      "status": {
+        "id": "beispiel_ermutigt",
+        "duration": {
+          "unit": "owner_turns",
+          "count": 3
+        },
+        "stacking": "refresh_duration",
+        "modifiers": [
+          {
+            "type": "attribute_add",
+            "attribute_id": "praesenz",
+            "value": 2
+          }
+        ]
+      }
+    }
+  ]
+}

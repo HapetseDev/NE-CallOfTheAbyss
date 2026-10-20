@@ -1,0 +1,15 @@
+{
+  "format_version": 1,
+  "id": "schwert_kreuzhieb_freischaltung",
+  "name": "Fortgeschrittene Variante bevorzugen",
+  "description": "Bei zwei erfüllten Ersetzungen gewinnt Priorität 20 gegenüber 10.",
+  "status": "example_draft",
+  "scope": "combat_action_selection",
+  "condition_id": "zwei_schwerter_bereit",
+  "priority": 20,
+  "effect": {
+    "type": "replace_action",
+    "action_id": "schwert_normal",
+    "replacement_id": "schwert_kreuzhieb"
+  }
+}
