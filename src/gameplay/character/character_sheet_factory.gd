@@ -22,6 +22,7 @@ static func create_default(character_name: String, overrides: Dictionary = {}) -
 	var data := CharacterResource.new()
 	data.character_id = str(overrides.get("character_id", _generate_character_id(character_name)))
 	data.character_name = character_name
+	data.voice = clampf(float(overrides.get("voice", 1.0)), 0.25, 4.0)
 	data.koerperkraft = int(overrides.get("koerperkraft", 2))
 	data.gewandheit = int(overrides.get("gewandheit", 2))
 	data.robustheit = int(overrides.get("robustheit", 2))

@@ -9,6 +9,8 @@ func check(value: bool, message: String) -> void:
 func _ready() -> void:
 	_run.call_deferred()
 func _run() -> void:
+	var original_quality := GraphicsSettings.cutout_quality
+	GraphicsSettings.cutout_quality = GraphicsSettings.Quality.HIGH
 	var game := load("res://src/core/main_game/main_game.tscn").instantiate() as MainGame
 	add_child(game)
 	await get_tree().process_frame
@@ -82,5 +84,6 @@ func _run() -> void:
 	visual._restore()
 	check(grid.mesh_library == original, "Abbau stellt Originalressourcen wieder her")
 	game.free()
+	GraphicsSettings.cutout_quality = original_quality
 	print("movement_cutout: %d Checks, %d Fehler" % [checks, failures])
 	get_tree().quit(1 if failures else 0)

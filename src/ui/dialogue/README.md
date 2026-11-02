@@ -71,4 +71,44 @@ Tests:
 - `test_dialogue_context.tscn`, `test_combat_quest.tscn`, `test_gameplay_journey.tscn`:
   echte Questannahme, Belohnung, Gesprächskontext und gesamter Spielablauf.
 - `test_conversation_ui.tscn -- --visual` erzeugt bei aktivem Renderer
-  `/tmp/conversation-ui-preview.png` und `/tmp/conversation-ui-small.png`.
+  `res://.godot/conversation-ui-preview.png`, `res://.godot/conversation-ui-small.png`
+  und `res://.godot/dialogue-options-preview.png`.
+
+## Schrittweiser Textaufbau
+
+Unter Menü → Optionen → Gespräche werden Texttempo und Sprechton lokal in
+`user://dialogue.cfg` gespeichert, unabhängig vom Spielstand:
+
+| Tempo | Sekunden pro Zeichen | Geschwindigkeit |
+|---|---|---|
+| Langsam | 0,06 | halbe Geschwindigkeit |
+| Normal (Vorgabe) | 0,03 | bisheriges Tempo |
+| Schnell | 0,015 | doppelte Geschwindigkeit |
+| Sofort | 0 | vollständig, ohne Verzögerung und Sprechton |
+
+Satzpausen skalieren mit dem Tempo. „Text vollständig anzeigen“ bzw. die
+Bestätigungstaste blendet den Rest ein, ohne weiterzuschalten. Erst danach
+erscheinen Weiter/Antworten. Escape und „Gespräch beenden“ schließen auch
+während des Textaufbaus. Frühere Beiträge bleiben sichtbar. Gleichzeitige
+Dialogzeilen laufen parallel; die Auswahl wartet auf alle Zeilen.
+
+Ausgewählte Party-Antworten und Themen werden ebenfalls eingetickert, bevor
+der nächste NPC-Beitrag startet. Überspringen und Schließen funktionieren
+auch während dieser Antworten.
+
+Der optionale Sprechton (Vorgabe: aus) basiert auf `assets/audio/sfx/dialogue/voice.json`;
+die zugehörige WAV ist die vorab erzeugte SFXR-Sinusvariante.
+`python src/debug/tools/generate_dialogue_voice.py` erzeugt sie aus der JSON neu;
+der Generator unterstützt die aktiven Parameter dieses Presets. Er läuft über SFX
+(ersatzweise Master), nur bei benannten Sprechern und sichtbaren Textzeichen.
+Leerzeichen und Satzzeichen bleiben stumm, die Tonfolge ist auf einen Start pro
+45 ms begrenzt. Sofortanzeige/Überspringen erzeugen keine nachgeholten Töne.
+
+`CharacterResource.voice` erscheint im Inspector als **Voice**: 1,0 Standard,
+0,5 eine Oktave tiefer, 2,0 eine Oktave höher (Bereich 0,25–4,0).
+Party, NPCs und registrierte Gäste verwenden denselben Parameter. Er gehört zu
+den Charakterdaten und wird gespeichert; Save-Version 11 migriert ältere
+Charaktere auf 1,0. Namenlose Erzählerbeiträge bleiben stumm.
+
+Zusätzlicher Test: `res://src/debug/tools/test_dialogue_settings.tscn` prüft
+Tempostufen, ungültige Einstellungen, Voice-Speicherung und Migration.

@@ -23,6 +23,9 @@ config/icon="uid://b5ubgw6jktu33"
 
 [autoload]
 
+DialogueSettings="*res://src/core/autoload/dialogue_settings.gd"
+
+GraphicsSettings="*res://src/core/autoload/graphics_settings.gd"
 UIAudio="*res://src/core/autoload/ui_audio.gd"
 GameState="*res://src/core/autoload/game_state.gd"
 EventLog="*res://src/core/autoload/event_log.gd"

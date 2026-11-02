@@ -1,11 +1,13 @@
-# Godot 4+ specific ignores
+# Godot 4: generated imports, shader cache and local editor state
 .godot/
 .nomedia
+*.tmp
 
-# Godot-specific ignores
+# Godot 3 compatibility and private export credentials
 .import/
 export.cfg
 export_credentials.cfg
+# Keep export_presets.cfg, *.import and *.uid: project settings and resource IDs.
 
 # Imported translations (automatically generated from CSV files)
 *.translation
@@ -16,4 +18,11 @@ data_*/
 mono_crash.*.json
 
 /.claude
+
+# macOS Finder metadata and AppleDouble resource forks (including copied folders)
 .DS_Store
+._*
+.AppleDouble/
+.LSOverride
+.Spotlight-V100/
+.Trashes/

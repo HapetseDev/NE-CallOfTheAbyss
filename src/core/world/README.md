@@ -1,7 +1,7 @@
 # WorldState – erster Architekturbaustein
 
 Offene Questregeln und die geplante Fortsetzung stehen in
-[Architektur: offene Entscheidungen und nächste Schritte](../../../ARCHITEKTUR_OFFENE_PUNKTE.md).
+[Design: offene Entscheidungen und nächste Schritte](../../../docs/NascentEternity-Design-Document.md#offene-entscheidungen-und-nächste-schritte).
 
 `GameState.world_state` besitzt die Charakterregistrierung, Flags, besuchte Orte,
 Charakterpositionen und persistente Weltobjekte. Er enthält keine Welt-Nodes.
@@ -45,7 +45,7 @@ dieselbe Slot-Liste.
 Der Roundtrip neuer Plätze und das Ergänzen alter Inventare werden durch
 `test_inventory_layout.tscn` geprüft.
 
-## Speichervertrag Version 10
+## Speichervertrag Version 11
 
 `LevelManager.instance.save_world(path)` erfasst den Zustand im freien Gameplay
 und schreibt JSON. Während Kampf/Dialog/anderer Eingabesperre liefert es
@@ -82,7 +82,9 @@ sollte sie keinen notwendigen Code nach dem `await` besitzen. Der Autoload führ
 den Ablauf unabhängig von diesem Aufrufer zu Ende. Isolierte Daten-Snapshots ohne
 aktive Welt bleiben mit `WorldSaveStore.read` lesbar, sind aber keine ladbaren
 Spielsitzungen. `install_world` bleibt eine niedrige Daten-API für Tests/Bootstrap.
-Das aktuelle Speicherformat ist Version 10; Version 8 führte die Kartendaten ein.
+Das aktuelle Speicherformat ist Version 11; Version 8 führte die Kartendaten ein.
+Version 11 speichert `CharacterResource.voice` (Tonhöhenfaktor 0,25–4,0); ältere
+Charakterdaten werden auf 1,0 migriert. Ungültige Voice-Werte werden abgelehnt.
 
 `test_world_loader.tscn` prüft Datei-/Versionsfehler, Sperren, parallele Aufrufe,
 Änderungen während der Vorbereitung, Rückkehr nach Aufbaufehler, Werte/Positionen,
@@ -116,7 +118,9 @@ getrennter gleichnamiger Slots, großer Listen, Suche und Schreibfehlern.
 
 Automatisches Speichern sowie Überschreiben, Umbenennen und Löschen über die
 Oberfläche sind nicht Bestandteil dieses Schritts. Bestehende Speicherdateien
-bleiben erhalten. Das aktuelle Speicherformat ist Version 10; Version 8 führte die Kartendaten ein.
+bleiben erhalten. Das aktuelle Speicherformat ist Version 11; Version 8 führte die Kartendaten ein.
+Version 11 speichert `CharacterResource.voice` (Tonhöhenfaktor 0,25–4,0); ältere
+Charakterdaten werden auf 1,0 migriert. Ungültige Voice-Werte werden abgelehnt.
 
 ## Bewusste Grenzen
 
@@ -129,19 +133,20 @@ Entfernung getöteter Figuren sind noch offen. Positionen gelten für die vorhan
 Figuren am jeweiligen Ort. Weitere fest platzierte Weltobjekte brauchen explizite,
 projektweit eindeutige IDs; automatisch vergebene IDs sind nur für dynamische Drops.
 
-Ein erstes persistentes Ereignisprotokoll ist angebunden; automatische Queststeuerung ist noch offen. Conditions/Effects sind
-für Faktenwissen, boolesche Flags und Gold als erster Teilumfang angebunden. Phase 02 ist daher noch nicht vollständig abgeschlossen.
-Die Resourcefelder gehören zu Version 7; Schemaänderungen erfordern eine explizite
+Persistente Ereignisse und der geprüfte Banditenquestablauf sind angebunden.
+Conditions/Effects umfassen Wissen, Flags, Gold, Beziehungen, Inventare, Händler
+und Quests. Weitere allgemeine Questtypen fehlen.
+Das aktuelle Resourceformat gehört zu Version 10; Schemaänderungen erfordern eine explizite
 Versionsmigration. Version 1 wird ausdrücklich mit leeren Fakten- und Wissensbereichen migriert;
 vorhandene Charakter- und Weltdaten bleiben erhalten. Fehlende Wissensbereiche in
-Version 2 bis 7 werden als beschädigte Daten abgelehnt. Version 1/2 ergänzen das
+Version 2 bis 10 werden als beschädigte Daten abgelehnt. Version 1/2 ergänzen das
 neue Charakterfeld `is_defeated` zunächst mit false; vorhandene NPC-Sieg-Flags
-werden beim Szenenaufbau übernommen. Version 3 bis 7 verlangen das Feld ausdrücklich.
+werden beim Szenenaufbau übernommen. Version 3 bis 10 verlangen das Feld ausdrücklich.
 Version 1 bis 3 beginnen ohne gespeicherte Händlerdaten; ShopManager ergänzt
 diese beim Szenenaufbau aus den Vorlagen. Ab Version 4 ist der Bereich `shops` verpflichtend. Version 1 bis 4 erhalten
 ein leeres Ereignisprotokoll; Ab Version 5 ist `events` verpflichtend. Ab Version 6 ist `quest_states` verpflichtend;
 Versionen 1–5 leiten den Banditenquestzustand aus ihren bisherigen Flags ab.
-Andere Versionen werden abgelehnt.
+Zugelassen sind Versionen 1 bis 10; unbekannte Zukunftsversionen werden abgelehnt.
 
 ## Verifikation
 
@@ -211,7 +216,7 @@ Dialogunterbrechung setzt bereits gehörtes Wissen nicht zurück. Das ist keine
 Transaktion über ein vollständiges Gespräch; Queststart wird zusammen mit dem Hinweiswissen übernommen.
 Es gibt noch keine allgemeinen logischen Kombinationen, Attributbedingungen,
 Kampfeffekte und keine automatische Flagmigration.
-Die Regeln benötigen keine zusätzlichen Speicherfelder; der aktuelle Vertrag ist Version 7.
+Die Regeln benötigen keine zusätzlichen Speicherfelder; der aktuelle Vertrag ist Version 10.
 
 ```sh
 Godot --headless --path . res://src/debug/tools/test_world_rules.tscn
@@ -342,7 +347,7 @@ Welteintrag und erscheinen dadurch nicht erneut am Ursprungsort.
 Es gibt noch keinen Effekt zum Erzeugen neuer Gegenstände aus Vorlagen oder zum
 unbemerkten Entziehen von Ausrüstung. `transfer_item` übergibt ausschließlich
 existierenden Besitz. Wiederholbarkeit muss bei Questbelohnungen weiterhin durch
-Bedingungen und Abschlussflags abgesichert werden. Der aktuelle Speichervertrag ist Version 7.
+Bedingungen und Abschlussflags abgesichert werden. Der aktuelle Speichervertrag ist Version 10.
 
 ## Diebstahl über die Inventar-API
 
@@ -528,7 +533,7 @@ Versionen 1–6 erhalten bei vorhandener Spielwelt die bisher fest eingebaute
 Startparty Dannerman/Shalka; fehlen deren Charakterdaten, wird der Stand abgelehnt.
 Snapshots ohne aktive Spielwelt behalten einen leeren Partybereich. Version 7
 verlangt das Feld ausdrücklich. Das bestehende Datenformat bleibt erhalten;
-Anführerwechsel benötigen keine zusätzlichen Felder. Das aktuelle Format bleibt 8.
+Anführerwechsel benötigen keine zusätzlichen Felder. Das aktuelle Format ist 10.
 
 ```sh
 Godot --headless --path . res://src/debug/tools/test_party_state.tscn
@@ -586,9 +591,11 @@ Normales Laden ohne Ankunftspfad behält die gespeicherten Partypositionen.
 
 Die Übergangszonen im Ausgangslevel liegen unabhängig vom Banditen unter dem
 Levelroot, mit erhaltener Weltposition. Die Höhle implementiert `BaseLevel`.
-Ihr Gegner `lair_bandit_01` und der Trank `lair1_potion_1` besitzen eigene IDs;
-`defeated_lair_bandit` beeinflusst die bisherige Banditenquest nicht.
-Die bisherigen Gegnerwerte und der generische Banditendialog dienen als Vorlage.
+Die früher dokumentierte separate Gegner-ID `lair_bandit_01` ist in der aktuellen
+Höhlenszene nicht als Override eingerichtet. Die entsprechende Identitäts- und
+Questisolation ist daher keine abgeschlossene Integration. Der aktuelle
+Levelwechseltest meldet sechs Fehler bei Identität und Speichern/Laden; seine
+`/tmp`-Pfade sind zusätzlich unter Windows nicht ohne Weiteres verfügbar.
 
 `test_level_transitions.tscn` prüft echte Physiküberlappungen, Hin-/Rückweg,
 Partyidentität, Ankunft, getrennte Identitäten, Eingabe-/Kampfsperren, Speichern
