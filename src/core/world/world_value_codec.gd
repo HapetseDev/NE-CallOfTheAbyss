@@ -15,6 +15,7 @@ const TYPES := {
 	"CompanionEntry": "res://src/resources/characters/companion_entry.gd",
 }
 var failed: bool = false
+var migrate_legacy_voice: bool = false
 var migrate_legacy_character_state: bool = false
 var migrate_legacy_combat_items: bool = false
 var migrate_legacy_armor_items: bool = false
@@ -104,6 +105,14 @@ func decode(value: Variant, depth: int = 0) -> Variant:
 			data.break_chance = 0.0
 		if not data.has("combat_skill_id"):
 			data.combat_skill_id = "kurze_klingen" if data.get("item_id") == "Messer" else ""
+	if kind == "CharacterResource":
+		if migrate_legacy_voice and not data.has("voice"):
+			data = data.duplicate()
+			data.voice = 1.0
+		var voice: Variant = data.get("voice")
+		if not (voice is float or voice is int) or not is_finite(voice) or voice < 0.25 or voice > 4.0:
+			failed = true
+			return null
 	var resource: Resource = load(TYPES[kind]).new()
 	var properties: Dictionary = {}
 	for property in resource.get_property_list():

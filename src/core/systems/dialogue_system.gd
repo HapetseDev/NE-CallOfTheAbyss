@@ -386,14 +386,14 @@ func speaker_for(key: String) -> Dictionary:
 			var interaction := who.get_node_or_null("Interaction") as NPCInteraction
 			if interaction and interaction.data and interaction.data.portrait:
 				picture = interaction.data.portrait
-		return {"name": who.get_display_name(), "party": who in members, "portrait": picture}
+		return {"name": who.get_display_name(), "party": who in members, "portrait": picture, "voice": who.character.voice if who.character else 1.0}
 	if normalized == "npc" and current_data:
-		return {"name": current_data.display_name, "party": false, "portrait": current_data.portrait}
+		return {"name": current_data.display_name, "party": false, "portrait": current_data.portrait, "voice": current_data.character.voice if current_data.character else 1.0}
 	# Auch nicht instanziierte, registrierte Gäste können ihren Beitrag leisten.
 	var character := GameState.character_registry.get_character(key)
 	if character:
-		return {"name": character.character_name, "party": false, "portrait": character.get_portrait()}
-	return {"name": key, "party": false, "portrait": null}
+		return {"name": character.character_name, "party": false, "portrait": character.get_portrait(), "voice": character.voice}
+	return {"name": key, "party": false, "portrait": null, "voice": 1.0}
 
 
 func _matches_speaker(who: Playable, key: String) -> bool:

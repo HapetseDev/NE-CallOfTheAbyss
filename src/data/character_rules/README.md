@@ -1,7 +1,7 @@
 # JSON-Beispiele für Attribute, Talente und Regeln
 
 Hier liegen 32 zusammenhängende Beispieldateien zum Experimentieren. Einstieg und
-Formatbeschreibung: [Anleitung](../../../docs/CHARAKTERREGELN_JSON_BEISPIELE.md).
+Formatbeschreibung: [Entwurf im Design-Dokument](../../../docs/NascentEternity-Design-Document.md#geplante-datengetriebene-charakterregeln).
 
 **Entwurf, noch kein aktives Spielformat.** Es gibt derzeit keinen Importer für
 diesen Ordner. Keine Datei verändert bestehende Figuren, Dialoge oder Kämpfe.

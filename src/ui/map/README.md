@@ -1,6 +1,6 @@
 # Aufdeckbare Levelkarte
 
-Der bestehende Kartenknopf in der oberen Leiste öffnet die Karte. Mausrad zoomt
+Der bestehende Kartenknopf in der unteren Spiel-Leiste öffnet die Karte. Mausrad zoomt
 am Mauszeiger, Ziehen verschiebt, „Übersicht“ passt alle entdeckten Bereiche ein.
 Escape oder „Schließen“ schließt die Karte und gibt die eigene Eingabesperre frei.
 
@@ -28,8 +28,8 @@ und Beschriftungen ohne zusätzliche Bilddatei. Alle Farben liegen als `MAP_*`
 im zentralen NEColors-Tokensatz. Fenster und Buttons verwenden das globale Theme.
 
 `WorldState.map_exploration` enthält pro Levelpfad entdeckte Zellschlüssel und
-Markierungen (Weltposition, Name, Typ). Speicherformat **8** speichert und prüft
-diesen Bereich. Versionen 1–7 werden mit leerer Kartenerkundung übernommen;
+Markierungen (Weltposition, Name, Typ). Seit Speicherformat **8** wird dieser Bereich gespeichert und geprüft
+(aktuelles Gesamtformat: **10**). Versionen 1–7 werden mit leerer Kartenerkundung übernommen;
 ein neues Spiel leert alle Kartendaten. Der Kartenstand ist unabhängig von der
 bereits vorhandenen Liste besuchter Orte.
 

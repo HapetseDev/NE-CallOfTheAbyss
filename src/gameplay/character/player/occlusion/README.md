@@ -36,6 +36,21 @@ Boden-GridMaps. Laufzeitkopien schützen die Originalmaterialien und werden bei
 Levelwechsel neu aufgebaut. Charaktere selbst erhalten keinen zusätzlichen
 Leuchtpass; Glas und eigene Shader werden nicht konvertiert.
 
+## Qualitätsstufen
+
+`GraphicsSettings.cutout_quality`: Hoch verwendet den oben beschriebenen Shader;
+Aus stellt Originalmaterialien wieder her. Einfach prüft Verdeckungen mit 10 Hz
+gegen gecachte Mesh-AABBs mit Zellrotation, Skalierung und Mesh-Versatz. Sichtlinien
+zu Brust, Kopf und Seiten blenden verdeckende GridMap-Zellen oder einzelne Meshes
+ohne Shader aus. Der Modus ist unabhängig von Kollisionspunkten/-normalen und
+erfasst auch versetzte Tiles und mehrere Wandlagen. Laufboden unter den Füßen
+und Geometrie hinter der Figur bleiben sichtbar. Die Zellgeometrie ist bis zum
+nächsten Modus-/Levelwechsel gecacht (statische GridMaps). Temporäre MeshLibrary-Items
+ohne Mesh behalten Shapes und Navigation; originale Zell-IDs, Orientierungen und
+Bibliotheken werden bei Wechsel und Abbau wiederhergestellt. Das kann lokale
+GridMap-Neuberechnungen und sichtbares Aufpoppen verursachen. Originalressourcen
+und persistenter Weltzustand werden nicht verändert.
+
 ## Prüfung
 
 `test_movement_cutout.tscn`: Partyzuordnung, Anführerwechsel, Materialisolation,

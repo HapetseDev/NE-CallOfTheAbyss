@@ -9,6 +9,12 @@ var entries: Array[Dictionary] = []
 var left_speaker: Dictionary = {}
 var right_speaker: Dictionary = {}
 var busy := false
+signal typing_completed
+const VOICE_PATH := "res://assets/audio/sfx/dialogue/voice.wav"
+var _voice_player: AudioStreamPlayer
+var _last_voice_msec := -1000
+var _reply_pending := false
+var _typing_labels: Array[DialogueLabel] = []
 var _closed := false
 var _history: VBoxContainer
 var _scroll: ScrollContainer
@@ -19,6 +25,11 @@ var _left: Dictionary
 var _right: Dictionary
 
 func _ready() -> void:
+	_voice_player = AudioStreamPlayer.new()
+	_voice_player.stream = load(VOICE_PATH)
+	_voice_player.max_polyphony = 4
+	_voice_player.bus = &"SFX" if AudioServer.get_bus_index(&"SFX") >= 0 else &"Master"
+	add_child(_voice_player)
 	add_to_group("ui_sound_window")
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	mouse_filter = MOUSE_FILTER_STOP
@@ -125,6 +136,7 @@ func start(resource: DialogueResource, title: String, context: Array) -> void:
 func next(next_id: String) -> void:
 	if busy or _closed:
 		return
+	_finish_typing()
 	busy = true
 	_end_button.disabled = true
 	_clear_options()
@@ -138,14 +150,25 @@ func next(next_id: String) -> void:
 			_append_line(concurrent)
 	busy = false
 	_end_button.disabled = false
-	if line == null:
+	_refresh_options()
+	_scroll_to_end.call_deferred()
+
+func _refresh_options() -> void:
+	if _closed or busy:
+		return
+	_clear_options()
+	if not _typing_labels.is_empty():
+		_button("Text vollständig anzeigen", _finish_typing)
+	elif _reply_pending:
+		pass
+	elif dialogue_line == null:
 		_show_topics()
-	elif not line.responses.is_empty():
-		for response: DialogueResponse in line.responses:
+	elif not dialogue_line.responses.is_empty():
+		for response: DialogueResponse in dialogue_line.responses:
 			if response.is_allowed:
 				_button(response.text, _choose.bind(response))
 	else:
-		_button("Weiter", next.bind(line.next_id))
+		_button("Weiter", next.bind(dialogue_line.next_id))
 	_focus_first()
 	_scroll_to_end.call_deferred()
 
@@ -170,17 +193,71 @@ func _append_entry(speaker: Dictionary, text: String, line: DialogueLine = null)
 		heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if speaker.party else HORIZONTAL_ALIGNMENT_LEFT
 		heading.add_theme_font_size_override("font_size", NETypography.SIZE_H1)
 		block.add_child(heading)
-	var body := DialogueLabel.new() if line else RichTextLabel.new()
+	var body := DialogueLabel.new()
 	body.bbcode_enabled = true
 	body.fit_content = true
 	body.scroll_active = false
 	body.mouse_filter = Control.MOUSE_FILTER_PASS
 	body.add_theme_font_size_override("normal_font_size", NETypography.SIZE_BODY)
 	block.add_child(body)
-	if line:
-		body.dialogue_line = line
+	if speaker.party:
+		body.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var spoken_line := line
+	if spoken_line == null:
+		spoken_line = DialogueLine.new()
+		spoken_line.text = text
+	body.dialogue_line = spoken_line
+	body.seconds_per_step = DialogueSettings.seconds_per_character()
+	body.seconds_per_pause_step = 0.3 * body.seconds_per_step / 0.03
+	body.spoke.connect(_on_letter_spoken.bind(float(speaker.get("voice", 1.0)), not speaker.name.is_empty()))
+	if body.seconds_per_step == 0.0:
 		body.skip_typing()
-	body.text = ("[right]" + text + "[/right]") if speaker.party else text
+	else:
+		_typing_labels.append(body)
+		body.finished_typing.connect(_on_typing_finished.bind(body), CONNECT_ONE_SHOT)
+		body.type_out()
+
+func _on_typing_finished(label: DialogueLabel) -> void:
+	_typing_labels.erase(label)
+	if _typing_labels.is_empty():
+		_notify_typing_completed.call_deferred()
+	_refresh_options.call_deferred()
+
+func _notify_typing_completed() -> void:
+	if not _closed and _typing_labels.is_empty():
+		typing_completed.emit()
+
+func _finish_typing() -> void:
+	_voice_player.stop()
+	for label in _typing_labels.duplicate():
+		if is_instance_valid(label):
+			label.skip_typing()
+	_typing_labels.clear()
+	_refresh_options.call_deferred()
+
+func _on_letter_spoken(letter: String, _index: int, _speed: float, voice: float, has_speaker: bool) -> void:
+	if _closed or not has_speaker or not DialogueSettings.sound_enabled:
+		return
+	# Whitespace and punctuation are silent. Limit overlapping ticks on fast text.
+	if letter.strip_edges().is_empty() or letter in ".,!?;:–—-…\"'()[]":
+		return
+	var now := Time.get_ticks_msec()
+	if now - _last_voice_msec < 45:
+		return
+	_last_voice_msec = now
+	_voice_player.pitch_scale = clampf(voice, 0.25, 4.0) if is_finite(voice) else 1.0
+	_voice_player.play()
+
+func _speak_choice(text: String, next_id: String) -> void:
+	_reply_pending = true
+	_finish_typing()
+	_append_entry(system.speaker_for("player"), text)
+	_refresh_options()
+	if not _typing_labels.is_empty():
+		await typing_completed
+	_reply_pending = false
+	if not _closed:
+		await next(next_id)
 
 func _set_portrait(speaker: Dictionary, party_side: bool) -> void:
 	if party_side:
@@ -197,8 +274,9 @@ func _set_portrait(speaker: Dictionary, party_side: bool) -> void:
 func _choose(response: DialogueResponse) -> void:
 	if busy or _closed or not response.is_allowed:
 		return
-	_append_entry(system.speaker_for("player"), response.text)
-	await next(response.next_id)
+	if _reply_pending:
+		return
+	await _speak_choice(response.text, response.next_id)
 
 func _show_topics() -> void:
 	for option: Dictionary in system.conversation_options(dialogue_resource):
@@ -211,8 +289,9 @@ func _topic(option: Dictionary) -> void:
 	if not option in system.conversation_options(dialogue_resource):
 		return
 	if option.has("title"):
-		_append_entry(system.speaker_for("player"), option.label)
-		await next(option.title)
+		if _reply_pending:
+			return
+		await _speak_choice(option.label, option.title)
 	elif option.action == "trade":
 		system.open_shop(system.current_data.shop_id)
 	elif option.action == "fight":
@@ -247,11 +326,16 @@ func close() -> void:
 
 func dismiss() -> void:
 	_closed = true
+	_voice_player.stop()
+	_typing_labels.clear()
+	typing_completed.emit()
 	hide()
 	queue_free()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
+	if event.is_action_pressed("ui_accept") and not event.is_echo() and not _typing_labels.is_empty():
+		_finish_typing()
+	elif event.is_action_pressed("ui_cancel"):
 		close()
 	get_viewport().set_input_as_handled()
 

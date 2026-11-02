@@ -13,10 +13,10 @@ Projektwurzel, damit Agenten sie vor Änderungen finden.
 - Bei verschobenen Dateien nach dem Dateinamen suchen. Fachliche READMEs unter
   `src/` weiterhin beachten, solange sie noch nicht zentral verschoben wurden.
 - Zuerst die zur Aufgabe passenden Dokumente lesen, nicht den gesamten Bestand:
-  - `DOKUMENTATION.md`: technische Übersicht und Verwendung.
-  - `ARCHITEKTUR_OFFENE_PUNKTE.md`: offene Regeln und bekannte Grenzen.
-  - `NascentEternity-Design-Document.md`: Spielkonzept und Designabsicht.
-  - `NECOTA_SEQUENCE_SYSTEM.md`: Sequence-Zielarchitektur und Umsetzungsphasen.
+  - `docs/NascentEternity-Design-Document.md`: zentrale Referenz für Spielkonzept,
+    aktuellen Umsetzungsstand, offene Regeln sowie Sequence-/JSON-Planungen.
+    Die früheren zentralen Begleitdokumente sind darin konsolidiert.
+  - Komponenten-READMEs unter `src/`: konkrete technische Verträge und Verwendung.
 - Implementierten Stand von Planungen unterscheiden. Tatsächliche APIs und
   Ressourcen vor Verwendung im Code prüfen; Abweichungen dokumentieren.
 - Neue zentrale Dokumentation unter `doc/` ablegen, sobald dieser Ordner die

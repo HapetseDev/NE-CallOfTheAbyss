@@ -291,6 +291,29 @@ func _open_saves() -> void:
 
 func _options() -> void:
 	_clear_content()
+	_title.text = "Optionen"
+	_label(_body, "Grafik · Änderungen wirken sofort und werden lokal gespeichert.")
+	_graphics_choice("Party-Sichtfenster", "cutout_quality", ["Aus", "Einfach", "Hoch"], GraphicsSettings.cutout_quality,
+		"Einfach: Verdecken Wände die Party, werden betroffene Wandteile ohne weichen Übergang ausgeblendet. Hoch: präzise Sichtöffnungen. Aus: Wände können Figuren verdecken.")
+	_graphics_choice("Dynamische Schatten", "shadow_quality", ["Aus", "Einfach", "Hoch"], GraphicsSettings.shadow_quality,
+		"Einfach: harte Sonnenschatten bis 30 Meter, keine Fackelschatten. Hoch: ursprüngliche Schatten. Die Beleuchtung und Figurenschattenflächen bleiben erhalten.")
+	_graphics_choice("3D-Auflösung", "resolution_index", ["100 %", "85 %", "70 %", "50 %"], GraphicsSettings.resolution_index,
+		"Niedrigere Auflösung entlastet die Grafik, macht die Welt aber weicher. Die Oberfläche bleibt scharf.")
+	_label(_body, "Gespräche")
+	_label(_body, "Textgeschwindigkeit")
+	var dialogue_speed := OptionButton.new()
+	for item in DialogueSettings.SPEED_LABELS:
+		dialogue_speed.add_item(item)
+	dialogue_speed.select(DialogueSettings.speed_index)
+	dialogue_speed.custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
+	dialogue_speed.item_selected.connect(func(index: int) -> void: DialogueSettings.set_option("speed", index))
+	_body.add_child(dialogue_speed)
+	var dialogue_sound := CheckButton.new()
+	dialogue_sound.text = "Sprechton beim Textaufbau"
+	dialogue_sound.button_pressed = DialogueSettings.sound_enabled
+	dialogue_sound.custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
+	dialogue_sound.toggled.connect(func(enabled: bool) -> void: DialogueSettings.set_option("sound", enabled))
+	_body.add_child(dialogue_sound)
 	_label(_body, "Lautstärke")
 	for bus in AudioServer.bus_count:
 		_label(_body, AudioServer.get_bus_name(bus))
@@ -301,6 +324,18 @@ func _options() -> void:
 		slider.value_changed.connect(func(value: float) -> void: AudioServer.set_bus_volume_db(bus, value))
 		_body.add_child(slider)
 	_button(_body, "Zurück", func() -> void: select_page(5))
+
+func _graphics_choice(text: String, option: String, choices: Array, selected: int, hint: String) -> void:
+	_label(_body, text)
+	var choice := OptionButton.new()
+	for item in choices:
+		choice.add_item(item)
+	choice.select(selected)
+	choice.tooltip_text = hint
+	choice.custom_minimum_size.y = NEDimensions.BUTTON_HEIGHT
+	choice.item_selected.connect(func(index: int) -> void: GraphicsSettings.set_option(option, index))
+	_body.add_child(choice)
+	_label(_body, hint)
 
 func _build_debug() -> void:
 	_label(_body, "Entwicklungswerkzeuge")

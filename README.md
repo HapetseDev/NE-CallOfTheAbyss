@@ -4,5 +4,5 @@ Ein Bisschen Final Fantasy, ein Bisschen Ultima, ein wenig PNP, hoffentlich komm
 
 ## Architekturarbeit
 
-- [Offene Entscheidungen und nächste Schritte](ARCHITEKTUR_OFFENE_PUNKTE.md)
+- [Design, Umsetzungsstand und offene Entscheidungen](docs/NascentEternity-Design-Document.md)
 - [WorldState und aktueller Speichervertrag](src/core/world/README.md)

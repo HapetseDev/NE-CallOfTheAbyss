@@ -72,5 +72,5 @@ Laufzeitfehler, globale Pause, Wiedereinsetzen nach einem Lade-Rollback,
 MainGame-Abbau und WorldState-Flagpersistenz. Bestehende
 WorldRules-/WorldLoader-/Level-/Dialogtests bleiben Regressionstests.
 
-Zielspezifikation: `docs/NECOTA_SEQUENCE_SYSTEM.md`. Als nächstes Marker,
-LiveActors und einen korrelierten Sequence-Dialogvertrag implementieren.
+Planung: [Sequence-Phasen und Verträge](../../../docs/NascentEternity-Design-Document.md#geplante-phasen-und-verträge).
+Geplante Commands sind noch nicht ausführbar; der aktuelle Umfang steht oben.
