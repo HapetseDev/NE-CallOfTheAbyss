@@ -5,6 +5,7 @@
 
 [sub_resource type="Resource" id="ItemUsageMode_stechen"]
 script = ExtResource("2_usage")
+damage_type = "pierce"
 mode_id = "stechen"
 label = "Stechen"
 attribute = 1
@@ -14,11 +15,13 @@ requires_line_of_sight = true
 
 [sub_resource type="Resource" id="ItemUsageMode_werfen"]
 script = ExtResource("2_usage")
+damage_type = "pierce"
 mode_id = "werfen"
 label = "Werfen"
 attribute = 1
 related_skill_id = "messerwerfen"
 range_type = 1
+range_meters = 10.0
 power = 8
 consumes_item = true
 requires_line_of_sight = true

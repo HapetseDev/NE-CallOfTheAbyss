@@ -1,6 +1,8 @@
 class_name NEColors
 extends RefCounted
 
+const HUD_CARD_NORMAL := Color(1.0, 1.0, 1.0, 1.0)
+
 ## Zentrale Farbpalette des NE-Designsystems.
 ## Werte sind aus der bereits bestehenden visuellen Identität des Projekts
 ## abgeleitet (dunkles HUD-Panel-Grau + gedämpftes Gold als Akzent, siehe

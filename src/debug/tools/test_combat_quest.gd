@@ -30,6 +30,10 @@ func _run() -> void:
 	check(not manager.is_in_combat(), "Flucht beendet diesen Kampf")
 	check(game._combat_order_hud._session == null and game._combat_order_hud._entries.is_empty(), "Kampfende entfernt Sitzung und Einträge aus dem HUD")
 	check(GameState.world_state.events.snapshot().is_empty(), "Flucht erzeugt kein Niederlageereignis")
+	# Nach der echten Flucht steht der Bandit weit entfernt. Die anschließende
+	# Testattacke braucht eine erreichbare, von anderen Figuren freie Linie.
+	leader.global_position = bandit.global_position + Vector3(0, 0, 1)
+	game.party.followers[0].global_position = bandit.global_position + Vector3(3, 0, 0)
 	CombatManager.trigger_attack(leader, bandit)
 	session = manager.active_session
 	var target := session.get_participant(bandit)

@@ -41,6 +41,11 @@ const TOOLTIP_MAX_WIDTH := 280
 # Standard-Innenabstand für Panels/Fenster (siehe MarginContainer-Nutzung)
 const PANEL_MARGIN := 16
 
+# Charakterkarten: Kampftransport und Reihenfolgeanimation.
+const COMBAT_CARD_SCALE := 0.5
+const COMBAT_CARD_TRANSITION_SEC := 0.3
+const COMBAT_CARD_REORDER_SEC := 0.18
+
 # Mindesthöhe der Porträts in der Vollbild-Gesprächsansicht.
 const DIALOGUE_PORTRAIT_SIZE := 144
 

@@ -15,6 +15,8 @@ signal inventory_changed
 ## Persistente Niederlage, unabhängig von HP und Tod. Heilung hebt sie nicht auf.
 @export var is_defeated: bool = false
 @export var character_name: String = ""
+## Gemeinsames Körperprofil; Profildefinitionen enthalten keine Verletzungsdaten.
+@export_enum("human", "beetle", "animal") var body_profile_id: String = "human"
 ## Sprechton: 1.0 = Standard, kleiner = tiefer, größer = höher.
 @export_range(0.25, 4.0, 0.01) var voice: float = 1.0
 @export var ausbildung: CharacterEnums.Ausbildung = CharacterEnums.Ausbildung.KEINE

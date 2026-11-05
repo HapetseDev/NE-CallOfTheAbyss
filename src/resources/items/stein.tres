@@ -18,6 +18,7 @@ mode_id = "werfen"
 label = "Werfen"
 attribute = 1
 range_type = 1
+range_meters = 10.0
 power = 5
 consumes_item = true
 requires_line_of_sight = true

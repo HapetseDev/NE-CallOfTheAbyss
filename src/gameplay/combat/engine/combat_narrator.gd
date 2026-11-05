@@ -52,6 +52,10 @@ static func _describe_outcome(actor: CombatParticipant, means: String, outcome: 
 	var target_name := "?"
 	if outcome.target and outcome.target.playable:
 		target_name = outcome.target.playable.get_display_name()
+		if not outcome.zone_id.is_empty():
+			var zone := CombatAnatomy.profile(outcome.target.playable.character).get_zone(outcome.zone_id)
+			if zone:
+				target_name += " (%s, %s)" % [zone.label, {"front": "von vorne", "side": "seitlich", "rear": "von hinten"}.get(outcome.incoming_direction, "")]
 	if outcome.healed > 0:
 		return "%s heilt %s mit %s um %d Punkte" % [actor_name, target_name, means, outcome.healed]
 	if outcome.evaded:
@@ -68,6 +72,10 @@ static func _reason_text(reason: String) -> String:
 			return "nicht genug Konzentration."
 		"no_line_of_sight":
 			return "keine freie Sicht auf das Ziel."
+		"out_of_range":
+			return "Ziel außerhalb der Waffenreichweite."
+		"no_ammunition":
+			return "keine passende Munition im Rucksack."
 		"effect_not_implemented":
 			return "Fähigkeit wirkt (noch) nicht."
 		"invalid_item", "invalid_ability", "invalid_actor":

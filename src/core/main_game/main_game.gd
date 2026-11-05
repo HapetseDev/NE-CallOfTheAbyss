@@ -97,9 +97,7 @@ func _setup_hud() -> void:
 		party.bind_hud(_party_hud, hud_root, below_bar)
 	_combat_order_hud = COMBAT_ORDER_HUD_SCENE.instantiate() as CombatOrderHud
 	hud_root.add_child(_combat_order_hud)
-	_combat_order_hud.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_combat_order_hud.offset_left = -236.0
-	_combat_order_hud.offset_right = -16.0
+	_combat_order_hud.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	_combat_order_hud.offset_top = below_bar
 	_event_log_hud = EVENT_LOG_HUD_SCENE.instantiate() as EventLogHud
 	hud_root.add_child(_event_log_hud)
@@ -109,7 +107,7 @@ func _setup_hud() -> void:
 	_event_log_hud.offset_top = -240.0
 	_event_log_hud.offset_bottom = -TOP_BAR_HEIGHT - NEDimensions.SPACING_S
 	if CombatManager.instance:
-		_combat_order_hud.bind(CombatManager.instance)
+		_combat_order_hud.bind(CombatManager.instance, _party_hud)
 
 
 

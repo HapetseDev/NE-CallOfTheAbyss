@@ -1,25 +1,5 @@
 [gd_scene format=3]
-
-[ext_resource type="Script" path="res://src/ui/hud/combat_order_entry.gd" id="1_entry"]
-[ext_resource type="StyleBoxFlat" path="res://src/ui/components/indicators/bar_background.tres" id="2_bar_bg"]
-[ext_resource type="StyleBoxFlat" path="res://src/ui/components/indicators/readiness_fill.tres" id="3_readiness_fill"]
-
-[node name="CombatOrderEntry" type="HBoxContainer"]
-custom_minimum_size = Vector2(200, 24)
-theme_override_constants/separation = 8
-script = ExtResource("1_entry")
-
-[node name="NameLabel" type="Label" parent="."]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 13
-clip_text = true
-
-[node name="ReadinessBar" type="ProgressBar" parent="."]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(70, 10)
-layout_mode = 2
-theme_override_styles/background = ExtResource("2_bar_bg")
-theme_override_styles/fill = ExtResource("3_readiness_fill")
-show_percentage = false
+[ext_resource type="Script" path="res://src/ui/hud/combat_order_entry.gd" id="1"]
+[node name="CombatOrderEntry" type="Control"]
+mouse_filter = 2
+script = ExtResource("1")

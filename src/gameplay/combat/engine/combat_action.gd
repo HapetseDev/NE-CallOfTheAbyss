@@ -16,5 +16,7 @@ var ability: AbilityDefinition = null
 ## ActionType.ITEM
 var item: ItemData = null
 var item_usage_mode: ItemUsageMode = null
+## Optionales räumliches Ziel; leer nutzt die Standardzone des Körperprofils.
+var target_zone_id: String = ""
 ## ActionType.MOVE
 var move_target_position: Vector3 = Vector3.ZERO

@@ -1,14 +1,16 @@
 class_name CombatLineOfSight
 
 ## Prüft, ob zwischen zwei Charakteren eine freie Sichtlinie besteht (kein
-## anderer Körper – Wand oder Charakter – steht dazwischen). Nahkampf,
-## Fernkampf und die meiste Magie sind ohne freie Sicht nicht anwendbar.
+## anderer Körper – Wand oder Charakter – steht dazwischen). Fähigkeiten nutzen
+## diese Sichtprüfung; Waffen nutzen get_attack_body() für den ersten Treffer.
 ##
 ## Verwendet Raycasts zur Sichtprüfung (PhysicsRayQueryParameters3D,
 ## RID-Exclude der eigenen Collider, Boden-Normalen-Filter). Anders als dort zählen
 ## hier andere Charakterkörper selbst als Blocker, nicht nur Wände.
 
 const EYE_HEIGHT := 1.5
+## Körperkapseln der vorhandenen Figuren sind 1 m hoch, Mittelpunkt bei 0,5 m.
+const ATTACK_HEIGHT := 0.5 * WorldUnits.METER
 const FLOOR_NORMAL_Y := 0.65
 
 ## Layer-Werte aus project.godot: Player=1, Walls=16(Bit 5), NPC=256(Bit 9).
@@ -16,6 +18,24 @@ const LAYER_PLAYER := 1
 const LAYER_WALLS := 16
 const LAYER_NPC := 256
 const DEFAULT_LOS_MASK := LAYER_PLAYER | LAYER_WALLS | LAYER_NPC
+
+
+## Waffenvektor: erster Körper auf der Linie, Angreifer ausgenommen.
+## Im Gegensatz zur Sichtprüfung wird das gewählte Ziel nicht ausgeschlossen.
+static func get_attack_body(from: Node3D, to: Node3D, check_walls: bool = true) -> Node:
+	if not is_instance_valid(from) or not is_instance_valid(to) or not from.is_inside_tree() or not to.is_inside_tree():
+		return null
+	var exclude: Array[RID] = []
+	_collect_collision_rids(from, exclude)
+	var query := PhysicsRayQueryParameters3D.create(
+		from.global_position + Vector3.UP * ATTACK_HEIGHT,
+		to.global_position + Vector3.UP * ATTACK_HEIGHT)
+	query.exclude = exclude
+	query.collision_mask = DEFAULT_LOS_MASK if check_walls else LAYER_PLAYER | LAYER_NPC
+	query.collide_with_areas = false
+	query.hit_from_inside = true
+	var hit := from.get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.get("collider") as Node
 
 
 static func has_clear_line(from: Node3D, to: Node3D, mask: int = DEFAULT_LOS_MASK) -> bool:

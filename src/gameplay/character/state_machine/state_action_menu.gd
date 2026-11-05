@@ -1,7 +1,7 @@
 class_name StateActionMenu extends State
 
 # Radius um den Spieler, in dem Interaktionen gesucht werden (in Metern)
-@export var action_range: float = 1.5
+@export var action_range: float = WorldUnits.INTERACTION_RADIUS
 
 @onready var idle: State = $"../Idle"
 @onready var walk: State = $"../Walk"

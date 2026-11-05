@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/resources/items/item_data.gd" id="1_item"]
+[ext_resource type="Script" path="res://src/resources/items/item_usage_mode.gd" id="2_usage"]
+
+[sub_resource type="Resource" id="Mode"]
+script = ExtResource("2_usage")
+damage_type = "pierce"
+mode_id = "pfeil_angriff"
+label = "Stechen"
+attribute = 0
+range_type = 0
+range_meters = 1.0
+power = 1
+ammunition_item_id = ""
+
+[resource]
+script = ExtResource("1_item")
+item_id = "Pfeil"
+item_name = "Pfeil"
+description = "Pfeil: 1 m Angriffsreichweite."
+weight = 0.03
+max_stack = 99
+combat_value = 1
+combat_skill_id = ""
+equipment_slot = "primaer_hand"
+usage_modes = Array[ExtResource("2_usage")]([SubResource("Mode")])

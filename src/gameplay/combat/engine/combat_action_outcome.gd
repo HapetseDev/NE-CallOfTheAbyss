@@ -9,3 +9,6 @@ var damage: int = 0
 var healed: int = 0
 var evaded: bool = false
 var defeated: bool = false
+var zone_id: String = ""
+var incoming_direction: String = "front"
+var damage_type: String = "blunt"

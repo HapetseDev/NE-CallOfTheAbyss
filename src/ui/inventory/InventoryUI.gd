@@ -196,6 +196,13 @@ func _inspect_item(item: ItemData) -> void:
 	var lines: PackedStringArray = [item.item_name, "Gewicht: %.2f" % item.weight]
 	if item.is_armor:
 		lines.append("Rüstung")
+		var covered: PackedStringArray = []
+		for id in item.armor_zones:
+			covered.append(CombatAnatomy.zone_label(id))
+		lines.append("Schutz: " + (", ".join(covered) if not covered.is_empty() else "nach angelegtem Körperplatz"))
+		for type in CombatAnatomy.DAMAGE_TYPES:
+			if item.armor_protection.has(type):
+				lines.append("%s-Schutz: %.1f" % [CombatAnatomy.DAMAGE_LABELS[type], item.armor_protection[type]])
 	if item.get_combat_value() > 1:
 		lines.append("Kampfwert: %d" % item.get_combat_value())
 	if not item.description.is_empty():
@@ -207,7 +214,7 @@ func _inspect_item(item: ItemData) -> void:
 	for mode in item.usage_modes:
 		if mode:
 			var value_text := " · Kampfwert %d" % item.get_combat_value(mode) if item.get_combat_value(mode) > 1 else ""
-			lines.append("%s%s · %s" % [mode.label, value_text, "Fernkampf" if mode.range_type == ItemUsageMode.RangeType.THROWN else "Nahkampf"])
+			lines.append("%s%s · %s · %.1f m · %s" % [mode.label, value_text, "Nahkampf" if mode.range_type == ItemUsageMode.RangeType.MELEE else "Fernkampf", mode.range_meters, CombatAnatomy.DAMAGE_LABELS.get(mode.damage_type, mode.damage_type)])
 	_stats.text = "\n".join(lines)
 
 

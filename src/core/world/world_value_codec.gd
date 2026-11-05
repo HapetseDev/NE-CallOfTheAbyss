@@ -19,6 +19,8 @@ var migrate_legacy_voice: bool = false
 var migrate_legacy_character_state: bool = false
 var migrate_legacy_combat_items: bool = false
 var migrate_legacy_armor_items: bool = false
+var migrate_legacy_weapon_ranges: bool = false
+var migrate_legacy_anatomy: bool = false
 
 
 func encode(value: Variant) -> Variant:
@@ -91,6 +93,23 @@ func decode(value: Variant, depth: int = 0) -> Variant:
 	if not kind is String or not TYPES.has(kind) or not data is Dictionary:
 		failed = true
 		return null
+	if migrate_legacy_anatomy:
+		data = data.duplicate()
+		if kind == "CharacterResource" and not data.has("body_profile_id"):
+			data.body_profile_id = "human"
+		if kind == "ItemUsageMode" and not data.has("damage_type"):
+			data.damage_type = "blunt"
+		if kind == "ItemData":
+			if not data.has("armor_zones"):
+				data.armor_zones = []
+			if not data.has("armor_protection"):
+				data.armor_protection = {"kind": "Dictionary", "value": {}}
+	if kind == "CharacterResource" and (not data.get("body_profile_id") is String or not CombatAnatomy.PROFILE_PATHS.has(data.body_profile_id)):
+		failed = true
+		return null
+	if kind == "ItemUsageMode" and data.get("damage_type") not in CombatAnatomy.DAMAGE_TYPES:
+		failed = true
+		return null
 	if migrate_legacy_character_state and kind == "CharacterResource" and not data.has("is_defeated"):
 		data = data.duplicate()
 		data.is_defeated = false
@@ -114,6 +133,17 @@ func decode(value: Variant, depth: int = 0) -> Variant:
 			failed = true
 			return null
 	var resource: Resource = load(TYPES[kind]).new()
+	if kind == "ItemUsageMode":
+		if migrate_legacy_weapon_ranges:
+			data = data.duplicate()
+			if not data.has("range_meters"):
+				data.range_meters = 10.0 if data.get("range_type") == ItemUsageMode.RangeType.THROWN else 1.5
+			if not data.has("ammunition_item_id"):
+				data.ammunition_item_id = ""
+		var reach: Variant = data.get("range_meters")
+		if not (reach is float or reach is int) or not is_finite(reach) or reach <= 0.0 or reach > 1000.0 or not data.get("ammunition_item_id") is String:
+			failed = true
+			return null
 	var properties: Dictionary = {}
 	for property in resource.get_property_list():
 		if _stored(property):
@@ -171,7 +201,29 @@ func decode(value: Variant, depth: int = 0) -> Variant:
 			target.assign(decoded)
 		else:
 			resource.set(key, decoded)
+	if kind == "ItemData" and not _valid_armor(resource as ItemData):
+		failed = true
+		return null
 	return resource
+
+
+func _valid_armor(item: ItemData) -> bool:
+	for type in item.armor_protection:
+		var amount: Variant = item.armor_protection[type]
+		if type not in CombatAnatomy.DAMAGE_TYPES or not (amount is int or amount is float) or not is_finite(amount) or amount < 0 or amount > 1000:
+			return false
+	var seen: Array[String] = []
+	for id in item.armor_zones:
+		if id in seen:
+			return false
+		seen.append(id)
+		var known := false
+		for profile_id in CombatAnatomy.PROFILE_PATHS:
+			if CombatAnatomy.profile_for_id(profile_id).get_zone(id) != null:
+				known = true
+		if not known:
+			return false
+	return true
 
 
 func _stored(property: Dictionary) -> bool:

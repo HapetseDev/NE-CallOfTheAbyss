@@ -1,7 +1,41 @@
-[gd_resource type="Resource" script_class="CharacterResource" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="CharacterResource" load_steps=18 format=3]
 
 [ext_resource type="Script" uid="uid://b00j3lcjo3wq5" path="res://src/resources/characters/character_sheet.gd" id="1"]
 [ext_resource type="Script" uid="uid://dvaktft3p8jrl" path="res://src/resources/characters/learned_skill.gd" id="2"]
+
+[ext_resource type="Script" path="res://src/gameplay/inventory/inventory.gd" id="3_inventory"]
+[ext_resource type="Script" path="res://src/gameplay/inventory/InventorySlot.gd" id="4_slot"]
+
+[ext_resource type="Resource" path="res://src/resources/items/bogen.tres" id="weapon_bogen"]
+[ext_resource type="Resource" path="res://src/resources/items/speer.tres" id="weapon_speer"]
+[ext_resource type="Resource" path="res://src/resources/items/dolch.tres" id="weapon_dolch"]
+[ext_resource type="Resource" path="res://src/resources/items/schwert.tres" id="weapon_schwert"]
+[ext_resource type="Resource" path="res://src/resources/items/pfeil.tres" id="weapon_pfeil"]
+
+[sub_resource type="Resource" id="Starting_bogen"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_bogen")
+count = 1
+
+[sub_resource type="Resource" id="Starting_speer"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_speer")
+count = 1
+
+[sub_resource type="Resource" id="Starting_dolch"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_dolch")
+count = 1
+
+[sub_resource type="Resource" id="Starting_schwert"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_schwert")
+count = 1
+
+[sub_resource type="Resource" id="Starting_pfeil"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_pfeil")
+count = 20
 
 [sub_resource type="Resource" id="LearnedSkill_ausweichen"]
 script = ExtResource("2")
@@ -12,6 +46,10 @@ level = 2
 script = ExtResource("2")
 skill_id = "meditieren"
 level = 1
+
+[sub_resource type="Resource" id="StartingInventory"]
+script = ExtResource("3_inventory")
+slots = Array[ExtResource("4_slot")]([SubResource("Starting_bogen"), SubResource("Starting_speer"), SubResource("Starting_dolch"), SubResource("Starting_schwert"), SubResource("Starting_pfeil")])
 
 [resource]
 script = ExtResource("1")
@@ -32,3 +70,5 @@ praesenz = 2
 learned_skills = [SubResource("LearnedSkill_ausweichen"), SubResource("LearnedSkill_meditieren")]
 active_training_skill_ids = Array[String](["ausweichen", "meditieren"])
 gold = 20
+
+inventory = SubResource("StartingInventory")

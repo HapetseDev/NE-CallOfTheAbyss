@@ -45,7 +45,7 @@ dieselbe Slot-Liste.
 Der Roundtrip neuer Plätze und das Ergänzen alter Inventare werden durch
 `test_inventory_layout.tscn` geprüft.
 
-## Speichervertrag Version 11
+## Speichervertrag Version 13
 
 `LevelManager.instance.save_world(path)` erfasst den Zustand im freien Gameplay
 und schreibt JSON. Während Kampf/Dialog/anderer Eingabesperre liefert es
@@ -82,7 +82,7 @@ sollte sie keinen notwendigen Code nach dem `await` besitzen. Der Autoload führ
 den Ablauf unabhängig von diesem Aufrufer zu Ende. Isolierte Daten-Snapshots ohne
 aktive Welt bleiben mit `WorldSaveStore.read` lesbar, sind aber keine ladbaren
 Spielsitzungen. `install_world` bleibt eine niedrige Daten-API für Tests/Bootstrap.
-Das aktuelle Speicherformat ist Version 11; Version 8 führte die Kartendaten ein.
+Das aktuelle Speicherformat ist Version 13; Version 8 führte die Kartendaten ein.
 Version 11 speichert `CharacterResource.voice` (Tonhöhenfaktor 0,25–4,0); ältere
 Charakterdaten werden auf 1,0 migriert. Ungültige Voice-Werte werden abgelehnt.
 
@@ -118,7 +118,7 @@ getrennter gleichnamiger Slots, großer Listen, Suche und Schreibfehlern.
 
 Automatisches Speichern sowie Überschreiben, Umbenennen und Löschen über die
 Oberfläche sind nicht Bestandteil dieses Schritts. Bestehende Speicherdateien
-bleiben erhalten. Das aktuelle Speicherformat ist Version 11; Version 8 führte die Kartendaten ein.
+bleiben erhalten. Das aktuelle Speicherformat ist Version 13; Version 8 führte die Kartendaten ein.
 Version 11 speichert `CharacterResource.voice` (Tonhöhenfaktor 0,25–4,0); ältere
 Charakterdaten werden auf 1,0 migriert. Ungültige Voice-Werte werden abgelehnt.
 
@@ -634,3 +634,30 @@ Abspielpositionen sind kein persistenter Charakterzustand.
 1–9 wird nur ein fehlender Wert mit `false` ergänzt; vorhandene Angaben bleiben
 erhalten. Kleidung wird nicht anhand ihres Namens oder Platzes automatisch als
 Rüstung eingeordnet. Version 10 verlangt das Feld und dessen korrekten Typ.
+
+## Waffenreichweiten – Speicherformat 12
+
+Version 12 ergänzt `ItemUsageMode.range_meters` (endliche Zahl größer 0 bis
+1000) und `ammunition_item_id` (String). Der generische Resource-Writer erfasst
+beide Felder; der Reader prüft sie. Versionen 1–11 ergänzen fehlende Felder mit
+1,5 m für Nahkampf bzw. 10 m für Wurf und leerer Munitions-ID. Version 12
+verlangt die Felder ausdrücklich. Alle übrigen Migrationen bleiben erhalten.
+
+`test_weapon_ranges.tscn` prüft Ressourcen, Weltobjekte, Grenzdistanzen,
+Höhenunterschiede, Codec-Rundlauf, Migration, ungültige Werte und Pfeilverbrauch.
+
+## Anatomie und örtlicher Rüstungsschutz – Speicherformat 13
+
+`CharacterResource.body_profile_id` verweist auf einen der freigegebenen
+Profil-IDs `human`, `beetle`, `animal`. Die gemeinsamen Profilressourcen und ihre
+rechnerischen Trefferboxen gehören zur Projektdefinition, nicht in den Save.
+`ItemData.armor_zones` ist eine Liste bekannter Zonen-IDs ohne Duplikate;
+`armor_protection` enthält endliche Schutzwerte von 0 bis 1000 pro freigegebener
+Schadensart. `ItemUsageMode.damage_type` ist `blunt`, `slash`, `pierce` oder `magic`.
+
+Versionen 1–12 ergänzen fehlende Anatomiefelder mit Menschenprofil, leerer
+Rüstungsabdeckung/-minderung und Wuchtschaden. Leere Abdeckung bedeutet Schutz
+über den tatsächlich angelegten Körperplatz. Version 13 verlangt alle Felder.
+Writer, Reader und Validierung verwenden denselben Vertrag. Die Migration
+verändert vorhandene Angaben nicht. `test_combat_anatomy.tscn` prüft zusätzlich
+einen vollständigen Welt-Rundlauf und echte Version-12-Migration.

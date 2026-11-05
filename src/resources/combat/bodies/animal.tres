@@ -1,0 +1,79 @@
+[gd_resource type="Resource" script_class="CombatBodyProfile" load_steps=10 format=3]
+[ext_resource type="Script" path="res://src/resources/combat/body_profile.gd" id="1"]
+[ext_resource type="Script" path="res://src/resources/combat/body_zone.gd" id="2"]
+
+[sub_resource type="Resource" id="head"]
+script = ExtResource("2")
+zone_id = "head"
+label = "Kopf"
+center = Vector3(0, 0.7, 0.48)
+size = Vector3(0.3, 0.3, 0.35)
+damage_multiplier = 1.6
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="torso"]
+script = ExtResource("2")
+zone_id = "torso"
+label = "Rumpf"
+center = Vector3(0, 0.56, 0)
+size = Vector3(0.4, 0.38, 0.65)
+damage_multiplier = 1.0
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="belly"]
+script = ExtResource("2")
+zone_id = "belly"
+label = "Bauch"
+center = Vector3(0, 0.32, 0)
+size = Vector3(0.36, 0.16, 0.6)
+damage_multiplier = 1.2
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="front_leg_left"]
+script = ExtResource("2")
+zone_id = "front_leg_left"
+label = "Linkes Vorderbein"
+center = Vector3(-0.16, 0.17, 0.22)
+size = Vector3(0.12, 0.34, 0.15)
+damage_multiplier = 0.75
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="front_leg_right"]
+script = ExtResource("2")
+zone_id = "front_leg_right"
+label = "Rechtes Vorderbein"
+center = Vector3(0.16, 0.17, 0.22)
+size = Vector3(0.12, 0.34, 0.15)
+damage_multiplier = 0.75
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="rear_leg_left"]
+script = ExtResource("2")
+zone_id = "rear_leg_left"
+label = "Linkes Hinterbein"
+center = Vector3(-0.16, 0.17, -0.22)
+size = Vector3(0.12, 0.34, 0.15)
+damage_multiplier = 0.75
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="rear_leg_right"]
+script = ExtResource("2")
+zone_id = "rear_leg_right"
+label = "Rechtes Hinterbein"
+center = Vector3(0.16, 0.17, -0.22)
+size = Vector3(0.12, 0.34, 0.15)
+damage_multiplier = 0.75
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[resource]
+script = ExtResource("1")
+profile_id = "animal"
+default_zone_id = "torso"
+zones = Array[ExtResource("2")]([SubResource("head"), SubResource("torso"), SubResource("belly"), SubResource("front_leg_left"), SubResource("front_leg_right"), SubResource("rear_leg_left"), SubResource("rear_leg_right")])

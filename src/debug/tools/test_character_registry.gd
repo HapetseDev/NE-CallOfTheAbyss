@@ -250,7 +250,14 @@ func _test_session_lifecycle() -> void:
 	game = get_tree().current_scene as MainGame
 	_check(game.party.leader.character != leader and game.party.leader.gold == 50, "Neues Spiel erzeugt frischen Dannerman")
 	_check(game.party.followers[0].character != follower and game.party.followers[0].gold == 20, "Neues Spiel erzeugt frische Shalka")
-	_check(game.party.leader.inventory.size() == 1, "Neues Spiel vergibt genau ein Startmesser")
+	_check(game.party.leader.inventory.size() == 6, "Neues Spiel erhält Messer und fünf weitere Gegenstandsstapel")
+	for member in game.party.get_all_members():
+		var counts: Dictionary = {}
+		for slot in member.inventory:
+			counts[slot.item.item_id] = int(counts.get(slot.item.item_id, 0)) + slot.count
+		for weapon in ["Bogen", "Speer", "Dolch", "Schwert"]:
+			_check(counts.get(weapon, 0) == 1, member.get_display_name() + ": einmal " + weapon)
+		_check(counts.get("Pfeil", 0) == 20, member.get_display_name() + ": 20 Startpfeile")
 	_check(GameState.character_registry.get_character("bandit_01") != bandit, "Neues Spiel erzeugt frische NPC-Daten")
 	_check(game.shop_manager.get_shop("haendler_01").entries[0].stock == stock, "Neues Spiel stellt Händlerbestand wieder her")
 	_check(not GameState.is_player_input_locked() and not GameState.has_flag("in_combat"), "Neues Spiel beginnt ohne alte Sperren oder Kampfflags")

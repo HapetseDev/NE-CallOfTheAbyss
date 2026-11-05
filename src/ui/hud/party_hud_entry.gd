@@ -28,7 +28,7 @@ func _apply_portrait() -> void:
 
 
 func refresh() -> void:
-	if member == null:
+	if not is_instance_valid(member):
 		return
 	_hp_bar.max_value = member.get_max_health()
 	_hp_bar.value = clampf(float(member.health), float(-member.get_max_health()), float(member.get_max_health()))
@@ -36,3 +36,16 @@ func refresh() -> void:
 	_mp_bar.max_value = member.get_max_mana()
 	_mp_bar.value = clampf(float(member.mana), float(-member.get_max_mana()), float(member.get_max_mana()))
 	_mp_label.text = "KP %d / %d" % [member.mana, member.get_max_mana()]
+
+
+func set_combat_presentation(active: bool, color: Color) -> void:
+	if not is_instance_valid(member):
+		return
+	_name_label.text = ("► " if active else "") + member.get_display_name()
+	_name_label.add_theme_color_override(&"font_color", color)
+
+
+func clear_combat_presentation() -> void:
+	if is_instance_valid(member):
+		_name_label.text = member.get_display_name()
+	_name_label.remove_theme_color_override(&"font_color")

@@ -10,7 +10,7 @@ class_name StatePartySkills extends State
 ## Menü-Baumuster wie state_action_menu.gd/state_combat_turn.gd: programmatisch
 ## gebaute CanvasLayer/Control/VBoxContainer, kein eigenes .tscn.
 
-@export var action_range: float = 1.5
+@export var action_range: float = WorldUnits.INTERACTION_RADIUS
 
 @onready var idle: State = $"../Idle"
 

@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="CombatBodyProfile" load_steps=8 format=3]
+[ext_resource type="Script" path="res://src/resources/combat/body_profile.gd" id="1"]
+[ext_resource type="Script" path="res://src/resources/combat/body_zone.gd" id="2"]
+
+[sub_resource type="Resource" id="head"]
+script = ExtResource("2")
+zone_id = "head"
+label = "Kopf"
+center = Vector3(0, 0.42, 0.43)
+size = Vector3(0.32, 0.3, 0.3)
+damage_multiplier = 1.3
+natural_protection = {"blunt": 1, "slash": 2, "pierce": 1}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="carapace"]
+script = ExtResource("2")
+zone_id = "carapace"
+label = "Rückenschild"
+center = Vector3(0, 0.64, -0.12)
+size = Vector3(0.7, 0.4, 0.65)
+damage_multiplier = 0.9
+natural_protection = {"blunt": 4, "slash": 8, "pierce": 6}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="belly"]
+script = ExtResource("2")
+zone_id = "belly"
+label = "Bauch"
+center = Vector3(0, 0.28, -0.08)
+size = Vector3(0.6, 0.3, 0.6)
+damage_multiplier = 1.4
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="joint_left"]
+script = ExtResource("2")
+zone_id = "joint_left"
+label = "Linkes Beingelenk"
+center = Vector3(-0.4, 0.25, 0)
+size = Vector3(0.16, 0.18, 0.45)
+damage_multiplier = 1.2
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[sub_resource type="Resource" id="joint_right"]
+script = ExtResource("2")
+zone_id = "joint_right"
+label = "Rechtes Beingelenk"
+center = Vector3(0.4, 0.25, 0)
+size = Vector3(0.16, 0.18, 0.45)
+damage_multiplier = 1.2
+natural_protection = {}
+equipment_slots = Array[String]([])
+
+[resource]
+script = ExtResource("1")
+profile_id = "beetle"
+default_zone_id = "carapace"
+zones = Array[ExtResource("2")]([SubResource("head"), SubResource("carapace"), SubResource("belly"), SubResource("joint_left"), SubResource("joint_right")])

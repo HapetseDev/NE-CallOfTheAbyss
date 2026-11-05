@@ -18,6 +18,10 @@ var _next_state: State = null
 
 var _canvas_layer: CanvasLayer
 var _vbox: VBoxContainer
+var _attack_line: MeshInstance3D
+var _preview_target: CombatParticipant
+var _preview_mode: ItemUsageMode
+var _preview_zone_id: String = ""
 
 
 func enter() -> void:
@@ -38,7 +42,12 @@ func exit() -> void:
 	_destroy_menu()
 
 
+func _exit_tree() -> void:
+	_clear_attack_line()
+
+
 func process(_delta: float) -> State:
+	_update_attack_line()
 	if _turn_over:
 		return combat_wait
 	if _next_state:
@@ -66,6 +75,7 @@ func _build_menu() -> void:
 
 
 func _destroy_menu() -> void:
+	_clear_attack_line()
 	if is_instance_valid(_canvas_layer):
 		_canvas_layer.queue_free()
 	_canvas_layer = null
@@ -73,6 +83,7 @@ func _destroy_menu() -> void:
 
 
 func _clear_vbox() -> void:
+	_clear_attack_line()
 	if _vbox == null:
 		return
 	for child in _vbox.get_children():
@@ -88,14 +99,15 @@ func _add_label(text: String) -> void:
 	_vbox.add_child(label)
 
 
-func _add_button(text: String, callback: Callable, disabled: bool = false) -> void:
+func _add_button(text: String, callback: Callable, disabled: bool = false) -> Button:
 	if _vbox == null:
-		return
+		return null
 	var btn := Button.new()
 	btn.text = text
 	btn.disabled = disabled
 	btn.pressed.connect(callback)
 	_vbox.add_child(btn)
+	return btn
 
 
 # --- Wurzel ---
@@ -150,20 +162,129 @@ func _render_item_target_menu(item: ItemData, mode: ItemUsageMode) -> void:
 	if candidates.is_empty():
 		_add_label("Kein Ziel verfügbar.")
 	for target in candidates:
-		var blocked := mode.requires_line_of_sight and not CombatLineOfSight.has_clear_line(player, target.playable)
+		var out_of_range := not mode.is_in_range(player, target.playable)
+		var recipient := CombatResolver.get_item_attack_target(_participant, target, mode)
+		var blocked := recipient == null
 		var label := target.playable.get_display_name()
 		if blocked:
-			label += " (keine Sichtlinie)"
-		_add_button(label, _on_item_target_chosen.bind(item, mode, target), blocked)
+			label += " (Angriffslinie blockiert)"
+		elif recipient != target:
+			label += " (trifft zuerst: %s)" % recipient.playable.get_display_name()
+		if recipient != null and not mode.is_in_range(player, recipient.playable):
+			blocked = true
+			label += " (außer Reichweite: %.1f m)" % mode.range_meters
+		if blocked and not out_of_range:
+			# Hinter Deckung kann z.B. der Kopf statt des Rumpfs erreichbar sein.
+			for zone in CombatAnatomy.profile(target.playable.character).zones:
+				var alternative := CombatResolver.get_item_attack_target(_participant, target, mode, zone.zone_id)
+				if alternative != null and mode.is_in_range(player, alternative.playable):
+					blocked = false
+					label += " (andere Trefferstelle möglich)"
+					break
+		if out_of_range:
+			blocked = true
+			label += " (Außerhalb der Reichweite von %s: max. %.1f m)" % [item.item_name, mode.range_meters]
+		if not mode.ammunition_item_id.is_empty() and not player.character.inventory.has_item(mode.ammunition_item_id):
+			blocked = true
+			label += " (keine Munition)"
+		var button := _add_button(label, _render_item_zone_menu.bind(item, mode, target), blocked)
+		if button:
+			if out_of_range:
+				_mark_out_of_range(button)
+			button.mouse_entered.connect(_preview_attack.bind(target, mode))
+			button.focus_entered.connect(_preview_attack.bind(target, mode))
 	_add_button("Zurück", _render_item_menu)
+	if not candidates.is_empty():
+		_preview_attack(candidates[0], mode)
 
 
-func _on_item_target_chosen(item: ItemData, mode: ItemUsageMode, target: CombatParticipant) -> void:
+func _render_item_zone_menu(item: ItemData, mode: ItemUsageMode, target: CombatParticipant) -> void:
+	_clear_vbox()
+	_add_label("Trefferstelle: %s" % target.playable.get_display_name())
+	for zone in CombatAnatomy.profile(target.playable.character).zones:
+		var hit := CombatResolver.get_item_attack_hit(_participant, target, mode, zone.zone_id)
+		var recipient := hit.get("target") as CombatParticipant
+		var blocked := recipient == null or (recipient != null and not mode.is_in_range(player, recipient.playable))
+		var out_of_range := not mode.is_in_range(player, target.playable) or (recipient != null and not mode.is_in_range(player, recipient.playable))
+		blocked = blocked or out_of_range
+		var label := zone.label
+		if recipient != null:
+			var actual_zone := CombatAnatomy.profile(recipient.playable.character).get_zone(hit.zone_id)
+			label += " → %s: %s" % [recipient.playable.get_display_name(), actual_zone.label]
+		else:
+			label += " (blockiert)"
+		if out_of_range:
+			label += " (Außerhalb der Reichweite von %s: max. %.1f m)" % [item.item_name, mode.range_meters]
+		if not mode.ammunition_item_id.is_empty() and not player.character.inventory.has_item(mode.ammunition_item_id):
+			blocked = true
+		var button := _add_button(label, _on_item_target_chosen.bind(item, mode, target, zone.zone_id), blocked)
+		if button:
+			if out_of_range:
+				_mark_out_of_range(button)
+			button.mouse_entered.connect(_preview_attack.bind(target, mode, zone.zone_id))
+			button.focus_entered.connect(_preview_attack.bind(target, mode, zone.zone_id))
+	_add_button("Zurück", _render_item_target_menu.bind(item, mode))
+	_preview_attack(target, mode)
+
+
+func _mark_out_of_range(button: Button) -> void:
+	# Semantischer Fehlerzustand, vorhandene globalen Button-StyleBoxen beibehalten.
+	for property in ["font_color", "font_disabled_color", "font_hover_color", "font_focus_color", "font_pressed_color"]:
+		button.add_theme_color_override(property, NEColors.DANGER)
+	button.tooltip_text = button.text
+
+
+func _preview_attack(target: CombatParticipant, mode: ItemUsageMode, zone_id: String = "") -> void:
+	_preview_target = target
+	_preview_mode = mode
+	_preview_zone_id = zone_id
+	_update_attack_line()
+
+
+func _update_attack_line() -> void:
+	if _preview_target == null or not is_instance_valid(_preview_target.playable):
+		if is_instance_valid(_attack_line):
+			_clear_attack_line()
+		return
+	if not is_instance_valid(_attack_line):
+		_attack_line = MeshInstance3D.new()
+		_attack_line.name = "AttackVectorPreview"
+		_attack_line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		player.get_parent().add_child(_attack_line)
+		_attack_line.top_level = true
+		_attack_line.global_transform = Transform3D.IDENTITY
+	var recipient := CombatResolver.get_item_attack_target(_participant, _preview_target, _preview_mode, _preview_zone_id)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = NEColors.WARNING if recipient != _preview_target else NEColors.ACCENT
+	if not _preview_mode.is_in_range(player, _preview_target.playable) or (recipient != null and not _preview_mode.is_in_range(player, recipient.playable)):
+		material.albedo_color = NEColors.DANGER
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	mesh.surface_add_vertex(CombatAnatomy.aim_point(player))
+	mesh.surface_add_vertex(CombatAnatomy.aim_point(_preview_target.playable, _preview_zone_id))
+	mesh.surface_end()
+	_attack_line.mesh = mesh
+
+
+func _clear_attack_line() -> void:
+	_preview_target = null
+	_preview_mode = null
+	_preview_zone_id = ""
+	if is_instance_valid(_attack_line):
+		_attack_line.queue_free()
+	_attack_line = null
+
+
+func _on_item_target_chosen(item: ItemData, mode: ItemUsageMode, target: CombatParticipant, zone_id: String = "") -> void:
+	if _turn_over:
+		return
 	var action := CombatAction.new()
 	action.actor = _participant
 	action.type = CombatAction.ActionType.ITEM
 	action.item = item
 	action.item_usage_mode = mode
+	action.target_zone_id = zone_id
 	action.targets = [target]
 	_apply_result(action, CombatResolver.resolve_action(action))
 
@@ -208,10 +329,15 @@ func _render_ability_target_menu(ability: AbilityDefinition, side: StringName) -
 		_add_label("Kein Ziel verfügbar.")
 	for target in candidates:
 		var blocked := ability.requires_line_of_sight and not CombatLineOfSight.has_clear_line(player, target.playable)
+		var out_of_range := not ability.is_in_range(player, target.playable)
 		var label := target.playable.get_display_name()
 		if blocked:
 			label += " (keine Sichtlinie)"
-		_add_button(label, _on_ability_target_chosen.bind(ability, target), blocked)
+		if out_of_range:
+			label += " (Außerhalb der Reichweite von %s: max. %.1f m)" % [ability.ability_name, ability.melee_range_meters]
+		var button := _add_button(label, _on_ability_target_chosen.bind(ability, target), blocked or out_of_range)
+		if button and out_of_range:
+			_mark_out_of_range(button)
 	_add_button("Zurück", _render_ability_menu)
 
 

@@ -24,3 +24,15 @@ enum EffectType { DAMAGE, HEAL, BUFF, DEBUFF, UTILITY }
 @export var effect_type: EffectType = EffectType.DAMAGE
 @export var power: int = 0
 @export var requires_line_of_sight: bool = true
+@export_enum("blunt", "slash", "pierce", "magic") var damage_type: String = "magic"
+## Reichweitenbegrenzung für Nahkampffähigkeiten einschließlich Fausthieb.
+@export_range(0.01, 1000.0, 0.1, "suffix:m") var melee_range_meters: float = 1.5 * WorldUnits.METER
+
+func is_in_range(origin: Node3D, target: Node3D) -> bool:
+	if range_type != RangeType.MELEE:
+		return true
+	if not is_instance_valid(origin) or not is_instance_valid(target) or not is_finite(melee_range_meters) or melee_range_meters <= 0:
+		return false
+	var start := origin.global_position if origin.is_inside_tree() else origin.position
+	var end := target.global_position if target.is_inside_tree() else target.position
+	return start.distance_squared_to(end) <= melee_range_meters * melee_range_meters
