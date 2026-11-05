@@ -19,7 +19,7 @@ const IMPROVISED_ITEM_POWER := 1
 const MITIGATION_FACTOR := 1.0
 
 ## Radius, in dem Charaktere auf einen Angriff reagieren (CombatParticipantResolver).
-const AWARENESS_RADIUS := 8.0
+const AWARENESS_RADIUS := 8.0 * WorldUnits.METER
 
 ## Fliehen: Grundchance +/- Differenz zur durchschnittlichen Gewandheit der Gegenseite.
 const FLEE_BASE_CHANCE := 0.5
@@ -38,9 +38,8 @@ const STEAL_CHANCE_MAX := 0.9
 ## "Bewegen"-Kampfzug: freie Positionierung in einem Kreis um die
 ## Ausgangsposition. Radius = effektive Gewandheit * STANDARD_LENGTH (später
 ## ggf. durch Perks modifizierbar). Ein Attributspunkt Gewandheit entspricht
-## also genau einer Standardlänge (~1 Meter in der Spielwelt); da Attribute
+## also genau einem Meter in der Spielwelt; da Attribute
 ## nie unter 1 starten, ist das gleichzeitig der praktische Mindestradius.
-const STANDARD_LENGTH := 1.0
-## Bewegungstempo während der freien Positionierung (kein Sprint), entspricht
-## StateWalk.base_speed.
-const COMBAT_MOVE_SPEED := 1.0
+const STANDARD_LENGTH := WorldUnits.METER
+## Bewegungstempo während der freien Positionierung: 1 Meter/Sekunde.
+const COMBAT_MOVE_SPEED := 1.0 * WorldUnits.METER

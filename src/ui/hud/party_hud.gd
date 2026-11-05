@@ -14,6 +14,8 @@ var _party: Party
 var _entries: Array[PartyHudEntry] = []
 var _moving_time: float = 0.0
 var _current_opacity: float = 1.0
+var _borrowed: Dictionary = {} # Playable -> übernommenes Welt-Panel
+var _return_tweens: Dictionary = {}
 
 @onready var _row: HBoxContainer = %Row
 
@@ -39,6 +41,9 @@ func rebuild() -> void:
 
 func _rebuild_entries() -> void:
 	for panel in _world_panels:
+		if _borrowed.values().has(panel):
+			continue
+		_stop_return(panel)
 		panel.get_parent().remove_child(panel)
 		panel.queue_free()
 	_world_panels.clear()
@@ -49,6 +54,11 @@ func _rebuild_entries() -> void:
 	if _party == null:
 		return
 	for member in _party.get_all_members():
+		if world_tracking and _borrowed.has(member) and is_instance_valid(_borrowed[member]):
+			var borrowed: PanelContainer = _borrowed[member]
+			_world_panels.append(borrowed)
+			_entries.append(borrowed.get_child(0) as PartyHudEntry)
+			continue
 		var entry := ENTRY_SCENE.instantiate() as PartyHudEntry
 		if world_tracking:
 			var panel := PanelContainer.new()
@@ -76,6 +86,8 @@ func _process(delta: float) -> void:
 		for index in _world_panels.size():
 			var panel := _world_panels[index]
 			var member := _entries[index].member
+			if _borrowed.has(member) or _return_tweens.has(panel):
+				continue
 			panel.visible = camera != null and is_instance_valid(member) and not camera.is_position_behind(member.global_position)
 			if panel.visible:
 				var screen := camera.unproject_position(member.global_position + Vector3.UP * 1.4)
@@ -113,6 +125,85 @@ func _update_movement_fade(delta: float) -> void:
 
 
 func _exit_tree() -> void:
+	for tween in _return_tweens.values():
+		if tween.is_valid():
+			tween.kill()
+	_return_tweens.clear()
 	for panel in _world_panels:
-		if is_instance_valid(panel):
+		if is_instance_valid(panel) and not _borrowed.values().has(panel):
 			panel.queue_free()
+	_borrowed.clear()
+
+
+func _stop_return(panel: PanelContainer) -> void:
+	var tween: Tween = _return_tweens.get(panel)
+	if tween and tween.is_valid():
+		tween.kill()
+	_return_tweens.erase(panel)
+
+
+func _ensure_world_card(member: Playable) -> PanelContainer:
+	if not world_tracking or _party == null or not _party.get_all_members().has(member):
+		return null
+	for index in _entries.size():
+		if _entries[index].member == member and is_instance_valid(_world_panels[index]):
+			return _world_panels[index]
+	var panel := PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	get_parent().add_child(panel)
+	var entry := ENTRY_SCENE.instantiate() as PartyHudEntry
+	panel.add_child(entry)
+	entry.bind(member)
+	_world_panels.append(panel)
+	_entries.append(entry)
+	return panel
+
+
+func take_world_card(member: Playable) -> PanelContainer:
+	var panel := _ensure_world_card(member)
+	if panel:
+		_stop_return(panel)
+		_borrowed[member] = panel
+	return panel
+
+
+func discard_world_card(member: Playable, panel: PanelContainer) -> void:
+	if _borrowed.get(member) != panel:
+		return
+	_borrowed.erase(member)
+	_stop_return(panel)
+	var index := _world_panels.find(panel)
+	if index >= 0:
+		_world_panels.remove_at(index)
+		_entries.remove_at(index)
+
+
+func return_world_card(member: Playable, panel: PanelContainer) -> bool:
+	if not is_instance_valid(member) or _party == null or not _party.get_all_members().has(member):
+		discard_world_card(member, panel)
+		return false
+	_borrowed.erase(member)
+	_stop_return(panel)
+	var origin := panel.global_position if panel.is_inside_tree() else panel.position
+	panel.reparent(get_parent(), false)
+	panel.global_position = origin
+	panel.visible = true
+	var entry := panel.get_child(0) as PartyHudEntry
+	entry.clear_combat_presentation()
+	var camera := get_viewport().get_camera_3d()
+	var destination := panel.position
+	if camera:
+		var screen := camera.unproject_position(member.global_position + Vector3.UP * 1.4)
+		destination = (screen - Vector2(panel.size.x * 0.5, panel.size.y)).clamp(Vector2.ZERO, (get_viewport_rect().size - panel.size).max(Vector2.ZERO))
+	var tween := create_tween().set_parallel(true)
+	_return_tweens[panel] = tween
+	tween.tween_property(panel, "position", destination, NEDimensions.COMBAT_CARD_TRANSITION_SEC).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(panel, "scale", Vector2.ONE, NEDimensions.COMBAT_CARD_TRANSITION_SEC)
+	tween.tween_callback(func(): _return_tweens.erase(panel)).set_delay(NEDimensions.COMBAT_CARD_TRANSITION_SEC)
+	return true
+
+
+func restore_world_cards() -> void:
+	if _party:
+		for member in _party.get_all_members():
+			_ensure_world_card(member)

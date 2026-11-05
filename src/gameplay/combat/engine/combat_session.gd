@@ -53,8 +53,14 @@ func admit(playable: Playable, side: StringName) -> CombatParticipant:
 		return null
 	var existing := get_participant(playable)
 	if existing:
+		var returning := existing.has_fled
+		if returning and _fleeing.has(existing):
+			playable._finish_flee(false)
 		existing.side = side
 		existing.has_fled = false
+		if returning:
+			playable.enter_combat_mode(self)
+			participant_joined.emit(existing)
 		return existing
 	var participant := CombatParticipant.new(playable, side)
 	participants.append(participant)
@@ -98,6 +104,32 @@ func mark_fled(participant: CombatParticipant) -> void:
 ## Kampfreihenfolge) – _active_turn bleibt intern gesetzt.
 func get_active_participant() -> CombatParticipant:
 	return _active_turn
+
+
+## Ein Eintrag pro aktivem Teilnehmer. Warteschlange bleibt autoritativ;
+## danach Zeit bis zur nächsten Schwelle statt bloßem Balkenfüllstand.
+func get_upcoming_participants() -> Array[CombatParticipant]:
+	var result: Array[CombatParticipant] = []
+	if _active_turn != null and not _active_turn.is_out_of_combat() and is_instance_valid(_active_turn.playable):
+		result.append(_active_turn)
+	for participant in turn_queue:
+		if not participant.is_out_of_combat() and is_instance_valid(participant.playable) and not result.has(participant):
+			result.append(participant)
+	var rest: Array[CombatParticipant] = []
+	for participant in participants:
+		if not participant.is_out_of_combat() and is_instance_valid(participant.playable) and not result.has(participant):
+			rest.append(participant)
+	rest.sort_custom(func(a: CombatParticipant, b: CombatParticipant) -> bool:
+		var a_time := _time_until_ready(a)
+		var b_time := _time_until_ready(b)
+		return participants.find(a) < participants.find(b) if a_time == b_time else a_time < b_time)
+	result.append_array(rest)
+	return result
+
+
+func _time_until_ready(participant: CombatParticipant) -> float:
+	var speed := participant.playable.get_effective_attribute(CharacterEnums.Attribute.GEWANDHEIT) * CombatBalance.INITIATIVE_SPEED_FACTOR
+	return maxf(0.0, CombatBalance.INITIATIVE_THRESHOLD - participant.initiative_meter) / speed if speed > 0 else INF
 
 
 ## Zentraler Aufrufpunkt fürs Aktions-Feedback: von state_combat_turn.gd und

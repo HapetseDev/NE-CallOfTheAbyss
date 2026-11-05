@@ -60,9 +60,8 @@ Hauptmenü).
 Hinweise/Fußzeilen · `SIZE_BUTTON`(16) → Button-Text · `SIZE_TOOLTIP`(12) ·
 `SIZE_STAT`(14) → Zahlen-/Statuswerte.
 
-Kompakte, dauerhaft sichtbare HUD-Titel (z.B. "Reihenfolge" im
-Kampf-HUD) bleiben bewusst kleiner als Fenster-Sektionstitel — andere
-Größenklasse, kein Widerspruch zum System.
+Kompakte, dauerhaft sichtbare HUD-Titel bleiben kleiner als Fenster-Sektionstitel.
+Die Kampfreihenfolge verwendet die skalierten Charakterkarten ohne eigenen Titel.
 
 ## Spacing- & Größensystem (`dimensions.gd`)
 
@@ -101,9 +100,9 @@ Klasse, wenn sie einen echten Vorteil bietet:
 
 - **`indicators/*.tres`** — geteilte `StyleBoxFlat`-Ressourcen für
   Balkenhintergrund sowie HP-/MP-/Initiative-Füllung
-  (`bar_background.tres`, `hp_fill.tres`, `mp_fill.tres`,
-  `readiness_fill.tres`). Werden per `ExtResource` in `party_hud_entry.tscn`
-  und `combat_order_entry.tscn` referenziert statt pro Szene dupliziert.
+  (`bar_background.tres`, `hp_fill.tres`, `mp_fill.tres`). Die Charakterkarten
+  referenzieren sie in `party_hud_entry.tscn`; auch der Kampf verwendet
+  diese Karten. `readiness_fill.tres` bleibt als ältere Ressource erhalten.
 - **`panels/NESectionHeader`** (`ne_section_header.gd/.tscn`) — Label mit
   fest verdrahteter H3-Größe/-Farbe für Abschnittstitel *innerhalb* eines
   Fensters (z.B. "Ausrüstung", "Gegenstände", Attribut-Abschnitte im
@@ -223,3 +222,16 @@ Gegenstandsplätze, Portrait, Paperdoll und Detailspalte stehen als
 `PAPERDOLL_HEIGHT` und `INVENTORY_DETAILS_WIDTH` in `dimensions.gd`.
 Bei schmaler Ansicht wandert die Detailspalte unter die Körperansicht;
 Schnellausrüstung und Rucksack passen ihre Spaltenzahl der verfügbaren Breite an.
+
+
+## Charakterkarten im Kampf
+
+`CombatOrderHud` übernimmt die Weltkarten von `PartyHud` und verwendet für
+weitere Teilnehmer dieselbe `PartyHudEntry`-Szene. Der HUD-Root ist ein
+transparentes Standard-Control; die frühere eigene Balkenliste entfällt.
+`COMBAT_CARD_SCALE`, `COMBAT_CARD_TRANSITION_SEC` und `COMBAT_CARD_REORDER_SEC`
+liegen in `dimensions.gd`. Layout-Abstände stammen aus der Spacing-Skala;
+Panels und SP-/KP-Anzeigen verwenden ihre vorhandenen Theme-Ressourcen.
+Aktive Karten tragen einen Pfeil; die Namensfarbe kennzeichnet die Kampfseite.
+Der reine CanvasItem-Shader `combat_card_exit.gdshader` desaturiert ausscheidende
+Karten während der Entfernung, ohne Theme-StyleBoxen zu verändern.

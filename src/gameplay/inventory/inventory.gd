@@ -119,6 +119,14 @@ func has_item(item_id: String) -> bool:
 	return false
 
 
+## Ein Projektil pro ausgeführtem Schuss, aus dem Rucksack.
+func consume_ammunition(item_id: String) -> bool:
+	for slot in slots:
+		if slot.item and slot.item.item_id == item_id and slot.count > 0:
+			return remove_item(slot.item, 1)
+	return false
+
+
 func equip(slot_key: String, item: ItemData) -> void:
 	ensure_equipment_slots()
 	if not equipment.has(slot_key):

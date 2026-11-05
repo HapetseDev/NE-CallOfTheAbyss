@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CharacterResource" load_steps=11 format=3]
+[gd_resource type="Resource" script_class="CharacterResource" load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://src/resources/characters/character_sheet.gd" id="1"]
 [ext_resource type="Script" path="res://src/resources/characters/learned_skill.gd" id="2"]
@@ -7,6 +7,37 @@
 [ext_resource type="Script" path="res://src/gameplay/inventory/InventorySlot.gd" id="4_slot"]
 [ext_resource type="Resource" path="res://src/resources/items/messer.tres" id="5_knife"]
 
+[ext_resource type="Resource" path="res://src/resources/items/bogen.tres" id="weapon_bogen"]
+[ext_resource type="Resource" path="res://src/resources/items/speer.tres" id="weapon_speer"]
+[ext_resource type="Resource" path="res://src/resources/items/dolch.tres" id="weapon_dolch"]
+[ext_resource type="Resource" path="res://src/resources/items/schwert.tres" id="weapon_schwert"]
+[ext_resource type="Resource" path="res://src/resources/items/pfeil.tres" id="weapon_pfeil"]
+
+[sub_resource type="Resource" id="Starting_bogen"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_bogen")
+count = 1
+
+[sub_resource type="Resource" id="Starting_speer"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_speer")
+count = 1
+
+[sub_resource type="Resource" id="Starting_dolch"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_dolch")
+count = 1
+
+[sub_resource type="Resource" id="Starting_schwert"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_schwert")
+count = 1
+
+[sub_resource type="Resource" id="Starting_pfeil"]
+script = ExtResource("4_slot")
+item = ExtResource("weapon_pfeil")
+count = 20
+
 [sub_resource type="Resource" id="StartingKnife"]
 script = ExtResource("4_slot")
 item = ExtResource("5_knife")
@@ -14,7 +45,7 @@ count = 1
 
 [sub_resource type="Resource" id="StartingInventory"]
 script = ExtResource("3_inventory")
-slots = Array[ExtResource("4_slot")]([SubResource("StartingKnife")])
+slots = Array[ExtResource("4_slot")]([SubResource("StartingKnife"), SubResource("Starting_bogen"), SubResource("Starting_speer"), SubResource("Starting_dolch"), SubResource("Starting_schwert"), SubResource("Starting_pfeil")])
 
 [sub_resource type="Resource" id="LearnedSkill_nahkampf"]
 script = ExtResource("2")

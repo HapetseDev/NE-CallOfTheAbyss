@@ -1,6 +1,6 @@
 class_name WorldSaveStore extends RefCounted
 
-const VERSION := 11
+const VERSION := 13
 const MAX_BYTES := 8 * 1024 * 1024
 var last_error: String = ""
 
@@ -54,10 +54,12 @@ func read(path: String) -> WorldState:
 	if json.parse(file.get_as_text()) != OK:
 		return _reject("Ungültiges JSON.")
 	var root: Variant = json.data
-	if not root is Dictionary or (root.get("version") != 1 and root.get("version") != 2 and root.get("version") != 3 and root.get("version") != 4 and root.get("version") != 5 and root.get("version") != 6 and root.get("version") != 7 and root.get("version") != 8 and root.get("version") != 9 and root.get("version") != 10 and root.get("version") != VERSION) or not root.has("world"):
+	if not root is Dictionary or (root.get("version") != 1 and root.get("version") != 2 and root.get("version") != 3 and root.get("version") != 4 and root.get("version") != 5 and root.get("version") != 6 and root.get("version") != 7 and root.get("version") != 8 and root.get("version") != 9 and root.get("version") != 10 and root.get("version") != 11 and root.get("version") != 12 and root.get("version") != VERSION) or not root.has("world"):
 		return _reject("Unbekannte Speicherversion.")
 	var codec := WorldValueCodec.new()
 	codec.migrate_legacy_voice = root.version < 11
+	codec.migrate_legacy_anatomy = root.version < 13
+	codec.migrate_legacy_weapon_ranges = root.version < 12
 	codec.migrate_legacy_character_state = root.version < 3
 	codec.migrate_legacy_combat_items = root.version < 9
 	codec.migrate_legacy_armor_items = root.version < 10

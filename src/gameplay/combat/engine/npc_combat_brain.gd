@@ -42,7 +42,8 @@ static func _choose_target(session: CombatSession, participant: CombatParticipan
 	for candidate in session.participants:
 		if candidate.side != enemy_side or candidate.is_out_of_combat():
 			continue
-		if not CombatLineOfSight.has_clear_line(participant.playable, candidate.playable):
+		# Figuren auf der Angriffslinie werden später vom Waffenresolver getroffen.
+		if not CombatLineOfSight.has_clear_line(participant.playable, candidate.playable, CombatLineOfSight.LAYER_WALLS):
 			continue
 		var score := -RelationshipService.get_disposition(participant.get_character(), candidate.get_character())
 		if score > best_score:

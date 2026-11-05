@@ -16,8 +16,12 @@ extends Resource
 @export_range(1, 999) var combat_value: int = 1
 ## Zusätzlich zur Körperkraft auf den Schaden addiertes Talent.
 @export var combat_skill_id: String = ""
-## Kennzeichnung für Mindestschaden, noch keine eigene Rüstungsabsorption.
+## Kennzeichnung für örtlichen Schutz und die Mindestschadensregel.
 @export var is_armor: bool = false
+## Leer: Abdeckung über die Körperplätze des Profils; sonst explizite Zonen-IDs.
+@export var armor_zones: Array[String] = []
+## Schadensminderung je Typ: blunt, slash, pierce, magic.
+@export var armor_protection: Dictionary = {}
 ## Bruch nach ausgeführtem Angriff, auch beim Ausweichen; 0 = unzerbrechlich.
 @export_range(0.0, 1.0) var break_chance: float = 0.0
 ## Bevorzugter Körper-/Handplatz. Hände/Schnellausrüstung nehmen jedes Item auf.

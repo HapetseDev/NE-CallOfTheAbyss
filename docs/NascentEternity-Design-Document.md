@@ -421,6 +421,89 @@ Von der Bedienung ist das Inventar-Fenster genauso zu behandeln wie das Charakte
 
 Gegenstände können über Kontextmenü oder über Drag and Drop an andere Charakter weitergegeben werden, da ein Inventar eines Charakters überhalb des Inventars eines anderes Charakters durchgescrollt werden kann.
 
+## Verbindlicher Weltmaßstab
+
+**Implementiert:** Eine Godot-3D-Welteinheit entspricht genau **einem Meter**.
+Die gemeinsame Definition ist `WorldUnits.METER` in
+`src/core/world/world_units.gd`. Positionen, Radien, Waffenreichweiten und
+Bewegungsdistanzen werden in Metern angegeben, Geschwindigkeiten in Metern pro
+Sekunde. Der Maßstab ist ein fester Vertrag, kein Balancing-Regler; für andere
+Reichweiten werden die jeweiligen Meterwerte geändert. Kamera-Zoom und
+Sprite-Skalierung ändern die physische Entfernung nicht. Neue Modelle und
+Kollisionsformen sind in diesem Maßstab anzulegen; bestehende Levels werden
+nicht nachträglich skaliert. Gespeicherte Positionen bleiben unverändert gültig.
+
+Aktuell verwenden Interaktionen standardmäßig 1,5 m Radius und die Reaktion auf
+Kampfaufnahme 8 m Radius. Der Kampfbewegungskreis hat einen Radius von einem Meter
+pro effektivem Gewandheitspunkt (mindestens 1 m), bei 1 m/s Bewegungstempo.
+Er begrenzt die Entfernung vom Ausgangspunkt auf der XZ-Ebene, nicht die insgesamt
+gelaufene Weglänge. Interaktionen messen ebenfalls auf der XZ-Ebene; die
+Kampfaufnahme verwendet weiterhin die räumliche 3D-Entfernung.
+
+**Implementiert:** Gegenstandsangriffe prüfen die räumliche 3D-Entfernung zwischen
+Actor-Ursprüngen vor Schaden und Verbrauch. Nahkampfmodi ohne explizite Angabe
+verwenden 1,5 m; Messer- und Steinwurf 10 m. Neue Waffen:
+
+| Gegenstand | Reichweite | Kampfwert | Besonderheit |
+|---|---:|---:|---|
+| Dolch | 1 m | 6 | Kurze Klingen |
+| Schwert | 2 m | 8 | Schwertkampf (klassisch) |
+| Speer | 3 m | 8 | Stoßangriff |
+| Bogen | 20 m | 7 | Bogenschießen; ein Pfeil aus dem Rucksack pro Schuss |
+
+Die Ressourcen liegen unter `src/resources/items/`, die aufhebbaren Szenen unter
+`src/world/objects/items/` (jeweils `dolch`, `schwert`, `speer`, `bogen`, `pfeil`).
+Sie verwenden zunächst einfache 3D-Platzhalter und sind noch nicht in Levels
+platziert. Pfeile sind stapelbare eigene Gegenstände. Der Bogen bleibt nach dem
+Schuss erhalten; ein ausgewichener Schuss verbraucht ebenfalls einen Pfeil.
+Bei fehlender Munition, Reichweite oder Sicht erfolgt kein Verbrauch.
+Die Werte sind erste Balancingwerte, keine Simulation historischer Waffen.
+
+### Angriffslinie und Abfangen von Waffenangriffen
+
+**Implementiert:** Bei Gegenstandsangriffen (Bogen, Wurf- und Nahkampfwaffen,
+auch improvisierte Schläge) bestimmt eine 3D-Linie zwischen den Profil-Zielpunkten die erste Trefferform
+zwischen Angreifer und gewähltem Ziel.
+Der Angreifer ist ausgeschlossen. Die erste aktive Figur der laufenden
+CombatSession erhält den Angriff, unabhängig von ihrer Kampfseite: Auch
+Verbündete und neutrale Teilnehmer können getroffen werden. Wände stoppen den
+Angriff; eine Figur vor einer Wand wird zuerst getroffen. Figuren außerhalb der
+Session sowie ausgeschiedene Körper blockieren weiterhin, erhalten aber keinen
+neuen Schaden. Es werden keine zusätzlichen Charakterdaten oder Teilnehmer erzeugt.
+
+Die Waffenreichweite wird vor dem Angriff sowohl zum gewählten Ziel als auch
+zum tatsächlichen Empfänger geprüft. Ein naher Abfänger erlaubt keinen Angriff
+auf ein gewähltes Ziel außerhalb der Reichweite. Ein solcher Versuch schlägt mit
+`out_of_range` fehl, ohne Schaden, Munition, Wurfgegenstand oder Bruchprüfung.
+Ausweichen, Rüstung und Niederlage beziehen sich auf den tatsächlichen Empfänger. Der Angriff endet auch bei Ausweichen am ersten Körper;
+es gibt kein Durchschlagen. Ein ausgeführter Bogenschuss verbraucht genau einen
+Pfeil. Eine blockierte oder zu lange Angriffslinie verbraucht keine Munition.
+
+Die Waffen-Zielwahl zeigt bei Hover bzw. Tastaturfokus die Angriffslinie und
+nennt im Zielknopf den ersten Empfänger. Ein Abfänger sperrt die Aktion nicht.
+Die endgültige Trefferprüfung erfolgt erneut beim Ausführen. Die Vorschau wird
+bei Menüwechsel, Zugende und Szenenabbau entfernt. Die Gegner-KI nutzt dieselbe
+Trefferermittlung; taktisches Vermeiden eigener Verbündeter bleibt offen.
+Fähigkeiten und Heilung behalten ihre bisherigen Ziel-/Sichtregeln. Die Linie
+ist eine gerade Angriffsbahn, noch keine Projektilflugkurve oder Schwertschwingfläche.
+
+Prüfung: `res://src/debug/tools/test_attack_vectors.tscn` testet echte
+Körperkollisionen, Abfangreihenfolge, Seiten/Höhen, Wände, Reichweite,
+Munition, Ausweichen, Niederlage und die Menüvorschau samt Bereinigung.
+
+Nahkampffähigkeiten einschließlich Fausthieb prüfen ebenfalls ihre Reichweite
+(Standard 1,5 m), bevor Konzentration verbraucht wird.
+
+Die Ziel- und Trefferstellenbuttons zeigen zu weit entfernte Ziele mit roter
+Schrift (`NEColors.DANGER`), Waffen-/Aktionsname und maximaler Reichweite an;
+sie sind gesperrt. Der Angriffsresolver prüft unabhängig von der Anzeige erneut,
+auch nach einer Positionsänderung. Die Angriffsvorschau kennzeichnet eine zu
+lange Linie ebenfalls rot.
+
+**Noch offen:** Reichweiten von Fernkampf-/Magiefähigkeiten,
+Projektilanimationen, Zweihandpflicht und taktisches Annähern der Gegner-KI.
+Der Wahrnehmungsradius bei Kampfaufnahme ist noch kein allgemeines Wahrnehmungssystem.
+
 ## Angriffe, Gegenstandseigenschaften und Musik
 
 **Umgesetzt mit ausdrücklich genannten Übergangsregeln.** Die Unterpunkte zu späterer Entwicklung sind weiterhin geplant, keine aktuellen Fähigkeiten.
@@ -461,9 +544,113 @@ Ein erfolgreicher Treffer mit positiver Angriffsstärke verursacht **mindestens 
 
 Bei einer gerüsteten Trefferstelle darf der Schaden vollständig abgefangen werden. Nullschäden bleiben damit ein gewollter Bestandteil des Kampfsystems. Schwachpunkte sollen später Möglichkeiten schaffen, wirksame Angriffe gegen ansonsten gut geschützte Gegner auszuführen.
 
-**Vorläufige Umsetzung:** Trefferzonen werden noch nicht ausgewertet. Sobald mindestens ein ausdrücklich als Rüstung gekennzeichneter Gegenstand an einem Körperplatz getragen wird, gilt vorerst die gesamte Figur als gerüstet. Normale Kleidung sowie Rüstung im Rucksack oder in der Schnellausrüstung zählen nicht automatisch als angelegte Rüstung.
+**Umgesetzt:** Trefferzonen und örtliche Rüstung werden gemäß den folgenden Körperprofil-Regeln ausgewertet. Normale Kleidung sowie Rüstung im Rucksack oder in der Schnellausrüstung schützen nicht automatisch.
 
-Die Rüstungskennzeichnung gewährt derzeit keinen zusätzlichen eigenen Schadensminderungswert. Sie entscheidet zunächst darüber, ob der Mindestschaden gilt. Die ortsbezogene Prüfung wird mit Trefferzonen und Schwachpunkten ergänzt.
+Die Rüstungskennzeichnung bestimmt den örtlichen Mindestschaden; zusätzliche Schadensminderung wird pro Zone und Schadensart aus natürlichem Schutz und Rüstungswerten berechnet.
+
+### Körperprofile, Trefferzonen und richtungsabhängige Verwundbarkeit
+
+**Implementiert als erste Ausbaustufe.** Körperbau, Angriffsrichtung und Schutz
+werden im bestehenden CombatResolver ausgewertet. Alle Zonen teilen weiterhin
+die Lebens-/Stärkepunkte der CharacterResource. Es gibt keine zweite
+Schadensbuchhaltung und keine individuellen Gliedmaßenverletzungen.
+
+#### Gemeinsame Körperprofile
+
+`CharacterResource.body_profile_id` wählt `human`, `beetle` oder `animal`.
+Die gemeinsamen Profilressourcen liegen unter `src/resources/combat/bodies/`;
+`body_profile.gd` und `body_zone.gd` definieren ihre Datenverträge.
+Die Definitionen werden zur Laufzeit gelesen, nicht pro Figur verändert.
+Bestehende Figuren und ältere Spielstände erhalten das Menschenprofil.
+Weitere Arten benötigen ein neues Profil und dessen Freigabe im Profilkatalog;
+eine automatische Ableitung aus Namen oder Spezies findet nicht statt.
+
+| Profil | Trefferzonen | Erste Balancingwerte |
+|---|---|---|
+| Mensch | Kopf, Rumpf, Ober-/Unterarme, Beine und Füße, Gliedmaßen links/rechts getrennt | Kopf ×1,75; Rumpf ×1; Unterarm ×0,65 |
+| Gepanzerter Käfer | Kopf, Rückenschild, Bauch, linkes/rechtes Beingelenk | Rückenschild ×0,9 mit natürlichem Schutz; Bauch ×1,4 ohne Panzer |
+| Ungerüstetes Tier | Kopf, Rumpf, Bauch, vier Beine | Kopf ×1,6; Rumpf ×1; kein natürlicher Rüstungsabzug |
+
+Eine Zone besitzt eine stabile ID, Bezeichnung, lokale Trefferbox in Metern,
+Schadensfaktor, natürlichen Schutz und passende Körper-Ausrüstungsplätze.
+Die Boxen folgen Position und Blickrichtung der Figur (+Z vorne, +Y oben).
+Sie sind separate rechnerische Trefferformen; die Bewegungskapsel bleibt
+unverändert. Sie sind auf die derzeitigen Prototypkörper abgestimmt und noch
+nicht an animierte Skelettknochen gebunden.
+
+#### Räumliche Zielwahl und Abfangen
+
+Bei Waffen wird nach dem Ziel eine Trefferstelle gewählt. Die Vorschau führt
+vom Standard-Zielpunkt des Angreifers zum Mittelpunkt der gewählten Zone.
+Der Resolver prüft dieselbe Linie erneut und verwendet die erste geschnittene
+Profil-Trefferbox. Daher kann eine andere Zone oder ein anderer Kampfteilnehmer
+als angezielt getroffen werden. Die körperliche Abfangreihenfolge und Wände
+bleiben maßgeblich; die Bewegungskapseln registrierter Teilnehmer ersetzen die
+Profilboxen dabei nicht. Ein durch Deckung verdeckter Rumpf verhindert nicht die
+Auswahl einer anderen erreichbaren Zone. Reichweite und Munition werden weiter
+vor der Schadensauflösung geprüft.
+
+Schadensfähigkeiten verwenden ohne explizite Zielzone die Standardzone des
+Empfängers. Ihre bisherigen Ziel- und Sichtregeln bleiben bestehen. Fausthieb
+verursacht Wuchtschaden. Heilung verwendet keine Verwundbarkeitsmultiplikatoren.
+
+#### Richtung und Abwehr
+
+Vorne, Seite und hinten ergeben sich aus der Blickrichtung des tatsächlich
+getroffenen Lebewesens und der horizontalen Richtung zum Angreifer. Ein
+Skalarprodukt ab 0,5 gilt als vorne, bis −0,5 als hinten, dazwischen als Seite.
+Bei horizontal gleicher Position gilt vorne. Die Abwehr-Gewandheit wird derzeit
+vorne mit 1, seitlich mit 0,6 und hinten mit 0,25 gewichtet; Genauigkeit und die
+bestehende Ausweichobergrenze werden anschließend wie bisher angewendet.
+Die Faktoren stehen im Körperprofil und sind artspezifisch änderbar.
+
+Es gibt keinen pauschalen zusätzlichen Rückenschadensbonus. Der tatsächliche
+Schutz der getroffenen Zone bleibt ausschlaggebend, sodass ein Käferrücken trotz
+eingeschränkter Abwehr stark geschützt sein kann. Parieren ist noch nicht
+implementiert.
+
+#### Schutz pro Zone und Schadensart
+
+Wucht (`blunt`), Schnitt (`slash`), Stich (`pierce`) und Magie (`magic`) sind
+explizite Schadensarten von Waffen-Verwendungsarten bzw. Fähigkeiten.
+Natürlicher Schutz und angelegte Rüstung werden pro Typ und Trefferzone addiert.
+Der Käfer-Rückenschild mindert beispielsweise Wucht um 4, Schnitt um 8 und Stich
+um 6; sein Bauch hat keinen solchen Abzug. Die Werte sind Balancing-Startwerte.
+
+`ItemData.armor_zones` legt explizite geschützte Zonen fest. Bei leerer Liste
+bestimmt der angelegte Körperplatz die Abdeckung gemäß Profil. Nur als Rüstung
+gekennzeichnete Gegenstände an Kopf, Rumpf, Beinen oder Füßen zählen;
+Rucksack, Hände, Schmuck und Schnellausrüstung gewähren diesen Schutz nicht.
+`armor_protection` enthält die Abzüge je Schadensart. Die Beispielressourcen
+`lederhelm.tres` und `lederweste.tres` schützen Kopf bzw. Rumpf. Das Inventar
+zeigt Abdeckung, Schutzwerte sowie Schadensarten und Reichweiten der Angriffe.
+
+Der Schaden ist zunächst gerundete Angriffsstärke × Zonenfaktor, abzüglich der
+bestehenden Robustheitsminderung und des örtlichen Schutzes. Ein erfolgreicher
+positiver Angriff verursacht an einer ungeschützten Zone mindestens 1 Schaden;
+örtliche Rüstung oder wirksame natürliche Panzerung dürfen ihn vollständig
+abfangen. Die frühere Regel „ein Rüstungsteil macht die ganze Figur gerüstet“
+ist damit ersetzt. Das Ergebnis/Log nennt die tatsächlich getroffene Zone und
+Angriffsrichtung; Niederlagen betreffen weiterhin den wirklichen Empfänger.
+
+#### Speicherung, Prüfung und Grenzen
+
+Speicherformat 13 enthält Profil-ID, Rüstungsabdeckung/-schutz und die
+Schadensart der ItemUsageMode. Versionen 1–12 ergänzen fehlende Profil-IDs mit
+`human`, Rüstungsfelder mit leeren Listen/Schutzwerten und Schadensarten mit
+`blunt`. Bestehende Werte bleiben erhalten; eine Umdeutung alter Waffen anhand
+ihres Namens erfolgt nicht. Neue Vorlagen setzen ihre Schadensarten ausdrücklich.
+Reader und Validierung lehnen unbekannte Profile, Schadensarten, Zonen sowie
+ungültige Schutzwerte ab. Trefferboxen, Nodes und laufende Angriffe werden
+nicht gespeichert.
+
+`test_combat_anatomy.tscn` prüft Profile, Trefferzonen, Richtungen, Abwehr,
+örtlichen Schutz, Schadensarten, räumliche Treffer und Speicher-Migration.
+Die bestehenden Tests für Angriffslinien, Waffenreichweiten, Schaden, Weltzustand,
+Laden und Kampfsimulation bleiben Integrationsprüfungen.
+
+Offen bleiben animierte Trefferformen, individuelle Gliedmaßenverletzungen,
+zerstörbare Panzerplatten, weitere Arten und das Feintuning der Zahlen.
 
 ### Inventaranzeige und Gegenstandsbruch
 
@@ -505,13 +692,13 @@ Abspielpositionen und verbleibende Musikbedrohungen werden derzeit nicht im Spie
 
 ### Weitere Entwicklung und Balanceprüfung
 
-Schwachpunkte, Trefferzonen, Angriffsradien und die stärkere Einbindung von Bewegung werden später ergänzt.
+Trefferzonen, örtlicher Schutz und richtungsabhängige Abwehr sind als erste Ausbaustufe integriert. Weitere Schwachpunktmechaniken, Angriffsflächen und taktische Bewegung bleiben geplant.
 
 Eine feste Zielvorgabe für die Kampflänge ist noch nicht beschlossen. Stärkevorräte und Angriffswerte werden deshalb vorerst nicht auf eine bestimmte Trefferzahl abgestimmt.
 
 Weitere taktische Angriffsarten sollen über Fähigkeiten und Fertigkeiten gestaltet werden. Dafür werden derzeit noch keine neuen Mechaniken festgelegt.
 
-Die textuelle Kampfsimulation im Hauptmenü dient zur Prüfung der aktuellen Regeln. Sie erlaubt einstellbare Charaktere, einzelne Kampfschritte und Serienvergleiche. Räumliche Faktoren und zukünftige Schwachpunktregeln sind darin noch nicht enthalten.
+Die textuelle Kampfsimulation im Hauptmenü dient zur Prüfung der aktuellen Regeln. Sie erlaubt einstellbare Charaktere, einzelne Kampfschritte und Serienvergleiche. Die Simulation nutzt die allgemeinen Zonen-/Schutzregeln mit Standardzonen; sie simuliert keine räumliche Aufstellung oder taktische Trefferstellenwahl.
 
 # Aktueller Umsetzungsstand
 
@@ -530,7 +717,7 @@ als **Planung** erhalten; es wird nicht als bereits verfügbare Funktion ausgege
 | Interaktion | Teilweise umgesetzt | Radius, Aktionen und Hervorhebung; kein allgemeines Wahrnehmungs-/Materialsystem |
 | Dialog/Wissen | Teilweise umgesetzt | Dialogue Manager, eigene UI und figurenspezifisches Wissen; kein allgemeines Ermittlungsframework |
 | Inventar/Handel/Diebstahl | Umgesetzt mit Grenzen | geprüfte Transfers und Händlerbestände; kein allgemeiner Rückkauf |
-| Kampf | Teilweise umgesetzt | Initiative, Gegenstände, Schaden, Bewegung, reale Fluchtwege; Statussystem, Trefferzonen und Recovery fehlen |
+| Kampf | Teilweise umgesetzt | Initiative, Gegenstände, Schaden, Bewegung, reale Fluchtwege; Trefferzonen und örtlicher Schutz integriert; Statussystem und Recovery fehlen |
 | Quest | Teilweise umgesetzt | geprüfter Banditenablauf; keine universelle Questzustandsmaschine |
 | Speichern/Laden | Teilweise umgesetzt | manuelle Saves, Validierung/Migration, Weltaufbau; bekannte Fehler im Levelwechseltest |
 | Spielefenster/Karte | Umgesetzt mit Grenzen | Cover Flow, Inventare, Kartenerkundung; Karte ohne Sichtprüfung/Stockwerkstrennung |
@@ -615,8 +802,13 @@ Rest-XP als Wahrheitswert und kann den freien Vorrat falsch abbuchen.
 **Aktuelle Vorlagen:** Dannerman hat Basisattribute 3/2/2/2/2/2/3, Shalka
 2/3/2/2/2/3/2 (Körperkraft, Gewandheit, Robustheit, Willenskraft, Verstand,
 Bewusstsein, Präsenz). Talentboni ergeben SP/KP/Tragkraft 12/10/40 bzw. 11/12/20.
-Dannerman startet mit 50 Gold, 50 freien XP und einem Messer im Rucksack,
-Shalka mit 20 Gold. Spielstände können abweichen. Portrait/Paperdoll verwenden
+Dannerman startet mit 50 Gold, 50 freien XP und seinem bisherigen Messer im
+Rucksack, Shalka mit 20 Gold. Beide erhalten zusätzlich je einen Bogen, Speer,
+Dolch, ein Schwert und 20 Pfeile im Rucksack. Die Gegenstände sind zunächst
+nicht ausgerüstet. Diese Startausstattung gilt für neue Spielsitzungen; beim
+Laden bleibt der gespeicherte Besitz erhalten. Die sichtbare Darstellung von
+Gegenständen in der Hand ist als nächster Ausbauschritt vorgesehen.
+Spielstände können abweichen. Portrait/Paperdoll verwenden
 `assets/characters/<name>/<name>_portrait.png` bzw. `<name>_paperdoll.png`.
 
 Beziehungen sind gerichtet, auf −10 bis +10 begrenzt. Persönliche Einträge gehen
@@ -722,6 +914,49 @@ Ein aktiver Zug, Gleichstände nach Teilnehmerreihenfolge; Gewandheit 0 sammelt
 nichts. Ein Rundensignal ist keine angeschlossene Regeneration/Statusdauer.
 Alle Partyfiguren werden im eigenen Zug manuell bedient, echte NPCs automatisch.
 
+### Charakterkarten und Zugreihenfolge im Kampf
+
+**Implementiert:** Die bisherige Initiative-Balkenanzeige ist durch eine
+horizontale Reihe der vorhandenen Charakterkarten am oberen Bildschirmrand
+ersetzt. Außerhalb des Kampfes bleiben die Partykarten über den Köpfen.
+Beim Kampfstart werden dieselben Panel-/Karteninstanzen übernommen und in
+0,3 Sekunden an den oberen Rand bewegt. Karten einschließlich Portrait,
+Schrift, SP-/KP-Balken und Abständen skalieren auf 50 Prozent. Zusätzliche
+Kombattanten erhalten dieselbe Kartenansicht und blenden sich von oben ein.
+Bei Platzmangel verkleinert sich die gesamte Reihe zusätzlich gleichmäßig,
+sodass kein Kombattant abgeschnitten wird. Die Karten blockieren keine Eingaben.
+
+Links steht der aktive Kombattant, danach die vorhandene Zugwarteschlange.
+Der Rest wird anhand der erwarteten Zeit bis zur Initiative-Schwelle sortiert:
+`max(0, 100 − Initiative) / (effektive Gewandheit × 6)`. Gewandheit 0 steht
+hinten; Gleichstände bleiben in Teilnehmerreihenfolge stabil. Pro Kombattant
+erscheint eine Karte. Diese Vorschau berücksichtigt laufende Attributänderungen;
+sie ist für noch nicht eingereihte Züge eine Prognose. Nach einem Zug wird die
+Karte entsprechend ihrer nächsten Bereitschaft neu einsortiert. Sehr schnelle
+Figuren können deshalb vor anderen erneut drankommen. Umsortieren wird kurz
+animiert; es werden keine Karten pro Frame neu erzeugt.
+
+Flucht und KO entfernen die Karte sofort aus der sichtbaren Sortierung. Sie
+wird ausgegraut, nach oben geschoben und ausgeblendet, anschließend werden
+Karten-Node und UI-Referenzen freigegeben. Der autoritative CombatParticipant
+bleibt für Kampfabschluss und mögliche Rückkehr erhalten; die UI löscht keine
+Charakterdaten. Bei Rückkehr während der Ausblendung wird diese abgebrochen;
+nach bereits abgeschlossener Entfernung entsteht genau eine neue Karte.
+`CombatSession.admit()` unterstützt nachträgliche Teilnehmer und meldet auch
+zurückkehrende Geflohene über `participant_joined`. Eine noch laufende
+Fluchtbewegung wird bei erneuter Aufnahme beendet.
+
+Am Kampfende bewegen sich überlebende Partykarten in Originalgröße zurück über
+die Köpfe. Ausgeschiedene Partymitglieder erhalten außerhalb des Kampfes wieder
+eine Weltkarte; Gegnerkarten verschwinden. Menü-Partyansichten bleiben separat.
+Session-Signale, Tweens und ausgeliehene Panels werden auch beim HUD-/Szenenabbau
+bereinigt. Die Darstellung ist kein gespeicherter Kampfzustand.
+
+`test_combat_cards.tscn` prüft Kartenidentität, Skalierung, Zugfolge,
+Geschwindigkeitsänderungen, KO/Flucht, Beitritt, Rückkehr und Freigabe.
+Mit `-- --preview-cards` bleibt die Anfangsaufstellung für eine visuelle Prüfung
+kurz geöffnet. Animationszeiten und Skalierung stehen in `NEDimensions`.
+
 Aktionen: Schlag bei freier Hand, Gegenstand, Fähigkeit, Bewegung, Reden, Flucht.
 Ausgelöste Aktionen können auch bei Fehlschlag den Zug verbrauchen;
 Zurücknavigation nicht. Nur Hände/Schnellplätze liefern Kampfgegenstände.
@@ -730,7 +965,7 @@ im Kreis `max(1, Gewandheit × 1)` um den Ausgangsort, Tempo 1. Das ist ein
 Abstandslimit, keine aufsummierte Wegstrecke. Bestätigen kostet den Zug,
 Abbrechen stellt die Ausgangsposition ohne Zugverbrauch wieder her.
 
-Sichtprüfung blockiert passende Angriffe durch Wände oder andere Körper.
+Sichtprüfung blockiert passende Fähigkeiten durch Wände oder andere Körper. Waffenangriffe treffen stattdessen den ersten aktiven Kampfteilnehmer auf ihrer Angriffslinie; Wände blockieren weiterhin.
 Numerische Nahkampf-/Wurf-/Magiedistanzen sind noch nicht ausgewertet.
 Reden ruft NPC-Interaktion auf; Überzeugen/Kapitulation/Friedensschluss brauchen
 konkrete Regeln. Die NPC-KI wählt ein sichtbares Ziel mit negativster eigener

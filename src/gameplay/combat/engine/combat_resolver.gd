@@ -29,31 +29,51 @@ static func resolve_action(action: CombatAction, rng: RandomNumberGenerator = nu
 
 ## Automatische Verteidigung: jeder Charakter weicht/mindert Schaden passiv
 ## über seine eigenen Attribute, ohne dass er dafür einen Zug braucht.
-static func resolve_damage(actor: CombatParticipant, target: CombatParticipant, raw_power: int, attacker_attribute: CharacterEnums.Attribute, rng: RandomNumberGenerator = null, armored_hit: Variant = null) -> int:
-	return int(_roll_damage(actor, target, raw_power, attacker_attribute, rng, armored_hit)["damage"])
+static func resolve_damage(actor: CombatParticipant, target: CombatParticipant, raw_power: int, attacker_attribute: CharacterEnums.Attribute, rng: RandomNumberGenerator = null, armored_hit: Variant = null, zone_id: String = "", damage_type: String = "blunt") -> int:
+	return int(_roll_damage(actor, target, raw_power, attacker_attribute, rng, armored_hit, zone_id, damage_type)["damage"])
 
 
 ## Wie resolve_damage(), gibt zusätzlich zurück, ob das Ziel ausgewichen ist
 ## (für Anzeige-Zwecke, siehe CombatActionOutcome). Intern verwendet, damit
 ## resolve_damage() selbst öffentlich weiterhin nur den Schadenswert liefert.
-static func _roll_damage(actor: CombatParticipant, target: CombatParticipant, raw_power: int, attacker_attribute: CharacterEnums.Attribute, rng: RandomNumberGenerator = null, armored_hit: Variant = null) -> Dictionary:
+static func _roll_damage(actor: CombatParticipant, target: CombatParticipant, raw_power: int, attacker_attribute: CharacterEnums.Attribute, rng: RandomNumberGenerator = null, armored_hit: Variant = null, zone_id: String = "", damage_type: String = "blunt") -> Dictionary:
 	if target == null or target.playable == null or target.is_out_of_combat():
 		return {"damage": 0, "evaded": false}
-	var accuracy := 0
-	if actor and actor.playable:
-		accuracy = actor.playable.get_effective_attribute(attacker_attribute)
+	var body := CombatAnatomy.profile(target.playable.character)
+	var zone := body.get_zone(zone_id if not zone_id.is_empty() else body.default_zone_id)
+	if zone == null or damage_type not in CombatAnatomy.DAMAGE_TYPES:
+		return {"damage": 0, "evaded": false}
+	var attacker: Playable = actor.playable if actor else null
+	var accuracy := attacker.get_effective_attribute(attacker_attribute) if attacker else 0
 	var evasion := target.playable.get_effective_attribute(CharacterEnums.Attribute.GEWANDHEIT)
-	var evade_chance := clampf((evasion - accuracy) * CombatBalance.EVADE_FACTOR * 0.01, 0.0, CombatBalance.EVADE_CAP)
+	var factor := CombatAnatomy.evasion_factor(attacker, target.playable) if attacker else 1.0
+	var evade_chance := clampf((evasion * factor - accuracy) * CombatBalance.EVADE_FACTOR * 0.01, 0.0, CombatBalance.EVADE_CAP)
+	var roll := {"damage": 0, "evaded": false, "zone_id": zone.zone_id,
+		"incoming_direction": CombatAnatomy.direction(attacker, target.playable), "damage_type": damage_type}
 	if (rng.randf() if rng else randf()) < evade_chance:
-		return {"damage": 0, "evaded": true}
-	var mitigation := target.playable.get_effective_attribute(CharacterEnums.Attribute.ROBUSTHEIT) * CombatBalance.MITIGATION_FACTOR
-	var armored: bool = has_worn_armor(target.playable.character) if armored_hit == null else bool(armored_hit)
-	# Mindestschaden nur bei einem wirklichen Angriff und nach erfolgreichem Treffer.
+		roll.evaded = true
+		return roll
+	var protection := CombatAnatomy.protection(target.playable.character, zone, damage_type)
+	var mitigation := target.playable.get_effective_attribute(CharacterEnums.Attribute.ROBUSTHEIT) * CombatBalance.MITIGATION_FACTOR + float(protection.amount)
+	var armored: bool = bool(protection.armored) if armored_hit == null else bool(armored_hit)
 	var minimum := 1 if raw_power > 0 and not armored else 0
-	var final_damage := maxi(minimum, raw_power - int(mitigation))
+	var final_damage := maxi(minimum, roundi(raw_power * zone.damage_multiplier) - int(mitigation))
 	if final_damage > 0:
 		target.playable.take_damage(final_damage)
-	return {"damage": final_damage, "evaded": false}
+	roll.damage = final_damage
+	return roll
+
+
+## Gemeinsame Trefferermittlung für Vorschau und Auflösung. Nur bestehende
+## Session-Teilnehmer verwenden; ausgeschiedene/unbeteiligte Körper blockieren.
+static func get_item_attack_hit(actor: CombatParticipant, aimed: CombatParticipant, mode: ItemUsageMode, zone_id: String = "") -> Dictionary:
+	if mode == null:
+		return {}
+	return CombatAnatomy.trace(actor, aimed, mode.requires_line_of_sight, zone_id)
+
+
+static func get_item_attack_target(actor: CombatParticipant, aimed: CombatParticipant, mode: ItemUsageMode, zone_id: String = "") -> CombatParticipant:
+	return get_item_attack_hit(actor, aimed, mode, zone_id).get("target") as CombatParticipant
 
 
 static func _resolve_item(action: CombatAction, rng: RandomNumberGenerator = null, log_item_break: bool = true) -> CombatActionResult:
@@ -65,20 +85,53 @@ static func _resolve_item(action: CombatAction, rng: RandomNumberGenerator = nul
 		result.success = false
 		result.failed_reason = "invalid_item"
 		return result
+	if mode.damage_type not in CombatAnatomy.DAMAGE_TYPES:
+		result.success = false
+		result.failed_reason = "invalid_item"
+		return result
+	if not mode.ammunition_item_id.is_empty() and action.targets.size() != 1:
+		result.success = false
+		result.failed_reason = "invalid_target"
+		return result
+	# Vor Verbrauch auf gültiges Ziel, Reichweite und Sicht prüfen.
+	var valid_targets: Array[CombatParticipant] = []
+	var hits: Dictionary = {}
+	for aimed in action.targets:
+		if aimed != null and is_instance_valid(aimed.playable) and not mode.is_in_range(action.actor.playable, aimed.playable):
+			result.failed_reason = "out_of_range"
+			continue
+		var hit := get_item_attack_hit(action.actor, aimed, mode, action.target_zone_id)
+		var target := hit.get("target") as CombatParticipant
+		if target == null:
+			result.failed_reason = "no_line_of_sight"
+			continue
+		if not mode.is_in_range(action.actor.playable, target.playable):
+			result.failed_reason = "out_of_range"
+			continue
+		if not valid_targets.has(target):
+			valid_targets.append(target)
+			hits[target] = hit
+	if valid_targets.is_empty():
+		result.success = false
+		if result.failed_reason.is_empty():
+			result.failed_reason = "invalid_target"
+		return result
+	var inventory := action.actor.playable.character.inventory
+	if not mode.ammunition_item_id.is_empty() and not inventory.has_item(mode.ammunition_item_id):
+		result.success = false
+		result.failed_reason = "no_ammunition"
+		return result
 	if mode.consumes_item and not action.actor.playable.consume_combat_item(action.item):
 		result.success = false
 		result.failed_reason = "invalid_item"
 		return result
-	for target in action.targets:
-		if target == null or target.playable == null or target.is_out_of_combat():
-			continue
-		if mode.requires_line_of_sight and not CombatLineOfSight.has_clear_line(action.actor.playable, target.playable):
-			result.failed_reason = "no_line_of_sight"
-			continue
+	if not mode.ammunition_item_id.is_empty():
+		inventory.consume_ammunition(mode.ammunition_item_id)
+	for target in valid_targets:
 		var sheet := action.actor.playable.character
 		var power := sheet.get_effective_attribute(CharacterEnums.Attribute.KOERPERKRAFT) + action.item.get_combat_value(mode)
 		power += get_damage_skill_bonus(sheet, action.item.get_combat_skill_id(mode))
-		var roll := _roll_damage(action.actor, target, power, mode.attribute, rng)
+		var roll := _roll_damage(action.actor, target, power, mode.attribute, rng, null, hits[target].zone_id, mode.damage_type)
 		var outcome := _make_outcome(target, roll)
 		result.outcomes.append(outcome)
 		if outcome.defeated:
@@ -120,6 +173,18 @@ static func _resolve_ability(action: CombatAction, rng: RandomNumberGenerator = 
 		result.success = false
 		result.failed_reason = "invalid_ability"
 		return result
+	if ability.effect_type == AbilityDefinition.EffectType.DAMAGE and not action.target_zone_id.is_empty():
+		for target in action.targets:
+			if target == null or not is_instance_valid(target.playable) or CombatAnatomy.profile(target.playable.character).get_zone(action.target_zone_id) == null:
+				result.success = false
+				result.failed_reason = "invalid_target"
+				return result
+	if ability.range_type == AbilityDefinition.RangeType.MELEE:
+		for target in action.targets:
+			if target != null and is_instance_valid(target.playable) and not ability.is_in_range(action.actor.playable, target.playable):
+				result.success = false
+				result.failed_reason = "out_of_range"
+				return result
 	if ability.mana_cost > 0 and not action.actor.playable.use_mana(ability.mana_cost):
 		result.success = false
 		result.failed_reason = "not_enough_mana"
@@ -150,7 +215,7 @@ static func _apply_damage_to_targets(action: CombatAction, ability: AbilityDefin
 		if ability.ability_id == "fausthieb":
 			var sheet := action.actor.playable.character
 			power = sheet.get_effective_attribute(CharacterEnums.Attribute.KOERPERKRAFT) + get_damage_skill_bonus(sheet, "waffenloser_kampf")
-		var roll := _roll_damage(action.actor, target, power, scaling_attribute, rng)
+		var roll := _roll_damage(action.actor, target, power, scaling_attribute, rng, null, action.target_zone_id, "blunt" if ability.ability_id == "fausthieb" else ability.damage_type)
 		var outcome := _make_outcome(target, roll)
 		result.outcomes.append(outcome)
 		if outcome.defeated:
@@ -173,6 +238,9 @@ static func _make_outcome(target: CombatParticipant, roll: Dictionary) -> Combat
 	outcome.target = target
 	outcome.damage = int(roll["damage"])
 	outcome.evaded = bool(roll["evaded"])
+	outcome.zone_id = roll.get("zone_id", "")
+	outcome.incoming_direction = roll.get("incoming_direction", "front")
+	outcome.damage_type = roll.get("damage_type", "blunt")
 	outcome.defeated = outcome.damage > 0 and target.playable.is_character_dead()
 	return outcome
 
@@ -199,7 +267,8 @@ static func get_damage_skill_bonus(sheet: CharacterResource, skill_id: String) -
 static func has_worn_armor(sheet: CharacterResource) -> bool:
 	if sheet == null or sheet.inventory == null:
 		return false
-	# Übergangsregel ohne Trefferzonen: nur wirklich angelegte Körperausrüstung.
+	# Besitzabfrage für bestehende Aufrufer. Schadensberechnung verwendet dagegen
+	# ausschließlich CombatAnatomy.protection() für die tatsächlich getroffene Zone.
 	for slot in ["kopf", "rumpf", "beine", "fuesse", "schmuck"]:
 		var item: Variant = sheet.inventory.equipment.get(slot)
 		if item is ItemData and item.is_armor:
