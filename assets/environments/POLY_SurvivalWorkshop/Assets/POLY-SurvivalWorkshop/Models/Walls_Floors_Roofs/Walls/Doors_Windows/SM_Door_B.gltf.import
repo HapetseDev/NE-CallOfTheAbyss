@@ -1,0 +1,69 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://dcuutf1bgy8sg"
+path="res://.godot/imported/SM_Door_B.gltf-b925f9005733e5d016e5701d91b1092d.scn"
+
+[deps]
+
+source_file="res://Assets/POLY-SurvivalWorkshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/SM_Door_B.gltf"
+dest_files=["res://.godot/imported/SM_Door_B.gltf-b925f9005733e5d016e5701d91b1092d.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"Main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY-SurvivalWorkshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/extracted/SM_Door_B.Main.material"
+}
+},
+"meshes": {
+"Root Scene_SM_DoorB": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/extracted/SM_Door_B.SM_DoorB.mesh"
+},
+"Root Scene_SM_Door_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/extracted/SM_Door_B.SM_Door_B.mesh"
+},
+"SM_DoorB": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/extracted/SM_Door_B.SM_DoorB.mesh"
+},
+"SM_Door_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Walls_Floors_Roofs/Walls/Doors_Windows/extracted/SM_Door_B.SM_Door_B.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

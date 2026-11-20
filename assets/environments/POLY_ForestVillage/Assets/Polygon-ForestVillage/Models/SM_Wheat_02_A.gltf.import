@@ -1,0 +1,54 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://co25inct5iuau"
+path="res://.godot/imported/SM_Wheat_02_A.gltf-29d58f7009bb3a34cf022b82f23e26ec.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-ForestVillage/Models/SM_Wheat_02_A.gltf"
+dest_files=["res://.godot/imported/SM_Wheat_02_A.gltf-29d58f7009bb3a34cf022b82f23e26ec.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=2
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"Root Scene_SM_Wheat_02_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-ForestVillage/Models/extracted/SM_Wheat_02_A.SM_Wheat_02_A.mesh"
+},
+"SM_Wheat_02_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-ForestVillage/Models/extracted/SM_Wheat_02_A.SM_Wheat_02_A.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

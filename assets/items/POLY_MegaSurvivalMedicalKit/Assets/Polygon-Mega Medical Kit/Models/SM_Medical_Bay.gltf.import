@@ -1,0 +1,234 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://cdo6xlpil1i7a"
+path="res://.godot/imported/SM_Medical_Bay.gltf-e0a01b2c55753d4427fd9208c5fa2326.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-Mega Medical Kit/Models/SM_Medical_Bay.gltf"
+dest_files=["res://.godot/imported/SM_Medical_Bay.gltf-e0a01b2c55753d4427fd9208c5fa2326.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"Root Scene_SM_Climb_For_Medical_Bay": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Climb_For_Medical_Bay.mesh"
+},
+"Root Scene_SM_DEVICES_FOR_Medical_Bay_01": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_DEVICES_FOR_Medical_Bay_01.mesh"
+},
+"Root Scene_SM_DEVICES_FOR_Medical_Bay_02": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_DEVICES_FOR_Medical_Bay_02.mesh"
+},
+"Root Scene_SM_Door_For_Medical_Bay_01": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Door_For_Medical_Bay_01.mesh"
+},
+"Root Scene_SM_FASTENING_05": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_05.mesh"
+},
+"Root Scene_SM_FASTENING_06": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_06.mesh"
+},
+"Root Scene_SM_FASTENING_07": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_07.mesh"
+},
+"Root Scene_SM_FASTENING_08": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_08.mesh"
+},
+"Root Scene_SM_Handle_For_Door_01001": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Handle_For_Door_01001.mesh"
+},
+"Root Scene_SM_Lamp_For_Medical_Bay": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Lamp_For_Medical_Bay.mesh"
+},
+"Root Scene_SM_Medical_Bay": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Medical_Bay.mesh"
+},
+"Root Scene_SM_Pilar_For_Medical_Bay_01": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_01.mesh"
+},
+"Root Scene_SM_Pilar_For_Medical_Bay_02": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_02.mesh"
+},
+"Root Scene_SM_Pilar_For_Medical_Bay_03": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_03.mesh"
+},
+"Root Scene_SM_Pilar_For_Medical_Bay_04": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_04.mesh"
+},
+"Root Scene_SM_SPOTLIGHT_03": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_SPOTLIGHT_03.mesh"
+},
+"Root Scene_SM_SPOTLIGHT_04": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_SPOTLIGHT_04.mesh"
+},
+"Root Scene_SM_Speaker_03": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Speaker_03.mesh"
+},
+"Root Scene_SM_Speaker_04": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Speaker_04.mesh"
+},
+"SM_Climb_For_Medical_Bay": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Climb_For_Medical_Bay.mesh"
+},
+"SM_DEVICES_FOR_Medical_Bay_01": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_DEVICES_FOR_Medical_Bay_01.mesh"
+},
+"SM_DEVICES_FOR_Medical_Bay_02": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_DEVICES_FOR_Medical_Bay_02.mesh"
+},
+"SM_Door_For_Medical_Bay_01": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Door_For_Medical_Bay_01.mesh"
+},
+"SM_FASTENING_05": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_05.mesh"
+},
+"SM_FASTENING_06": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_06.mesh"
+},
+"SM_FASTENING_07": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_07.mesh"
+},
+"SM_FASTENING_08": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_FASTENING_08.mesh"
+},
+"SM_Handle_For_Door_01001": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Handle_For_Door_01001.mesh"
+},
+"SM_Lamp_For_Medical_Bay": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Lamp_For_Medical_Bay.mesh"
+},
+"SM_Medical_Bay": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Medical_Bay.mesh"
+},
+"SM_Pilar_For_Medical_Bay_01": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_01.mesh"
+},
+"SM_Pilar_For_Medical_Bay_02": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_02.mesh"
+},
+"SM_Pilar_For_Medical_Bay_03": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_03.mesh"
+},
+"SM_Pilar_For_Medical_Bay_04": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Pilar_For_Medical_Bay_04.mesh"
+},
+"SM_SPOTLIGHT_03": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_SPOTLIGHT_03.mesh"
+},
+"SM_SPOTLIGHT_04": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_SPOTLIGHT_04.mesh"
+},
+"SM_Speaker_03": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Speaker_03.mesh"
+},
+"SM_Speaker_04": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Medical Kit/Models/extracted/SM_Medical_Bay.SM_Speaker_04.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

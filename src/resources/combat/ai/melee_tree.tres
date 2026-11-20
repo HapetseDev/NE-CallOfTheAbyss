@@ -1,0 +1,13 @@
+[gd_resource type="BehaviorTree" load_steps=6 format=3]
+[ext_resource type="Script" path="res://src/gameplay/combat/ai/tasks/plan_combat_action.gd" id="1"]
+[ext_resource type="Script" path="res://src/gameplay/combat/ai/tasks/execute_combat_action.gd" id="2"]
+[sub_resource type="BTAction" id="Plan"]
+script = ExtResource("1")
+custom_name = "Gültigen Angriff oder bessere Position wählen"
+[sub_resource type="BTAction" id="Execute"]
+script = ExtResource("2")
+custom_name = "Handlung ausführen und Bewegung abwarten"
+[sub_resource type="BTSequence" id="Turn"]
+children = [SubResource("Plan"), SubResource("Execute")]
+[resource]
+root_task = SubResource("Turn")

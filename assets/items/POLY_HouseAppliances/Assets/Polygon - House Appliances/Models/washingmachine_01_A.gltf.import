@@ -1,0 +1,119 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://gtme0hor0rcq"
+path="res://.godot/imported/washingmachine_01_A.gltf-16bafe73978ac0cb648811f119e09ece.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/washingmachine_01_A.gltf"
+dest_files=["res://.godot/imported/washingmachine_01_A.gltf-16bafe73978ac0cb648811f119e09ece.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.main.material"
+}
+},
+"meshes": {
+"Doorforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Doorforwashingmachine_01_A.mesh"
+},
+"Root Scene_Doorforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Doorforwashingmachine_01_A.mesh"
+},
+"Root Scene_Switchforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Switchforwashingmachine_01_A.mesh"
+},
+"Root Scene_Switchforwashingmachine_02_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Switchforwashingmachine_02_A.mesh"
+},
+"Root Scene_Switchforwashingmachine_03_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Switchforwashingmachine_03_A.mesh"
+},
+"Root Scene_hatchforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.hatchforwashingmachine_01_A.mesh"
+},
+"Root Scene_shelfforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.shelfforwashingmachine_01_A.mesh"
+},
+"Root Scene_washingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.washingmachine_01_A.mesh"
+},
+"Switchforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Switchforwashingmachine_01_A.mesh"
+},
+"Switchforwashingmachine_02_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Switchforwashingmachine_02_A.mesh"
+},
+"Switchforwashingmachine_03_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.Switchforwashingmachine_03_A.mesh"
+},
+"hatchforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.hatchforwashingmachine_01_A.mesh"
+},
+"shelfforwashingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.shelfforwashingmachine_01_A.mesh"
+},
+"washingmachine_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachine_01_A.washingmachine_01_A.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

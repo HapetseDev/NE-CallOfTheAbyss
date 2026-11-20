@@ -1,0 +1,99 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://cg7i4664yxatt"
+path="res://.godot/imported/kettlemodern_01_C.gltf-96dfd17a3c9eeb25a35fafa63add920c.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/kettlemodern_01_C.gltf"
+dest_files=["res://.godot/imported/kettlemodern_01_C.gltf-96dfd17a3c9eeb25a35fafa63add920c.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.main.material"
+}
+},
+"meshes": {
+"Buttonforkettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Buttonforkettlemodern_01_C.mesh"
+},
+"Capforkettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Capforkettlemodern_01_C.mesh"
+},
+"Electrickettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Electrickettlemodern_01_C.mesh"
+},
+"Root Scene_Buttonforkettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Buttonforkettlemodern_01_C.mesh"
+},
+"Root Scene_Capforkettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Capforkettlemodern_01_C.mesh"
+},
+"Root Scene_Electrickettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Electrickettlemodern_01_C.mesh"
+},
+"Root Scene_Switchforkettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Switchforkettlemodern_01_C.mesh"
+},
+"Root Scene_kettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.kettlemodern_01_C.mesh"
+},
+"Switchforkettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.Switchforkettlemodern_01_C.mesh"
+},
+"kettlemodern_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettlemodern_01_C.kettlemodern_01_C.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

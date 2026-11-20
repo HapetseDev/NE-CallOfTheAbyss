@@ -1,0 +1,79 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://d1kr6x3opdbjx"
+path="res://.godot/imported/coffeemaker_01_E.gltf-1835b393f8051fbe0af6861508e17ec8.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/coffeemaker_01_E.gltf"
+dest_files=["res://.godot/imported/coffeemaker_01_E.gltf-1835b393f8051fbe0af6861508e17ec8.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeemaker_01_E.main.material"
+}
+},
+"meshes": {
+"Capforcoffemaker_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeemaker_01_E.Capforcoffemaker_01_E.mesh"
+},
+"Root Scene_Capforcoffemaker_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeemaker_01_E.Capforcoffemaker_01_E.mesh"
+},
+"Root Scene_coffeemaker_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeemaker_01_E.coffeemaker_01_E.mesh"
+},
+"Root Scene_leverarmforcoffemaker_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeemaker_01_E.leverarmforcoffemaker_01_E.mesh"
+},
+"coffeemaker_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeemaker_01_E.coffeemaker_01_E.mesh"
+},
+"leverarmforcoffemaker_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeemaker_01_E.leverarmforcoffemaker_01_E.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

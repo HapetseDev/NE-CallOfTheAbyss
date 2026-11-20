@@ -1,0 +1,59 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://bsqp8iyiljjo6"
+path="res://.godot/imported/PillarPrototype02x08x02.gltf-69b66f87429a4353650eaa9cec8b6af9.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-Mega Survival/Standard Assets/Prototyping/Models/PillarPrototype02x08x02.gltf"
+dest_files=["res://.godot/imported/PillarPrototype02x08x02.gltf-69b66f87429a4353650eaa9cec8b6af9.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=30.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"NavyGrid": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon-Mega Survival/Standard Assets/Prototyping/Materials/NavyGrid.material"
+}
+},
+"meshes": {
+"PillarPrototype02x08x02": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Standard Assets/Prototyping/Models/extracted/PillarPrototype02x08x02.PillarPrototype02x08x02.mesh"
+},
+"Root Scene_PillarPrototype02x08x02": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Standard Assets/Prototyping/Models/extracted/PillarPrototype02x08x02.PillarPrototype02x08x02.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

@@ -1,0 +1,99 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://dqneubr8i6hip"
+path="res://.godot/imported/washingmachinemodern_01_E.gltf-aa3491b76242f9ccd0fc069105f33cb6.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/washingmachinemodern_01_E.gltf"
+dest_files=["res://.godot/imported/washingmachinemodern_01_E.gltf-aa3491b76242f9ccd0fc069105f33cb6.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.main.material"
+}
+},
+"meshes": {
+"Doorforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Doorforwashingmachinemodern_01_E.mesh"
+},
+"Hatchforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Hatchforwashingmachinemodern_01_E.mesh"
+},
+"Root Scene_Doorforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Doorforwashingmachinemodern_01_E.mesh"
+},
+"Root Scene_Hatchforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Hatchforwashingmachinemodern_01_E.mesh"
+},
+"Root Scene_Shelfforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Shelfforwashingmachinemodern_01_E.mesh"
+},
+"Root Scene_Switchforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Switchforwashingmachinemodern_01_E.mesh"
+},
+"Root Scene_washingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.washingmachinemodern_01_E.mesh"
+},
+"Shelfforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Shelfforwashingmachinemodern_01_E.mesh"
+},
+"Switchforwashingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.Switchforwashingmachinemodern_01_E.mesh"
+},
+"washingmachinemodern_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/washingmachinemodern_01_E.washingmachinemodern_01_E.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

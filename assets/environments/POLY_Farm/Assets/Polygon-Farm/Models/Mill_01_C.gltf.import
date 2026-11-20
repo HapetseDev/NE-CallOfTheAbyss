@@ -1,0 +1,74 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://by2fshqlyi7jr"
+path="res://.godot/imported/Mill_01_C.gltf-63448a85c53a7a9aa53696c052a65c31.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-Farm/Models/Mill_01_C.gltf"
+dest_files=["res://.godot/imported/Mill_01_C.gltf-63448a85c53a7a9aa53696c052a65c31.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=2.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"MillDoor_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Mill_01_C.MillDoor_01_C.mesh"
+},
+"MillSpinner_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Mill_01_C.MillSpinner_01_C.mesh"
+},
+"Mill_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Mill_01_C.Mill_01_C.mesh"
+},
+"Root Scene_MillDoor_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Mill_01_C.MillDoor_01_C.mesh"
+},
+"Root Scene_MillSpinner_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Mill_01_C.MillSpinner_01_C.mesh"
+},
+"Root Scene_Mill_01_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Mill_01_C.Mill_01_C.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

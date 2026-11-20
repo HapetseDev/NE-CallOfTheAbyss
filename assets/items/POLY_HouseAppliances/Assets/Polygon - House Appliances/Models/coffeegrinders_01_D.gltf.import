@@ -1,0 +1,89 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://bfyrmksb8ji0f"
+path="res://.godot/imported/coffeegrinders_01_D.gltf-2fbafa1356e85e14e50f892e337ce6ee.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/coffeegrinders_01_D.gltf"
+dest_files=["res://.godot/imported/coffeegrinders_01_D.gltf-2fbafa1356e85e14e50f892e337ce6ee.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.main.material"
+}
+},
+"meshes": {
+"Glassforcoffeegrinders_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.Glassforcoffeegrinders_01_D.mesh"
+},
+"Root Scene_Glassforcoffeegrinders_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.Glassforcoffeegrinders_01_D.mesh"
+},
+"Root Scene_Switchforcoffeegrinders_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.Switchforcoffeegrinders_01_D.mesh"
+},
+"Root Scene_Switchforcoffeegrinders_02_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.Switchforcoffeegrinders_02_D.mesh"
+},
+"Root Scene_coffeegrinders_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.coffeegrinders_01_D.mesh"
+},
+"Switchforcoffeegrinders_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.Switchforcoffeegrinders_01_D.mesh"
+},
+"Switchforcoffeegrinders_02_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.Switchforcoffeegrinders_02_D.mesh"
+},
+"coffeegrinders_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/coffeegrinders_01_D.coffeegrinders_01_D.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

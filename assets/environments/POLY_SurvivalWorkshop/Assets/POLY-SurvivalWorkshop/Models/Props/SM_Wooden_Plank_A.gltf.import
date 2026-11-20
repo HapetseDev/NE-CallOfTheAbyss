@@ -1,0 +1,59 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://b2plpjnn5b1lv"
+path="res://.godot/imported/SM_Wooden_Plank_A.gltf-dcc4bf25542d1919880c12efd69ab3cf.scn"
+
+[deps]
+
+source_file="res://Assets/POLY-SurvivalWorkshop/Models/Props/SM_Wooden_Plank_A.gltf"
+dest_files=["res://.godot/imported/SM_Wooden_Plank_A.gltf-dcc4bf25542d1919880c12efd69ab3cf.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"Main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY-SurvivalWorkshop/Models/Props/extracted/SM_Wooden_Plank_A.Main.material"
+}
+},
+"meshes": {
+"Root Scene_SM_Wooden_Plank_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Props/extracted/SM_Wooden_Plank_A.SM_Wooden_Plank_A.mesh"
+},
+"SM_Wooden_Plank_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Props/extracted/SM_Wooden_Plank_A.SM_Wooden_Plank_A.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

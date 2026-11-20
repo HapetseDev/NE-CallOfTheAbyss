@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://src/resources/items/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/armor/icons/eisenhelm.png" id="2"]
+[resource]
+script = ExtResource("1")
+icon = ExtResource("2")
+item_id = "Eisenhelm"
+item_name = "Eisenhelm"
+description = "Metallhelm zum Schutz des Kopfes. Schützt weder Rumpf noch Arme."
+weight = 1.8
+max_stack = 1
+is_armor = true
+equipment_slot = "kopf"
+armor_zones = Array[String](["head"])
+armor_protection = {"blunt": 2, "slash": 5, "pierce": 3}

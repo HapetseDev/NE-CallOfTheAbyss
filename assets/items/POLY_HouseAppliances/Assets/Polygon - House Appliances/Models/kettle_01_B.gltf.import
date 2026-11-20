@@ -1,0 +1,89 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://bl52bkgkc6qx"
+path="res://.godot/imported/kettle_01_B.gltf-5dc6801329f6ae81c8eb8ea829d4de97.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/kettle_01_B.gltf"
+dest_files=["res://.godot/imported/kettle_01_B.gltf-5dc6801329f6ae81c8eb8ea829d4de97.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.main.material"
+}
+},
+"meshes": {
+"Capforkettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.Capforkettle_01_B.mesh"
+},
+"Electrickettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.Electrickettle_01_B.mesh"
+},
+"Root Scene_Capforkettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.Capforkettle_01_B.mesh"
+},
+"Root Scene_Electrickettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.Electrickettle_01_B.mesh"
+},
+"Root Scene_Switchforkettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.Switchforkettle_01_B.mesh"
+},
+"Root Scene_kettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.kettle_01_B.mesh"
+},
+"Switchforkettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.Switchforkettle_01_B.mesh"
+},
+"kettle_01_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/kettle_01_B.kettle_01_B.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

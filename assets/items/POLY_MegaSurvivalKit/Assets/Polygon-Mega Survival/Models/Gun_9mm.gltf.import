@@ -1,0 +1,74 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://vgpufhfkbtk2"
+path="res://.godot/imported/Gun_9mm.gltf-a53e9e2726fb0b6325d6b5eb7aa97f09.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-Mega Survival/Models/Gun_9mm.gltf"
+dest_files=["res://.godot/imported/Gun_9mm.gltf-a53e9e2726fb0b6325d6b5eb7aa97f09.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=2
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"Gate_07": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Models/extracted/Gun_9mm.Gate_07.mesh"
+},
+"Gun_9mm": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Models/extracted/Gun_9mm.Gun_9mm.mesh"
+},
+"Root Scene_Gate_07": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Models/extracted/Gun_9mm.Gate_07.mesh"
+},
+"Root Scene_Gun_9mm": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Models/extracted/Gun_9mm.Gun_9mm.mesh"
+},
+"Root Scene_Trigger_Guard_07": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Models/extracted/Gun_9mm.Trigger_Guard_07.mesh"
+},
+"Trigger_Guard_07": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival/Models/extracted/Gun_9mm.Trigger_Guard_07.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

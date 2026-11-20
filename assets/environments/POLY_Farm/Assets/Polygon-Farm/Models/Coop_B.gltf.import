@@ -1,0 +1,64 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://c13rjimdehoyt"
+path="res://.godot/imported/Coop_B.gltf-2b8352d1010791bd021da891b37f7988.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-Farm/Models/Coop_B.gltf"
+dest_files=["res://.godot/imported/Coop_B.gltf-2b8352d1010791bd021da891b37f7988.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=3.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"CoopDoor_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Coop_B.CoopDoor_B.mesh"
+},
+"Coop_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Coop_B.Coop_B.mesh"
+},
+"Root Scene_CoopDoor_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Coop_B.CoopDoor_B.mesh"
+},
+"Root Scene_Coop_B": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Coop_B.Coop_B.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

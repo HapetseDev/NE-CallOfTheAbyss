@@ -35,4 +35,4 @@ func is_in_range(origin: Node3D, target: Node3D) -> bool:
 		return false
 	var start := origin.global_position if origin.is_inside_tree() else origin.position
 	var end := target.global_position if target.is_inside_tree() else target.position
-	return start.distance_squared_to(end) <= melee_range_meters * melee_range_meters
+	return WorldUnits.is_within_range(start, end, melee_range_meters)

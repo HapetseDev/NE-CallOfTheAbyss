@@ -53,7 +53,7 @@ static func _roll_damage(actor: CombatParticipant, target: CombatParticipant, ra
 	if (rng.randf() if rng else randf()) < evade_chance:
 		roll.evaded = true
 		return roll
-	var protection := CombatAnatomy.protection(target.playable.character, zone, damage_type)
+	var protection := CombatAnatomy.protection(target.playable.character, zone, damage_type, roll.incoming_direction)
 	var mitigation := target.playable.get_effective_attribute(CharacterEnums.Attribute.ROBUSTHEIT) * CombatBalance.MITIGATION_FACTOR + float(protection.amount)
 	var armored: bool = bool(protection.armored) if armored_hit == null else bool(armored_hit)
 	var minimum := 1 if raw_power > 0 and not armored else 0
@@ -132,6 +132,8 @@ static func _resolve_item(action: CombatAction, rng: RandomNumberGenerator = nul
 		var power := sheet.get_effective_attribute(CharacterEnums.Attribute.KOERPERKRAFT) + action.item.get_combat_value(mode)
 		power += get_damage_skill_bonus(sheet, action.item.get_combat_skill_id(mode))
 		var roll := _roll_damage(action.actor, target, power, mode.attribute, rng, null, hits[target].zone_id, mode.damage_type)
+		# Nur ausgeführte Angriffe drehen den Angreifer, auch beim Ausweichen.
+		action.actor.playable.face_world_position(CombatAnatomy.position(target.playable))
 		var outcome := _make_outcome(target, roll)
 		result.outcomes.append(outcome)
 		if outcome.defeated:
@@ -216,6 +218,8 @@ static func _apply_damage_to_targets(action: CombatAction, ability: AbilityDefin
 			var sheet := action.actor.playable.character
 			power = sheet.get_effective_attribute(CharacterEnums.Attribute.KOERPERKRAFT) + get_damage_skill_bonus(sheet, "waffenloser_kampf")
 		var roll := _roll_damage(action.actor, target, power, scaling_attribute, rng, null, action.target_zone_id, "blunt" if ability.ability_id == "fausthieb" else ability.damage_type)
+		# Nur ausgeführte Angriffe drehen den Angreifer, auch beim Ausweichen.
+		action.actor.playable.face_world_position(CombatAnatomy.position(target.playable))
 		var outcome := _make_outcome(target, roll)
 		result.outcomes.append(outcome)
 		if outcome.defeated:
@@ -256,7 +260,13 @@ static func _primary_attribute_for(ability: AbilityDefinition) -> CharacterEnums
 
 static func _resolve_move(action: CombatAction) -> CombatActionResult:
 	var result := CombatActionResult.new()
-	action.actor.playable.global_position = action.move_target_position
+	# MOVE bestätigt eine bereits physisch ausgeführte Bewegung. Kein Teleport.
+	if not action.move_target_position.is_finite() or CombatAnatomy.position(action.actor.playable).distance_to(action.move_target_position) > 0.05:
+		result.success = false
+		result.failed_reason = "invalid_move"
+	elif action.actor.playable.is_in_combat_mode() and not preload("res://src/world/combat/combat_grid.gd").is_centered(action.move_target_position):
+		result.success = false
+		result.failed_reason = "invalid_move"
 	return result
 
 

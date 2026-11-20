@@ -1,0 +1,129 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://bdhexnvy80r7v"
+path="res://.godot/imported/foodprocessor_01_D.gltf-3c9e245e7798f972ccd13c4b4030a8c9.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/foodprocessor_01_D.gltf"
+dest_files=["res://.godot/imported/foodprocessor_01_D.gltf-3c9e245e7798f972ccd13c4b4030a8c9.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.main.material"
+}
+},
+"meshes": {
+"Capforblender_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Capforblender_01_D.mesh"
+},
+"Plateforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Plateforfoodprocessor_01_D.mesh"
+},
+"Root Scene_Capforblender_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Capforblender_01_D.mesh"
+},
+"Root Scene_Plateforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Plateforfoodprocessor_01_D.mesh"
+},
+"Root Scene_Switchforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Switchforfoodprocessor_01_D.mesh"
+},
+"Root Scene_Switchforfoodprocessor_02_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Switchforfoodprocessor_02_D.mesh"
+},
+"Root Scene_blenderforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.blenderforfoodprocessor_01_D.mesh"
+},
+"Root Scene_foodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.foodprocessor_01_D.mesh"
+},
+"Root Scene_foodprocessormechanism_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.foodprocessormechanism_01_D.mesh"
+},
+"Root Scene_swivelmechanismforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.swivelmechanismforfoodprocessor_01_D.mesh"
+},
+"Switchforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Switchforfoodprocessor_01_D.mesh"
+},
+"Switchforfoodprocessor_02_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.Switchforfoodprocessor_02_D.mesh"
+},
+"blenderforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.blenderforfoodprocessor_01_D.mesh"
+},
+"foodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.foodprocessor_01_D.mesh"
+},
+"foodprocessormechanism_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.foodprocessormechanism_01_D.mesh"
+},
+"swivelmechanismforfoodprocessor_01_D": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/foodprocessor_01_D.swivelmechanismforfoodprocessor_01_D.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

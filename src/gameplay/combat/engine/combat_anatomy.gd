@@ -7,6 +7,7 @@ const PROFILE_PATHS := {
 }
 const DAMAGE_TYPES: Array[String] = ["blunt", "slash", "pierce", "magic"]
 const DAMAGE_LABELS := {"blunt": "Wucht", "slash": "Schnitt", "pierce": "Stich", "magic": "Magie"}
+const HUMAN_ARMOR_FACTORS := {"front": 1.0, "side": 0.75, "rear": 0.5}
 static var _profiles: Dictionary = {}
 
 static func profile_for_id(id: String) -> CombatBodyProfile:
@@ -42,7 +43,10 @@ static func aim_point(actor: Playable, zone_id: String = "") -> Vector3:
 static func direction(actor: Playable, target: Playable) -> String:
 	if actor == null or target == null:
 		return "front"
-	var incoming := position(actor) - position(target)
+	return direction_from_position(position(actor), target)
+
+static func direction_from_position(origin: Vector3, target: Playable) -> String:
+	var incoming := origin - position(target)
 	incoming.y = 0
 	if incoming.is_zero_approx():
 		return "front"
@@ -60,9 +64,14 @@ static func evasion_factor(actor: Playable, target: Playable) -> float:
 static func _protection(values: Dictionary, damage_type: String) -> float:
 	return maxf(0.0, float(values.get(damage_type, 0.0)))
 
-static func protection(sheet: CharacterResource, zone: CombatBodyZone, damage_type: String) -> Dictionary:
+static func armor_direction_factor(item: ItemData, sheet: CharacterResource, incoming: String) -> float:
+	var standard := float(HUMAN_ARMOR_FACTORS.get(incoming, 1.0)) if sheet and sheet.body_profile_id == "human" else 1.0
+	return float(item.armor_direction_factors.get(incoming, standard))
+
+static func protection(sheet: CharacterResource, zone: CombatBodyZone, damage_type: String, incoming: String = "front") -> Dictionary:
 	var amount := _protection(zone.natural_protection, damage_type)
 	var armored := amount > 0.0
+	var worn := 0.0
 	if sheet and sheet.inventory:
 		# Nur angelegte Körperplätze, nie Hände, Schmuck oder Schnellausrüstung.
 		for slot in ["kopf", "rumpf", "beine", "fuesse"]:
@@ -70,20 +79,24 @@ static func protection(sheet: CharacterResource, zone: CombatBodyZone, damage_ty
 			if not item is ItemData or not item.is_armor:
 				continue
 			var covers: bool = zone.zone_id in item.armor_zones if not item.armor_zones.is_empty() else slot in zone.equipment_slots
-			if covers:
+			var factor := armor_direction_factor(item, sheet, incoming)
+			if covers and factor > 0.0:
 				armored = true
-				amount += _protection(item.armor_protection, damage_type)
-	return {"amount": amount, "armored": armored}
+				worn += _protection(item.armor_protection, damage_type) * factor
+	# Getragene Rüstung einmal runden; natürlicher Schutz bleibt unverändert.
+	return {"amount": amount + roundf(worn), "armored": armored}
 
 ## Profil-Trefferboxen ersetzen für Angriffe die Bewegungskapseln. Keine
 ## Treffer-Nodes oder Laufzeitkopien von Charakterdaten erforderlich.
-static func trace(actor: CombatParticipant, aimed: CombatParticipant, check_walls: bool, zone_id: String = "") -> Dictionary:
+static func trace(actor: CombatParticipant, aimed: CombatParticipant, check_walls: bool, zone_id: String = "", proposed_position: Variant = null) -> Dictionary:
 	if actor == null or aimed == null or not is_instance_valid(actor.playable) or not is_instance_valid(aimed.playable) or aimed.is_out_of_combat():
 		return {}
 	var requested := profile(aimed.playable.character)
 	if not zone_id.is_empty() and requested.get_zone(zone_id) == null:
 		return {}
 	var start := aim_point(actor.playable)
+	if proposed_position is Vector3:
+		start += proposed_position - position(actor.playable)
 	var end := aim_point(aimed.playable, zone_id)
 	var candidates: Array[CombatParticipant] = [aimed]
 	var session := actor.playable.get_combat_session()

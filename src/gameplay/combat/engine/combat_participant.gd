@@ -7,6 +7,10 @@ class_name CombatParticipant extends RefCounted
 var playable: Playable
 var side: StringName
 var initiative_meter: float = 0.0
+## Flüchtiger KI-Zustand dieser Session, kein Charakter-/Speicherdatum.
+var ai_reposition_cooldown: int = 0
+## Actor-Instance-ID -> Position/Alter; keine RefCounted-Zyklen zwischen Teilnehmern.
+var ai_last_seen: Dictionary = {}
 var is_defeated: bool = false
 ## Erfolgreich geflohen (siehe CombatSession.mark_fled) – bleibt wie
 ## is_defeated Teil von participants (kein Ziel mehr, keine Züge mehr), bis

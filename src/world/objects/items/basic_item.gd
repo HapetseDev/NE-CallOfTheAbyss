@@ -37,6 +37,20 @@ func _ready() -> void:
 func _apply_visual() -> void:
 	if item_data == null:
 		return
+	var factory := preload("res://src/resources/items/item_visual.gd")
+	if item_data.item_id in factory.WEAPONS or factory.ARMOR_MODELS.has(item_data.item_id):
+		var visual := factory.create(item_data)
+		visual.name = "ArmorVisual" if factory.ARMOR_MODELS.has(item_data.item_id) else "WeaponVisual"
+		var bounds: AABB = factory.bounds(visual)
+		visual.position.y = -bounds.position.y
+		add_child(visual)
+		_mesh.visible = false
+		_sprite.visible = false
+		var shape := BoxShape3D.new()
+		shape.size = Vector3(maxf(0.08, bounds.size.x), bounds.size.y, maxf(0.08, bounds.size.z))
+		$CollisionShape3D.shape = shape
+		$CollisionShape3D.position = bounds.get_center() + visual.position
+		return
 	var tex: Texture2D = item_data.world_texture if item_data.world_texture else item_data.icon
 	if is_instance_valid(_sprite) and tex:
 		_sprite.texture = tex

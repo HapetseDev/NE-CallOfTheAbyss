@@ -1,0 +1,54 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://d3n5u4l6j6h8k"
+path="res://.godot/imported/SM_Magazine_For_Army_Pistol.gltf-6145512c740b3fd256f23f1586599041.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-LiteSurvivalCollection/Models/SM_Magazine_For_Army_Pistol.gltf"
+dest_files=["res://.godot/imported/SM_Magazine_For_Army_Pistol.gltf-6145512c740b3fd256f23f1586599041.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=2
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"Root Scene_SM_Magazine_For_Army_Pistol": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-LiteSurvivalCollection/Models/extracted/SM_Magazine_For_Army_Pistol.SM_Magazine_For_Army_Pistol.mesh"
+},
+"SM_Magazine_For_Army_Pistol": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-LiteSurvivalCollection/Models/extracted/SM_Magazine_For_Army_Pistol.SM_Magazine_For_Army_Pistol.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

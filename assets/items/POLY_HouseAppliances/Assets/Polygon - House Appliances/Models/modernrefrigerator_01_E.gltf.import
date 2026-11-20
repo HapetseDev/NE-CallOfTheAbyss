@@ -1,0 +1,149 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://dod5yleuimjml"
+path="res://.godot/imported/modernrefrigerator_01_E.gltf-2d90abd3c59ee0da4bd709ae0d80ad07.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/modernrefrigerator_01_E.gltf"
+dest_files=["res://.godot/imported/modernrefrigerator_01_E.gltf-2d90abd3c59ee0da4bd709ae0d80ad07.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.main.material"
+}
+},
+"meshes": {
+"Leftdoorofamodernrefrigerator_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.Leftdoorofamodernrefrigerator_01_E.mesh"
+},
+"Root Scene_Leftdoorofamodernrefrigerator_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.Leftdoorofamodernrefrigerator_01_E.mesh"
+},
+"Root Scene_modernrefrigerator_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.modernrefrigerator_01_E.mesh"
+},
+"Root Scene_pulloutrefrigeratorshelfleft_01_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfleft_01_01_E.mesh"
+},
+"Root Scene_pulloutrefrigeratorshelfleft_01_02_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfleft_01_02_E.mesh"
+},
+"Root Scene_pulloutrefrigeratorshelfleft_01_03_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfleft_01_03_E.mesh"
+},
+"Root Scene_pulloutrefrigeratorshelflong_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelflong_01_E.mesh"
+},
+"Root Scene_pulloutrefrigeratorshelfright_01_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfright_01_01_E.mesh"
+},
+"Root Scene_pulloutrefrigeratorshelfright_01_02_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfright_01_02_E.mesh"
+},
+"Root Scene_pulloutrefrigeratorshelfright_01_03_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfright_01_03_E.mesh"
+},
+"Root Scene_rightdoorofamodernrefrigerator_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.rightdoorofamodernrefrigerator_01_E.mesh"
+},
+"modernrefrigerator_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.modernrefrigerator_01_E.mesh"
+},
+"pulloutrefrigeratorshelfleft_01_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfleft_01_01_E.mesh"
+},
+"pulloutrefrigeratorshelfleft_01_02_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfleft_01_02_E.mesh"
+},
+"pulloutrefrigeratorshelfleft_01_03_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfleft_01_03_E.mesh"
+},
+"pulloutrefrigeratorshelflong_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelflong_01_E.mesh"
+},
+"pulloutrefrigeratorshelfright_01_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfright_01_01_E.mesh"
+},
+"pulloutrefrigeratorshelfright_01_02_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfright_01_02_E.mesh"
+},
+"pulloutrefrigeratorshelfright_01_03_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.pulloutrefrigeratorshelfright_01_03_E.mesh"
+},
+"rightdoorofamodernrefrigerator_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/modernrefrigerator_01_E.rightdoorofamodernrefrigerator_01_E.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

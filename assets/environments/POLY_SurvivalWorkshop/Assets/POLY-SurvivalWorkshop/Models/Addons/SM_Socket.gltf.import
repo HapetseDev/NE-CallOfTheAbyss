@@ -1,0 +1,59 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://ccex3rp3t643s"
+path="res://.godot/imported/SM_Socket.gltf-4fc3140ab651958c91b84ba2e540fd82.scn"
+
+[deps]
+
+source_file="res://Assets/POLY-SurvivalWorkshop/Models/Addons/SM_Socket.gltf"
+dest_files=["res://.godot/imported/SM_Socket.gltf-4fc3140ab651958c91b84ba2e540fd82.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"Main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY-SurvivalWorkshop/Models/Addons/extracted/SM_Socket.Main.material"
+}
+},
+"meshes": {
+"Root Scene_SM_Socket": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Addons/extracted/SM_Socket.SM_Socket.mesh"
+},
+"SM_Socket": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY-SurvivalWorkshop/Models/Addons/extracted/SM_Socket.SM_Socket.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

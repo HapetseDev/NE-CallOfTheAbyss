@@ -1,0 +1,54 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://dimyw7e2pnw5t"
+path="res://.godot/imported/Cabbage_01_A.gltf-8092a171f1bdb996115ec8ae5df515a3.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-Farm/Models/Cabbage_01_A.gltf"
+dest_files=["res://.godot/imported/Cabbage_01_A.gltf-8092a171f1bdb996115ec8ae5df515a3.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"Cabbage_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Cabbage_01_A.Cabbage_01_A.mesh"
+},
+"Root Scene_Cabbage_01_A": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Farm/Models/extracted/Cabbage_01_A.Cabbage_01_A.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

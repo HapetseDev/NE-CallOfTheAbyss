@@ -1,0 +1,59 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://b2otbse31yk8h"
+path="res://.godot/imported/laundrydryer_02_C.gltf-ac5bc85ae28af0d8af36182cb2cff185.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/laundrydryer_02_C.gltf"
+dest_files=["res://.godot/imported/laundrydryer_02_C.gltf-ac5bc85ae28af0d8af36182cb2cff185.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/laundrydryer_02_C.main.material"
+}
+},
+"meshes": {
+"Root Scene_laundrydryer_02_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/laundrydryer_02_C.laundrydryer_02_C.mesh"
+},
+"laundrydryer_02_C": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/laundrydryer_02_C.laundrydryer_02_C.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

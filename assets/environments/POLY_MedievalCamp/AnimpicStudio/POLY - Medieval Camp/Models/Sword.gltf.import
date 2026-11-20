@@ -1,0 +1,330 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://cdm8fccif5xv4"
+path="res://.godot/imported/Sword.gltf-3bdaf3a1ae8c78eb36fc12dbd3d75811.scn"
+
+[deps]
+
+source_file="res://AnimpicStudio/POLY - Medieval Camp/Models/Sword.gltf"
+dest_files=["res://.godot/imported/Sword.gltf-3bdaf3a1ae8c78eb36fc12dbd3d75811.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.2
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"Material": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material.material"
+},
+"Material.001": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material001.material"
+},
+"Material.004": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material004.material"
+},
+"Material.005": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material005.material"
+},
+"Material.006": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material006.material"
+},
+"Material.007": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material007.material"
+},
+"Material.008": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material008.material"
+},
+"Material.009": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material009.material"
+},
+"Material.010": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material010.material"
+},
+"Material.011": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material011.material"
+},
+"Material.012": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material012.material"
+},
+"Material.013": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material013.material"
+},
+"Material.014": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material014.material"
+},
+"Material.015": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material015.material"
+},
+"Material.016": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.Material016.material"
+}
+},
+"meshes": {
+"Root Scene_a spear": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.a spear.mesh"
+},
+"Root Scene_a spear 2": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.a spear 2.mesh"
+},
+"Root Scene_halberd": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.halberd.mesh"
+},
+"Root Scene_halberd broken": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.halberd broken.mesh"
+},
+"Root Scene_halberd broken_2": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.halberd broken_2.mesh"
+},
+"Root Scene_havy sword": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.havy sword.mesh"
+},
+"Root Scene_havy sword_2": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.havy sword_2.mesh"
+},
+"Root Scene_havy sword_2broken": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.havy sword_2broken.mesh"
+},
+"Root Scene_long sword": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.long sword.mesh"
+},
+"Root Scene_long sword broken": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.long sword broken.mesh"
+},
+"Root Scene_smart sword": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.smart sword.mesh"
+},
+"Root Scene_standart sword": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.standart sword.mesh"
+},
+"Root Scene_standart sword broken": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.standart sword broken.mesh"
+},
+"Root Scene_sword king": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.sword king.mesh"
+},
+"Root Scene_sword king broken": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"lods/normal_split_angle": 25.0,
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.sword king broken.mesh"
+},
+"a spear": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.a spear.mesh"
+},
+"a spear 2": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.a spear 2.mesh"
+},
+"halberd": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.halberd.mesh"
+},
+"halberd broken": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.halberd broken.mesh"
+},
+"halberd broken_2": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.halberd broken_2.mesh"
+},
+"havy sword": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.havy sword.mesh"
+},
+"havy sword_2": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.havy sword_2.mesh"
+},
+"havy sword_2broken": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.havy sword_2broken.mesh"
+},
+"long sword": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.long sword.mesh"
+},
+"long sword broken": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.long sword broken.mesh"
+},
+"smart sword": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.smart sword.mesh"
+},
+"standart sword": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.standart sword.mesh"
+},
+"standart sword broken": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.standart sword broken.mesh"
+},
+"sword king": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.sword king.mesh"
+},
+"sword king broken": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/POLY - Mega Bundle/POLY - Medieval Camp/Models/extracted/Sword.sword king broken.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

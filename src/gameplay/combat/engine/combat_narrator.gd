@@ -72,6 +72,10 @@ static func _reason_text(reason: String) -> String:
 			return "nicht genug Konzentration."
 		"no_line_of_sight":
 			return "keine freie Sicht auf das Ziel."
+		"movement_blocked":
+			return "Bewegung wird blockiert."
+		"invalid_move":
+			return "Bewegung wurde nicht ausgeführt."
 		"out_of_range":
 			return "Ziel außerhalb der Waffenreichweite."
 		"no_ammunition":

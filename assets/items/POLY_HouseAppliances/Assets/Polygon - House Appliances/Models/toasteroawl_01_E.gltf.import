@@ -1,0 +1,69 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://coah80naivrny"
+path="res://.godot/imported/toasteroawl_01_E.gltf-a72f7e56c0555981b34d55c88802ed63.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon - House Appliances/Models/toasteroawl_01_E.gltf"
+dest_files=["res://.godot/imported/toasteroawl_01_E.gltf-a72f7e56c0555981b34d55c88802ed63.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=false
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {
+"main": {
+"use_external/enabled": true,
+"use_external/path": "res://Assets/Polygon - House Appliances/Models/extracted/toasteroawl_01_E.main.material"
+}
+},
+"meshes": {
+"Root Scene_Switchfortoasteroawl_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/toasteroawl_01_E.Switchfortoasteroawl_01_E.mesh"
+},
+"Root Scene_toasteroawl_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/toasteroawl_01_E.toasteroawl_01_E.mesh"
+},
+"Switchfortoasteroawl_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/toasteroawl_01_E.Switchfortoasteroawl_01_E.mesh"
+},
+"toasteroawl_01_E": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon - House Appliances/Models/extracted/toasteroawl_01_E.toasteroawl_01_E.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1

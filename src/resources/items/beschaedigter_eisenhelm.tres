@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://src/resources/items/item_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/items/armor/icons/beschaedigter_eisenhelm.png" id="2"]
+[resource]
+script = ExtResource("1")
+icon = ExtResource("2")
+item_id = "BeschaedigterEisenhelm"
+item_name = "Beschädigter Eisenhelm"
+description = "Beschädigter Metallhelm mit geringerem Kopfschutz. Keine laufende Haltbarkeitsmechanik."
+weight = 1.6
+max_stack = 1
+is_armor = true
+equipment_slot = "kopf"
+armor_zones = Array[String](["head"])
+armor_protection = {"blunt": 1, "slash": 2, "pierce": 1}

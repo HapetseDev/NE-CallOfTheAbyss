@@ -224,6 +224,14 @@ Bei schmaler Ansicht wandert die Detailspalte unter die Körperansicht;
 Schnellausrüstung und Rucksack passen ihre Spaltenzahl der verfügbaren Breite an.
 
 
+Die Gegenstandsansicht verwendet einen normalen `TextureRect` mit
+`STRETCH_KEEP_ASPECT_CENTERED` für das ausgewählte `ItemData.icon`.
+Waffenbilder sind transparente Renderings der gemeinsamen Welt-/Handansicht.
+Die Vorschauhöhe beträgt zwei `INVENTORY_PORTRAIT_SIZE`; leere Auswahlen zeigen
+einen Hinweis. Es gibt keine eigenen Panel-Stile oder zusätzlichen Viewports im
+laufenden Inventar.
+
+
 ## Charakterkarten im Kampf
 
 `CombatOrderHud` übernimmt die Weltkarten von `PartyHud` und verwendet für

@@ -163,6 +163,10 @@ func _ready() -> void:
 	_ensure_model_animator()
 	_apply_facing()
 	add_to_group(CombatParticipantResolver.COMBAT_REACTIVE_GROUP)
+	var held := preload("res://src/gameplay/character/held_item_visuals.gd").new()
+	held.name = "HeldItemVisuals"
+	add_child(held)
+	held.setup(self)
 
 
 func bind_character(new_character: CharacterResource, duplicate_runtime: bool = true) -> void:
@@ -233,7 +237,7 @@ func _process(_delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	_tick_flee(delta)
+	_path_motion.tick(self, delta)
 	preload("res://src/gameplay/character/player/step_assist.gd").apply(self, delta, step_height)
 	_apply_gravity(delta)
 	move_and_slide()
@@ -278,13 +282,19 @@ func is_airborne() -> bool:
 # --- Bewegungs-Hilfsmethoden ---
 
 func face_world_position(world_pos: Vector3) -> void:
-	var to := world_pos - global_position
+	var origin := global_position if is_inside_tree() else position
+	var to := world_pos - origin
 	to.y = 0.0
 	if to.length_squared() < FACING_CHANGE_EPSILON_SQ:
 		return
-	facing_direction = to.normalized()
-	cardinal_direction = _nearest_cardinal(facing_direction)
+	var next_facing := to.normalized()
+	var next_cardinal := _nearest_cardinal(next_facing)
+	var changed := facing_direction.distance_squared_to(next_facing) > FACING_CHANGE_EPSILON_SQ or cardinal_direction != next_cardinal
+	facing_direction = next_facing
+	cardinal_direction = next_cardinal
 	_apply_facing()
+	if changed:
+		direction_changed.emit(facing_direction)
 
 
 func set_direction() -> bool:
@@ -467,46 +477,23 @@ func can_participate_in_combat() -> bool:
 	return character != null and not character.is_defeated and not is_character_dead()
 
 
-var flee_path := PackedVector3Array()
-var _flee_finished := Callable()
-var _flee_stalled := 0.0
-var _flee_previous := Vector3.ZERO
+const FLEE_MOTION_OWNER := -1
+var _path_motion = preload("res://src/gameplay/character/character_path_motion.gd").new()
+var flee_path: PackedVector3Array:
+	get:
+		return _path_motion.path if _path_motion.owner_id == FLEE_MOTION_OWNER else PackedVector3Array()
 
 func begin_flee(path: PackedVector3Array, finished: Callable) -> void:
-	flee_path = path
-	_flee_finished = finished
-	_flee_stalled = 0.0
-	_flee_previous = global_position
-
-func _tick_flee(delta: float) -> void:
-	if flee_path.is_empty():
-		return
-	var target := flee_path[0]
-	var offset := target - global_position
-	offset.y = 0
-	if offset.length() < 0.18:
-		flee_path.remove_at(0)
-		if flee_path.is_empty():
-			_finish_flee(true)
-		return
-	if global_position.distance_to(_flee_previous) < 0.005:
-		_flee_stalled += delta
-	else:
-		_flee_stalled = 0.0
-	_flee_previous = global_position
-	if _flee_stalled > 2.0:
-		_finish_flee(false)
-		return
-	direction = offset.normalized()
-	set_direction()
-	set_horizontal_velocity(direction * minf(5.0, offset.length() / delta))
-	update_animation("run")
+	if _path_motion.owner_id != 0:
+		_path_motion.cancel(self, _path_motion.owner_id)
+	_path_motion.start(self, FLEE_MOTION_OWNER, path, 5.0, finished, 0.18, false)
 
 func _finish_flee(arrived: bool) -> void:
-	flee_path.clear()
-	stop_horizontal_velocity()
-	update_animation("idle")
-	var callback := _flee_finished
-	_flee_finished = Callable()
-	if callback.is_valid():
-		callback.call(arrived)
+	if _path_motion.owner_id == FLEE_MOTION_OWNER:
+		_path_motion.finish(self, arrived)
+
+func begin_combat_path(owner_id: int, path: PackedVector3Array, speed: float, finished: Callable) -> bool:
+	return _path_motion.start(self, owner_id, path, speed, finished, 0.0005, true)
+
+func cancel_combat_path(owner_id: int) -> void:
+	_path_motion.cancel(self, owner_id)

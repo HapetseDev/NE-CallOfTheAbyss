@@ -1,0 +1,74 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://dlmbb6w28wad4"
+path="res://.godot/imported/SM_CONCRETE_MIXER.gltf-9ec79cd33a562b1b5678238b4318973c.scn"
+
+[deps]
+
+source_file="res://Assets/Polygon-Mega Survival Tools/Models/SM_CONCRETE_MIXER.gltf"
+dest_files=["res://.godot/imported/SM_CONCRETE_MIXER.gltf-9ec79cd33a562b1b5678238b4318973c.scn"]
+
+[params]
+
+nodes/root_type="Node3D"
+nodes/root_name=""
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+meshes/ensure_tangents=1
+meshes/generate_lods=true
+meshes/create_shadow_meshes=false
+meshes/light_baking=2
+meshes/lightmap_texel_size=0.2
+skins/use_named_skins=true
+animation/import=true
+animation/fps=24.0
+animation/trimming=false
+animation/remove_immutable_tracks=false
+import_script/path=""
+_subresources={
+"animations": {},
+"materials": {},
+"meshes": {
+"BARREL_FOR_CONCRETE_MIXER": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival Tools/Models/extracted/SM_CONCRETE_MIXER.BARREL_FOR_CONCRETE_MIXER.mesh"
+},
+"Root Scene_BARREL_FOR_CONCRETE_MIXER": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival Tools/Models/extracted/SM_CONCRETE_MIXER.BARREL_FOR_CONCRETE_MIXER.mesh"
+},
+"Root Scene_SM_CONCRETE_MIXER": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival Tools/Models/extracted/SM_CONCRETE_MIXER.SM_CONCRETE_MIXER.mesh"
+},
+"Root Scene_WHEEL_FOR_CONCRETE_MIXER": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival Tools/Models/extracted/SM_CONCRETE_MIXER.WHEEL_FOR_CONCRETE_MIXER.mesh"
+},
+"SM_CONCRETE_MIXER": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival Tools/Models/extracted/SM_CONCRETE_MIXER.SM_CONCRETE_MIXER.mesh"
+},
+"WHEEL_FOR_CONCRETE_MIXER": {
+"save_to_file/enabled": true,
+"save_to_file/make_streamable": "",
+"save_to_file/path": "res://Assets/Polygon-Mega Survival Tools/Models/extracted/SM_CONCRETE_MIXER.WHEEL_FOR_CONCRETE_MIXER.mesh"
+}
+},
+"nodes": {
+"PATH:AnimationPlayer": {
+"optimizer/enabled": true,
+"optimizer/max_angular_error": 0.00277778,
+"optimizer/max_linear_error": 0.5
+}
+}
+}
+gltf/embedded_image_handling=1
