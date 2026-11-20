@@ -1,0 +1,5 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="PackedScene" path="res://src/world/objects/items/basic_item.tscn" id="1"]
+[ext_resource type="Resource" path="res://src/resources/items/beschaedigter_eisenhelm.tres" id="2"]
+[node name="BeschaedigterEisenhelm" instance=ExtResource("1")]
+item_data = ExtResource("2")

@@ -21,6 +21,7 @@ var migrate_legacy_combat_items: bool = false
 var migrate_legacy_armor_items: bool = false
 var migrate_legacy_weapon_ranges: bool = false
 var migrate_legacy_anatomy: bool = false
+var migrate_legacy_directional_armor: bool = false
 
 
 func encode(value: Variant) -> Variant:
@@ -93,6 +94,9 @@ func decode(value: Variant, depth: int = 0) -> Variant:
 	if not kind is String or not TYPES.has(kind) or not data is Dictionary:
 		failed = true
 		return null
+	if migrate_legacy_directional_armor and kind == "ItemData" and not data.has("armor_direction_factors"):
+		data = data.duplicate()
+		data.armor_direction_factors = {"kind": "Dictionary", "value": {}}
 	if migrate_legacy_anatomy:
 		data = data.duplicate()
 		if kind == "CharacterResource" and not data.has("body_profile_id"):
@@ -208,6 +212,10 @@ func decode(value: Variant, depth: int = 0) -> Variant:
 
 
 func _valid_armor(item: ItemData) -> bool:
+	for direction in item.armor_direction_factors:
+		var factor: Variant = item.armor_direction_factors[direction]
+		if direction not in ["front", "side", "rear"] or not (factor is int or factor is float) or not is_finite(factor) or factor < 0.0 or factor > 2.0:
+			return false
 	for type in item.armor_protection:
 		var amount: Variant = item.armor_protection[type]
 		if type not in CombatAnatomy.DAMAGE_TYPES or not (amount is int or amount is float) or not is_finite(amount) or amount < 0 or amount > 1000:

@@ -1,7 +1,7 @@
 class_name CombatAction extends RefCounted
 
 ## Eine gewählte Handlung für einen Kampfzug. ITEM/ABILITY/MOVE werden von
-## CombatResolver aufgelöst (reine Stat-/Positions-Mutation). COMMUNICATE und
+## CombatResolver aufgelöst (Stat-Mutation bzw. Bestätigung bereits ausgeführter Bewegung). COMMUNICATE und
 ## FLEE haben Szenen-Seiteneffekte (Dialog öffnen, Session verlassen) und
 ## werden direkt vom aufrufenden State (state_combat_turn.gd) behandelt.
 

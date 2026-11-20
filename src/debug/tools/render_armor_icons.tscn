@@ -1,0 +1,7 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://src/debug/tools/render_weapon_icons.gd" id="1"]
+[node name="RenderArmorIcons" type="Node"]
+script = ExtResource("1")
+items = Array[String](["eisenhelm", "beschaedigter_eisenhelm"])
+output_directory = "res://assets/items/armor/icons"
+model_rotation = Vector3(-0.15, 0.55, 0)

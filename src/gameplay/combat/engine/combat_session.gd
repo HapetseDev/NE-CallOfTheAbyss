@@ -20,6 +20,10 @@ var turn_queue: Array[CombatParticipant] = []
 var state: SessionState = SessionState.ACTIVE
 
 var _fleeing: Array[CombatParticipant] = []
+const GRID := preload("res://src/world/combat/combat_grid.gd")
+var grid_display
+var _grid_pending: Array[Playable] = []
+var _grid_attempts: Dictionary = {}
 
 var _active_turn: CombatParticipant = null
 var _turned_this_round: Array[CombatParticipant] = []
@@ -45,6 +49,27 @@ func _process(delta: float) -> void:
 	_advance_turn_queue()
 
 
+func _physics_process(_delta: float) -> void:
+	if state != SessionState.ACTIVE:
+		return
+	for body in _grid_pending.duplicate():
+		var participant := get_participant(body) if is_instance_valid(body) else null
+		if participant == null or participant.is_out_of_combat() or not body.can_participate_in_combat() or GRID.place(body, self):
+			_grid_pending.erase(body)
+			_grid_attempts.erase(body)
+			continue
+		_grid_attempts[body] = int(_grid_attempts.get(body, 0)) + 1
+		if _grid_attempts[body] >= 3:
+			_grid_pending.erase(body)
+			_grid_attempts.erase(body)
+			EventLog.add("%s findet kein freies Rasterfeld; Bewegung ist hier nicht möglich." % body.get_display_name())
+
+
+func _place_on_grid(body: Playable) -> void:
+	if not GRID.place(body, self) and not _grid_pending.has(body):
+		_grid_pending.append(body)
+
+
 ## Erneutes admit() eines bereits Geflohenen (z.B. wieder angegriffen) holt
 ## ihn zurück in den Kampf – has_fled wird zurückgesetzt, sonst bekäme er nie
 ## wieder eigene Züge.
@@ -59,13 +84,21 @@ func admit(playable: Playable, side: StringName) -> CombatParticipant:
 		existing.side = side
 		existing.has_fled = false
 		if returning:
+			existing.ai_reposition_cooldown = 0
+			existing.ai_last_seen.clear()
 			playable.enter_combat_mode(self)
+			_place_on_grid(playable)
 			participant_joined.emit(existing)
 		return existing
 	var participant := CombatParticipant.new(playable, side)
 	participants.append(participant)
 	if playable:
 		playable.enter_combat_mode(self)
+		_place_on_grid(playable)
+	if grid_display == null and is_inside_tree():
+		grid_display = preload("res://src/world/combat/combat_grid_display.gd").new()
+		grid_display.session = self
+		add_child(grid_display)
 	participant_joined.emit(participant)
 	return participant
 
@@ -188,12 +221,15 @@ func _tick_initiative(delta: float) -> void:
 
 
 func _advance_turn_queue() -> void:
-	if _active_turn != null or turn_queue.is_empty():
+	if _active_turn != null or turn_queue.is_empty() or not _grid_pending.is_empty():
 		return
 	var next: CombatParticipant = turn_queue.pop_front()
 	if next == null:
 		return
 	_active_turn = next
+	# Auch nach unterbrochener Bewegung oder verspäteter Physikregistrierung.
+	if is_instance_valid(next.playable) and not GRID.is_centered(next.playable.global_position):
+		GRID.place(next.playable, self)
 	turn_started.emit(_active_turn)
 
 

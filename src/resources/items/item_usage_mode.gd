@@ -29,4 +29,4 @@ func is_in_range(origin: Node3D, target: Node3D) -> bool:
 	# Die Textsimulation verwendet absichtlich Actors außerhalb des Szenenbaums.
 	var start := origin.global_position if origin.is_inside_tree() else origin.position
 	var end := target.global_position if target.is_inside_tree() else target.position
-	return start.distance_squared_to(end) <= range_meters * range_meters
+	return WorldUnits.is_within_range(start, end, range_meters)

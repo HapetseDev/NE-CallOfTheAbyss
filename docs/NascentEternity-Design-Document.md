@@ -4,9 +4,9 @@
 
 ## Design Dokument
 
-Version: 3
+Version: 5
 
-Abgleich mit dem aktuellen Code: 30. Oktober 2026.
+Abgleich mit dem aktuellen Code: 19. November 2026.
 
 (Wird bei jeder Bearbeitung inkrementiert)
 
@@ -15,6 +15,10 @@ Abgleich mit dem aktuellen Code: 30. Oktober 2026.
 Dieses Hauptdokument führt die bisherigen zentralen Design-, Architektur-, Regelwerk-, Fenster-, Sequence- und JSON-Notizen zusammen. **Umgesetzt** bezeichnet vorhandenen Code, keine vollständige Abnahme auf allen Geräten. **Teilweise umgesetzt** benennt einen vorhandenen Teil mit Grenzen. **Geplant** ist ein Ziel ohne zugesicherte Laufzeitfunktion; **Offen** braucht noch eine Entscheidung. Der Ist-Stand berücksichtigt die noch nicht committierten Grafikänderungen.
 
 Die ursprünglichen Konzeptabschnitte bleiben als Zielbild erhalten. Der Abschnitt [Aktueller Umsetzungsstand](#aktueller-umsetzungsstand) stellt die tatsächlichen Regeln und Abweichungen dar. Veraltete Implementierungsbehauptungen der Begleitdokumente gelten nicht weiter.
+
+Eine inhaltsgleiche Typst-Fassung für Satz und Export liegt als
+`NascentEternity-Design-Document.typ` im selben Ordner. Bei fachlichen Änderungen
+werden beide Fassungen gemeinsam fortgeschrieben.
 
 # Inhalt
 
@@ -434,10 +438,10 @@ Kollisionsformen sind in diesem Maßstab anzulegen; bestehende Levels werden
 nicht nachträglich skaliert. Gespeicherte Positionen bleiben unverändert gültig.
 
 Aktuell verwenden Interaktionen standardmäßig 1,5 m Radius und die Reaktion auf
-Kampfaufnahme 8 m Radius. Der Kampfbewegungskreis hat einen Radius von einem Meter
-pro effektivem Gewandheitspunkt (mindestens 1 m), bei 1 m/s Bewegungstempo.
-Er begrenzt die Entfernung vom Ausgangspunkt auf der XZ-Ebene, nicht die insgesamt
-gelaufene Weglänge. Interaktionen messen ebenfalls auf der XZ-Ebene; die
+Kampfaufnahme 8 m Radius. Im Kampf gilt ein Raster mit 1 × 1 m großen Zellen.
+Das Bewegungsbudget beträgt einen Meter pro effektivem Gewandheitspunkt
+(mindestens 1 m), bei 1 m/s Bewegungstempo. Es begrenzt die gesamte Weglänge:
+gerade Schritte kosten 1 m, diagonale etwa 1,41 m. Interaktionen messen auf der XZ-Ebene; die
 Kampfaufnahme verwendet weiterhin die räumliche 3D-Entfernung.
 
 **Implementiert:** Gegenstandsangriffe prüfen die räumliche 3D-Entfernung zwischen
@@ -453,11 +457,83 @@ verwenden 1,5 m; Messer- und Steinwurf 10 m. Neue Waffen:
 
 Die Ressourcen liegen unter `src/resources/items/`, die aufhebbaren Szenen unter
 `src/world/objects/items/` (jeweils `dolch`, `schwert`, `speer`, `bogen`, `pfeil`).
-Sie verwenden zunächst einfache 3D-Platzhalter und sind noch nicht in Levels
-platziert. Pfeile sind stapelbare eigene Gegenstände. Der Bogen bleibt nach dem
+Sie verwenden gemeinsame 3D-Waffenansichten (siehe folgenden Abschnitt)
+und sind noch nicht in Levels platziert. Pfeile sind stapelbare eigene Gegenstände. Der Bogen bleibt nach dem
 Schuss erhalten; ein ausgewichener Schuss verbraucht ebenfalls einen Pfeil.
 Bei fehlender Munition, Reichweite oder Sicht erfolgt kein Verbrauch.
 Die Werte sind erste Balancingwerte, keine Simulation historischer Waffen.
+
+### Waffenformen und sichtbare Handausrüstung
+
+**Implementiert:** `src/resources/items/item_visual.gd` erzeugt die gemeinsame
+reine 3D-Ansicht für Weltgegenstände und Handausrüstung. Für passende Waffen
+verwendet sie Meshes aus dem gelieferten Paket `Poly-Survival Melee Weapons`:
+
+| Gegenstand | Modell im Quellpaket |
+|---|---|
+| Schwert | `SM_Handcrafted_Sword` |
+| Dolch | `SM_Handcrafted_Knife_02` |
+| Messer | `SM_Handcrafted_Knife_01` |
+
+Das Paket enthält 57 Modelle; Speer, Bogen und Pfeil besitzen keine passende
+Entsprechung und behalten ihre prozeduralen Ansichten. Die aufbereiteten Meshes
+liegen komprimiert mit eingebettetem Texturatlas unter `assets/items/weapons/`.
+Die ursprünglichen Demo-Positionsversätze und Verweise auf fehlende
+`NewPallet_v1.png`-/`res://Assets/…`-Pfade werden nicht übernommen. Der unveränderte
+Quellbestand wird per `.gdignore` von automatischem Godot-Import und Export
+getrennt; die verwendeten Spielressourcen liegen außerhalb dieses Ordners.
+
+Dolch, Schwert und Speer haben weiterhin eine Gesamtlänge von 1, 2 bzw. 3 Metern
+entsprechend ihrer Nahkampfreichweite. Beim Messer gelten 1,5 m, nicht die 10 m
+Wurfweite; der Pfeil ist 1 m lang. Der Bogen bleibt ungefähr 1,2 m groß statt
+seiner 20 m Schussreichweite. Die Meshes werden gleichmäßig skaliert und behalten
+ihren Ursprung im Griff für die Handbefestigung. Ablegen gleicht die tatsächliche
+Modellunterkante aus; die Kollisionsbox umfasst die sichtbare Form. Die Werte
+sind bewusst spielerische Darstellungsvorgaben.
+
+Alle sechs Waffen besitzen aus derselben Ansicht gerenderte, transparente
+256×256-PNG-Inventarbilder unter `assets/items/weapons/icons/`. `ItemData.icon`
+versorgt Rucksack, Hand- und Schnellplätze. Die größere Gegenstandsansicht im
+Inventar zeigt beim Auswählen/Hovern dasselbe Bild und leert sich bei leerer
+Auswahl. PNG-Pfade funktionieren mit dem bestehenden Save-Codec; es gibt keine
+Schemaänderung. Alte Speicherstände mit `icon=null` erhalten die Waffenbilder
+über ihre stabile Item-ID ebenfalls. `icon` und `world_texture` werden auch bei tiefen Registry-Kopien
+als unveränderte Bildassets geteilt, damit ihr stabiler Resourcepfad erhalten bleibt.
+
+Reproduzierbare Werkzeuge: `import_survival_weapon_models.tscn` bereitet die drei
+Quellmodelle auf; `render_weapon_icons.tscn` rendert die sechs Bilder mit einem
+normalen Rendering-Treiber (nicht `--headless`). Beide liegen unter
+`src/debug/tools/`. `test_weapon_models.tscn` prüft Modellwahl, Texturen, Länge,
+Weltkollision, Icons, Inventarausrüstung, tiefe Kopien und vollständige Weltstände
+(84 Prüfungen). Die Vorschau wurde zusätzlich im gerenderten Inventar kontrolliert.
+Inventarlayout (50), Kampf-Ausrüstung/Musik (30) und Handausrüstung (36) bestehen
+ebenfalls. Registry-Prüfungen bestehen mit 116 Checks, melden aber weiterhin den
+bereits bekannten HUD-Kartenfehler beim Wechsel ins Hauptmenü. Der abschließende
+Projektimport samt Script-UIDs ist erfolgreich; eine Warnung über ein weiteres
+`project.godot` im neu hinzugefügten FantasyVillage-Assetpaket bleibt außerhalb
+dieser Änderung. Ältere `/tmp/`-
+Testpfade wurden nur in temporären Windows-Testkopien angepasst.
+
+`held_item_visuals.gd` verbindet `primaer_hand` mit `RightHand` und `nebenhand`
+mit `LeftHand` des vorhandenen Skeleton3D. BoneAttachment3D führt die Ansicht
+mit der animierten Hand mit. Die GLB-/Armature-Skalierung wird kompensiert,
+damit die Waffe ihre Größe in Weltmetern behält. Für Modelle ohne passende
+Handknochen gibt es einen einfachen positionsbasierten Fallback.
+
+Inventarsignale und Charakter-Neubindung aktualisieren die Ansicht. Wechsel,
+Ablegen, Wurfverbrauch und Bruch entfernen das bisherige Modell; Handplätze
+sind voneinander unabhängig. Rucksack und Schnellplätze erzeugen keine
+Handansicht. Andere Gegenstände nutzen vorhandene Texturen, andernfalls eine
+neutrale Ersatzform. Es werden keine ItemData-Kopien, Weltobjekt-IDs oder
+Physikkörper für gehaltene Gegenstände angelegt und keine Visual-Nodes gespeichert.
+
+Aufhebbare Weltwaffen erhalten dieselbe Ansicht sowie eine aus den tatsächlichen
+Modellgrenzen abgeleitete Kollisionsbox. Die sichtbare Handwaffe verändert keine bestehenden
+Angriffs-, Reichweiten- oder Trefferzonenregeln. Zweihandpflicht, spezielle
+Greifposen, Spann-/Schussanimationen und fliegende Projektile bleiben offen.
+
+`test_held_weapons.tscn` prüft die tatsächlichen Mesh-Ausmaße, beide Handknochen,
+Maßstab, Ausrüstungswechsel, Verbrauch und fehlende persistente Duplikate.
 
 ### Angriffslinie und Abfangen von Waffenangriffen
 
@@ -501,7 +577,8 @@ auch nach einer Positionsänderung. Die Angriffsvorschau kennzeichnet eine zu
 lange Linie ebenfalls rot.
 
 **Noch offen:** Reichweiten von Fernkampf-/Magiefähigkeiten,
-Projektilanimationen, Zweihandpflicht und taktisches Annähern der Gegner-KI.
+Projektilanimationen und Zweihandpflicht. Taktisches Annähern nutzt jetzt den
+LimboAI-Nahkampf-Prototyp (siehe KI-Werkzeuge).
 Der Wahrnehmungsradius bei Kampfaufnahme ist noch kein allgemeines Wahrnehmungssystem.
 
 ## Angriffe, Gegenstandseigenschaften und Musik
@@ -613,7 +690,8 @@ implementiert.
 
 Wucht (`blunt`), Schnitt (`slash`), Stich (`pierce`) und Magie (`magic`) sind
 explizite Schadensarten von Waffen-Verwendungsarten bzw. Fähigkeiten.
-Natürlicher Schutz und angelegte Rüstung werden pro Typ und Trefferzone addiert.
+Natürlicher Schutz und der richtungsabhängige Schutz angelegter Rüstung werden
+pro Schadensart und Trefferzone addiert.
 Der Käfer-Rückenschild mindert beispielsweise Wucht um 4, Schnitt um 8 und Stich
 um 6; sein Bauch hat keinen solchen Abzug. Die Werte sind Balancing-Startwerte.
 
@@ -625,6 +703,132 @@ Rucksack, Hände, Schmuck und Schnellausrüstung gewähren diesen Schutz nicht.
 `lederhelm.tres` und `lederweste.tres` schützen Kopf bzw. Rumpf. Das Inventar
 zeigt Abdeckung, Schutzwerte sowie Schadensarten und Reichweiten der Angriffe.
 
+#### Blickrichtung nach Angriffen
+
+Ausgeführte Waffenangriffe, Fausthiebe und Schadensfähigkeiten richten den
+Angreifer zum tatsächlichen Trefferempfänger aus. Das gilt auch bei Ausweichen
+oder vollständig abgefangenem Schaden. Die gemeinsame Auflösung im
+CombatResolver übernimmt dies für Spieler, Begleiter und NPCs; der KI-Runner
+benötigt keine eigene vorherige Drehung. Bei mehreren Empfängern bleibt die
+Richtung zum zuletzt aufgelösten gültigen Empfänger erhalten.
+
+Zielvorschau, abgelehnte Angriffe und Heilung ändern die Angriffsrichtung nicht.
+Getroffene Figuren drehen sich nicht automatisch zum Angreifer. Wartestatus und
+Zugende setzen die Blickrichtung nicht zurück; reguläre Bewegung setzt weiterhin
+die Laufrichtung. `face_world_position()` aktualisiert Modell, Kardinalrichtung
+und bei Änderungen das vorhandene `direction_changed`-Signal. Die Methode
+unterstützt auch Simulations-Actors außerhalb des Szenenbaums. Für gleiche
+XZ-Position bleibt die vorhandene Richtung erhalten. Es gibt keine zusätzlichen
+persistenten Felder oder Änderungen am Speicherformat.
+
+`test_combat_facing.tscn` prüft 12 Fälle einschließlich echtem Spielerzug,
+Zielvorschau, Modelldrehung, Signal, passivem Verteidiger, Wartestatus,
+Reichweiten-/Munitions-/Konzentrationsfehlern, ausgewichenem Fähigkeitsangriff,
+Heilung und gleicher Position. NPC-KI (36), Richtungsrüstung (32) und Trefferzonen
+(58) bestehen ebenfalls. Projektimport, Klassenindex und Script-UID sind geprüft.
+
+#### Richtungsabhängige menschliche Rüstung
+
+Getragene Rüstung wird innerhalb der tatsächlich getroffenen Körperzone nochmals
+nach der vorhandenen Angriffsrichtung gewichtet. Menschliche Körperprofile nutzen
+standardmäßig **vorne 100 %, seitlich 75 %, hinten 50 %**. Natürlicher Schutz und
+Robustheit erhalten diesen Faktor nicht. Andere Körperprofile behalten ohne
+explizite Item-Overrides gleichmäßige getragene Rüstung; der natürliche
+Käfer-Rückenschild bleibt damit unverändert stark.
+
+Die Berechnung bleibt ein multiplizierter Abzug, ohne zusätzlichen Würfelwurf:
+
+`örtlicher Schutz = natürlicher Schutz + runden(Summe der passenden Rüstungsteile × jeweiligem Richtungsfaktor)`
+
+Beispiel für ein Rüstungsteil mit Schnittschutz 8: vorne 8, seitlich 6, hinten 4.
+Anschließend gelten die bisherigen Zonenfaktoren, Robustheit und Mindestschadens-
+regeln. Die gemeinsame Front-/Seite-/Rücken-Erkennung verwendet weiterhin das
+Skalarprodukt zur Blickrichtung mit den Grenzen +0,5 / −0,5. Der tatsächliche
+Trefferempfänger bestimmt Blickrichtung und Schutz, auch bei einem Abfänger.
+
+`ItemData.armor_direction_factors` erlaubt je Rüstungsteil die optionalen Schlüssel
+`front`, `side`, `rear`; fehlende Einträge nutzen die Profilstandards. Zulässig sind
+endliche Zahlen von 0 bis 2. Beispiel: `{"front": 1.25, "side": 0.5, "rear": 0.0}`.
+Faktor 0 bedeutet aus dieser Richtung keine Abdeckung durch dieses Rüstungsteil;
+bei sonst fehlendem Schutz gilt der ungerüstete Mindestschaden. Grundschutz und
+Abdeckung stehen weiterhin in `armor_protection` und `armor_zones`. Die Werte
+werden im Inventar mit den wirksamen Prozentfaktoren erläutert.
+
+Der Resolver und die KI nutzen dieselbe Schutzfunktion. Die KI bewertet auch
+geplante Standorte mit deren künftiger Angriffsrichtung, ohne Actors dafür zu
+versetzen. Bestehende Ausweichregeln bleiben zusätzlich wirksam.
+
+Speicherformat **14** enthält das neue Faktor-Dictionary. Writer, Reader und
+Validierung sind gemeinsam angepasst. Versionen 1–13 erhalten fehlende Dictionaries
+als leer und damit die neuen Standardfaktoren; vorhandene Grundschutzwerte bleiben
+erhalten. Unbekannte Richtungen, negative/zu große/nicht endliche Faktoren und
+fehlende neue Felder in Version 14 werden abgelehnt. Fehlgeschlagenes Schreiben
+erhält den letzten gültigen Spielstand.
+
+`test_directional_armor.tscn` besteht mit 32 Prüfungen für Front/Seite/Rücken,
+Drehung, örtliche Abdeckung, Item-Overrides, Faktor 0, natürlichen Käferschutz,
+Rundung, geplante KI-Positionen, Inventartext, Validierung und vollständige
+Speicherrundläufe einschließlich Version-13-Migration. Rüstung (55), Trefferzonen
+(58), NPC-KI (36) und Waffenmodelle (84) bestehen ebenfalls. Die Inventaranzeige
+wurde zusätzlich gerendert und kontrolliert. Inventar (50) und Kampfausrüstung
+(30) bestehen ebenfalls. Der Klassenindex ist aktualisiert; ein zusätzlicher
+Editorlauf lief beim Wiederöffnen vorhandener Szenen ins Zeitlimit.
+
+#### Rüstungsgegenstände aus vorhandenen Assets
+
+Aus `POLY_MedievalCamp/AnimpicStudio/POLY - Medieval Camp/Models/Helmet.gltf`
+werden die vorhandenen Meshes `helmet` und `broken helmet` verwendet. Die übrigen
+geprüften Modelle enthalten keine passenden eigenständigen Brustpanzer oder
+Kettenhemden; der vorhandene Bowler-Hut zählt nicht als Rüstung. Das Schild wird
+nicht als passiver Handschutz hinzugefügt, da dafür eigene Kampfregeln fehlen.
+
+| Gegenstand | Gewicht | Wucht / Schnitt / Stich | Kauf / Verkauf | Anfangsbestand |
+|---|---:|---:|---:|---:|
+| Eisenhelm | 1,8 | 2 / 5 / 3 | 45 / 20 Gold | 2 |
+| Beschädigter Eisenhelm | 1,6 | 1 / 2 / 1 | 15 / 5 Gold | 1 |
+
+Beide belegen `kopf` und schützen ausschließlich `head`. Die beschädigte Variante
+ist eine eigene Definition mit schwächerem Schutz; es gibt keine neue Haltbarkeits-
+oder Reparaturmechanik. Gewichte, Preise und Schutzwerte sind erste Balancingwerte.
+Die bisherigen Lederbeispiele bleiben erhalten. Die neuen Helme gibt es beim
+Wanderhändler in neuen Spielen. Bereits gespeicherte Händlerbestände werden wie
+bisher unverändert geladen und erhalten nicht automatisch neue Angebote.
+
+Definitionen: `src/resources/items/eisenhelm.tres` und
+`beschaedigter_eisenhelm.tres`. Aufhebbare Szenen liegen unter
+`src/world/objects/items/`. Die aufbereiteten Meshes und transparenten PNG-Icons
+liegen unter `assets/items/armor/`; Originalassets bleiben unverändert. Der Import
+repariert den Atlaspfad zu `MainTexture_01.png` und übernimmt die vorhandene
+Ausrichtung des Modells in die Mesh-Geometrie. `import_armor_models.tscn` und
+`render_armor_icons.tscn` unter `src/debug/tools/` können diese Ressourcen erneut
+erzeugen. Der gemeinsame Icon-Renderer besitzt dazu konfigurierbare Gegenstände,
+Ausgabepfad und Ansichtswinkel; die bisherige Waffenkonfiguration bleibt Standard.
+
+Die gemeinsame Item-Ansicht zeigt dieselben Modelle beim Ablegen, im Inventarbild
+und beim Ausrüsten. Der bisherige Handausrüstungs-Controller führt zusätzlich
+einen `Head`-Socket. `headfront`/`head_end` bestimmen die Helmmitte, falls vorhanden;
+BoneAttachment3D übernimmt die Bewegung. Importskalierung wird kompensiert.
+Actors ohne passenden Knochen verwenden die Kopfposition des Körperprofils.
+Wechsel, Ablegen, Charakter-Neubindung und Szenenabbau entfernen eigene Ansichten.
+Nur angelegte Kopfplätze verleihen Schutz; Tragen in Hand, Rucksack oder
+Schnellausrüstung wirkt weiterhin nicht als Kopfrüstung. Lange Haare können durch
+den Helm ragen, da Frisuren derzeit im Charaktermesh enthalten sind. Die statische
+Inventar-Paperdoll wird nicht neu gerendert; Slotbild und Gegenstandsansicht zeigen
+den Helm. Speichern verwendet die bestehenden Item-/Shopverträge und das oben
+beschriebene aktuelle Schema 14.
+
+`test_armor_models.tscn` prüft 55 Fälle für Schutz, tatsächlichen Schaden, fehlenden
+Schutz anderer Zonen/Plätze, Modell/Icon, Weltkollision, Shopkauf, beide Party-Rigs,
+Kopfmarkierungen, Fallback, Ablegen und Speichern/Laden. Gerenderte Inventar- und
+Charakteransichten wurden zusätzlich kontrolliert. Waffenmodelle (84) und
+Handausrüstung (36) bestehen ebenfalls. Der vorhandene Händlertest enthält drei
+veraltete Erwartungen an Inventargrößen von 1 bzw. 2 Slots; die seit der
+Waffenerweiterung größeren Startinventare verletzen diese Annahmen. Die neuen
+Helm-Käufe und Bestände werden im Rüstungstest gezielt geprüft. Trefferzonen
+bestehen mit 58 Prüfungen. Der erste Projektimport der neuen Helm-Bilder war
+erfolgreich; eine zusätzliche abschließende Importwiederholung lief ins Zeitlimit.
+Die neuen Script-UIDs sind vorhanden und die Laufzeitszenen sind geprüft.
+
 Der Schaden ist zunächst gerundete Angriffsstärke × Zonenfaktor, abzüglich der
 bestehenden Robustheitsminderung und des örtlichen Schutzes. Ein erfolgreicher
 positiver Angriff verursacht an einer ungeschützten Zone mindestens 1 Schaden;
@@ -635,8 +839,8 @@ Angriffsrichtung; Niederlagen betreffen weiterhin den wirklichen Empfänger.
 
 #### Speicherung, Prüfung und Grenzen
 
-Speicherformat 13 enthält Profil-ID, Rüstungsabdeckung/-schutz und die
-Schadensart der ItemUsageMode. Versionen 1–12 ergänzen fehlende Profil-IDs mit
+Seit Speicherformat 13 sind Profil-ID, Rüstungsabdeckung/-schutz und die
+Schadensart der ItemUsageMode enthalten. Versionen 1–12 ergänzen fehlende Profil-IDs mit
 `human`, Rüstungsfelder mit leeren Listen/Schutzwerten und Schadensarten mit
 `blunt`. Bestehende Werte bleiben erhalten; eine Umdeutung alter Waffen anhand
 ihres Namens erfolgt nicht. Neue Vorlagen setzen ihre Schadensarten ausdrücklich.
@@ -806,8 +1010,7 @@ Dannerman startet mit 50 Gold, 50 freien XP und seinem bisherigen Messer im
 Rucksack, Shalka mit 20 Gold. Beide erhalten zusätzlich je einen Bogen, Speer,
 Dolch, ein Schwert und 20 Pfeile im Rucksack. Die Gegenstände sind zunächst
 nicht ausgerüstet. Diese Startausstattung gilt für neue Spielsitzungen; beim
-Laden bleibt der gespeicherte Besitz erhalten. Die sichtbare Darstellung von
-Gegenständen in der Hand ist als nächster Ausbauschritt vorgesehen.
+Laden bleibt der gespeicherte Besitz erhalten. Die ausgerüsteten Gegenstände werden an den Handknochen dargestellt.
 Spielstände können abweichen. Portrait/Paperdoll verwenden
 `assets/characters/<name>/<name>_portrait.png` bzw. `<name>_paperdoll.png`.
 
@@ -960,17 +1163,233 @@ kurz geöffnet. Animationszeiten und Skalierung stehen in `NEDimensions`.
 Aktionen: Schlag bei freier Hand, Gegenstand, Fähigkeit, Bewegung, Reden, Flucht.
 Ausgelöste Aktionen können auch bei Fehlschlag den Zug verbrauchen;
 Zurücknavigation nicht. Nur Hände/Schnellplätze liefern Kampfgegenstände.
-Zwei belegte Hände erzeugen keinen Doppelangriff. Bewegung ist freie Positionierung
-im Kreis `max(1, Gewandheit × 1)` um den Ausgangsort, Tempo 1. Das ist ein
-Abstandslimit, keine aufsummierte Wegstrecke. Bestätigen kostet den Zug,
-Abbrechen stellt die Ausgangsposition ohne Zugverbrauch wieder her.
+Zwei belegte Hände erzeugen keinen Doppelangriff. Kampfbewegung erfolgt über
+Rasterfelder; außerhalb des Kampfes bleibt freie Bewegung erhalten.
+
+**Kampfraster (implementiert):**
+
+- Quadratische Zellen von 1 × 1 m, weltweit an ganzzahligen X-/Z-Meterpositionen
+  ausgerichtete Zellmitten. Kein Szenenwechsel und keine Umstellung auf 2D-Physik.
+- Bei Eintritt und Rückkehr nach Flucht werden Figuren auf nahe freie, begehbare
+  Zellmitten eingeordnet. Die Suche reicht bis vier Zellen je Achse; eine
+  Körperprüfung verhindert Einordnung durch Wände. Ohne geeigneten Platz bleibt
+  die Figur stehen und erhält einen Hinweis; Rasterbewegung ist dort nicht möglich.
+- Eine dezente Rasteranzeige erscheint lokal um die aktiven Kampfteilnehmer und
+  verschwindet bei Kampfende. In „Bewegen“ werden erreichbare Felder zurückhaltend
+  grün gezeichnet; das ausgewählte Feld ist eine deutlich hellere goldene Fläche
+  mit vollem Rand.
+- Zielfeld per Linksklick auf den Boden oder WASD/Bewegungstasten wählen.
+  Die Auswahl zeigt tatsächliche Wegkosten und das Bewegungsbudget
+  `max(1, effektive Gewandheit) × 1 m` an.
+- Gemeinsame Dijkstra-Wegsuche für Spieler und KI mit acht Bewegungsrichtungen.
+  Gerade Schritte kosten 1 m, diagonale etwa 1,41 m; Höhenunterschiede zählen
+  zur Weglänge. Wände, Figuren, belegte Felder und nicht begehbarer Boden sperren
+  Wege. Diagonales Abschneiden blockierter Ecken ist ausgeschlossen.
+- Erst „Bewegung ausführen“ startet den physischen Weg mit 1 m/s. Abbrechen vor
+  dem Start verändert keine Position und verbraucht keinen Zug. Nach dem Start
+  kostet auch eine blockierte Bewegung den Zug; sie kann nicht zurückgenommen werden.
+- Die Kampfkamera wird beim Eintritt in die Feldwahl in ihrer aktuellen Pose
+  gehalten. Sie bleibt sowohl während der Auswahl als auch während des physischen
+  Bewegungswegs still und wird beim Verlassen des Bewegungszugs wieder freigegeben.
+  Ein besitzergebundener Handle verhindert, dass ein anderer Kameraablauf diese
+  Pause versehentlich aufhebt.
+- Zielbelegung und Weg werden beim Start erneut geprüft. Die bestehende
+  Körperphysik und Blockierungserkennung führen den Weg aus; erfolgreiche Bewegung
+  endet auf einer Zellmitte. MOVE bestätigt die erreichte Position, ohne zu teleportieren.
+- Reichweiten bleiben räumliche Meterabstände zwischen Standpositionen, mit 1 mm
+  numerischer Ankunftstoleranz. Ein Dolch mit 1 m Reichweite erreicht ein gerades
+  Nachbarfeld, aber kein diagonales. Bestehende Waffenwerte bleiben passend erhalten.
+- Angriffslinien, Abfänger, Trefferzonen, Blickrichtung und Richtungsrüstung bleiben
+  räumlich wirksam. Das Raster ersetzt keine Trefferermittlung.
+- Freie Erkundungsbewegung und die laufende Flucht zu Fluchtbereichen verwenden
+  weiterhin ihre bisherigen Bewegungsregeln. Es werden keine Rasterdaten gespeichert.
+- Grenzen: vor allem ebene Böden/kleine Stufen; mehrzellige große Lebewesen sind
+  noch nicht implementiert. Die Wegsuche ist technisch auf höchstens 35 m Budget
+  pro Berechnung begrenzt; die KI sucht standardmäßig bis 6 m.
+- Prüfung: `test_combat_grid.tscn` besteht mit 41 Prüfungen sowohl headless als
+  auch gerendert unter Godot 4.7.2. Enthalten sind Eintritt/Rückkehr, Feldbelegung,
+  Wegkosten, blockierte Ecken, Dolchreichweite, KI, Maus-/Tastaturauswahl, Abbrechen,
+  neue Teilnehmer/Hindernisse, Kamerahalt während Auswahl und Bewegung sowie freie
+  Positionen nach Kampfende. Rasteranzeige und Menü wurden anhand einer gerenderten
+  Vorschau kontrolliert.
+- Bestehende Tests bestehen ebenfalls: NPC-KI (36), Taktik (18), Waffenreichweiten
+  (46), Blickrichtung (12), Flucht (78), Kampfquest (31) und Kampfkarten (25).
+  Für Flucht/Kampfquest wurden nur temporäre Testkopien mit `user://` anstelle
+  der vorhandenen `/tmp/`-Speicherpfade verwendet.
 
 Sichtprüfung blockiert passende Fähigkeiten durch Wände oder andere Körper. Waffenangriffe treffen stattdessen den ersten aktiven Kampfteilnehmer auf ihrer Angriffslinie; Wände blockieren weiterhin.
-Numerische Nahkampf-/Wurf-/Magiedistanzen sind noch nicht ausgewertet.
+Waffenverwendungen und Nahkampffähigkeiten prüfen ihre numerische Reichweite.
+Separate Regeln für weitergehende Magiedistanzen sind noch offen.
 Reden ruft NPC-Interaktion auf; Überzeugen/Kapitulation/Friedensschluss brauchen
-konkrete Regeln. Die NPC-KI wählt ein sichtbares Ziel mit negativster eigener
-Beziehung, ersten Kampfgegenstand/erste Verwendung, sonst Schlag. Keine
-allgemeine KI-Planung für Bewegung, Flucht, Heilung oder Fähigkeitskombinationen.
+konkrete Regeln. Die NPC-KI nutzt den unten beschriebenen LimboAI-Zugablauf.
+Automatische Flucht, Heilung und Fähigkeitskombinationen sind noch offen.
+
+### KI-Werkzeuge und implementierter Nahkampf-Prototyp
+
+**Installiert:** LimboAI **1.8.1** als GDExtension unter `addons/limboai/`.
+Quelle: [offizieller Release v1.8.1](https://github.com/limbonaut/limboai/releases/tag/v1.8.1),
+Archiv `limboai+v1.8.1.gdextension-4.6.zip`.
+Veröffentlichte und vor Installation geprüfte SHA-256:
+`0910411f8dbc0da8920f6c8bbbb6397c347cd9f2f193942468a702dfb11d5f0e`.
+Die unveränderten Addon-Dateien einschließlich Plattformbibliotheken und
+MIT-Lizenz sind enthalten; das Demo-Projekt wurde nicht übernommen.
+Es ist keine neue Godot-Version und kein eigener Engine-Build erforderlich.
+
+Die native Erweiterung wird über `addons/limboai/bin/limboai.gdextension`
+beim Projektimport erkannt; sie besitzt keine `plugin.cfg` und benötigt
+keinen zusätzlichen Eintrag in `[editor_plugins]`. Nach Installation muss
+Godot das Projekt neu laden, damit die nativen Klassen und der Editor verfügbar
+sind. `NavigationAgent3D` gehört bereits zur Engine. Beehave ist eine alternative
+Verhaltensbaum-Lösung und wurde nicht zusätzlich installiert.
+
+`test_ai_extensions.tscn` lädt die Erweiterung bei Bedarf ausdrücklich und
+prüft ihre Klassen, Blackboard sowie die Ausführung einer einfachen nativen
+BehaviorTree-Aufgabe unter der vorhandenen Godot-4.7.2-Version.
+Andere Exportplattformen sind durch Paketdateien vertreten, aber nicht getestet;
+es werden nur die von upstream tatsächlich mitgelieferten Plattformen unterstützt.
+
+**Implementiert:** `NPCCombatBrain` startet pro aktivem KI-Zug einen eigenen
+LimboAI-Runner unter der vorhandenen CombatSession. Der Verhaltensbaum
+`src/resources/combat/ai/melee_tree.tres` plant eine Handlung und führt sie aus.
+Die Projektaufgaben und die Bewertung liegen getrennt unter
+`src/gameplay/combat/ai/`; Drittanbieter-Code bleibt unverändert.
+
+Jeder NPC besitzt im Inspector `combat_ai_profile`; Standard ist
+`src/resources/combat/ai/melee_default.tres`. Für andere Gegner dieses Profil
+duplizieren und z.B. Wahrnehmungsradius (Standard 8 m), bevorzugten Abstand
+(80 % der verfügbaren Waffenreichweite), Schadens-/Beziehungs-/Verwundungsgewichte
+oder Suchbudget verändern. Das Profil verweist auf den austauschbaren
+Verhaltensbaum. Es gehört zur Szenenkonfiguration; CharacterRegistry und
+Save-Schema erhalten keine laufenden KI-Zustände oder duplizierten Charakterdaten.
+
+Die KI berücksichtigt bis zu drei nahe sichtbare Gegner der gegnerischen
+Kampfseite. Sie prüft ausgerüstete Waffen und Schnellplätze, fehlende Munition,
+Reichweite, Körperzonen und Panzerung. Eine freie Hand erlaubt Fausthieb.
+Angriffe nutzen dieselbe räumliche Trefferermittlung wie der Resolver;
+freundliche und neutrale Abfänger werden verworfen. Unmittelbar vor der
+Ausführung werden Ziel, Ausrüstung und Angriffslinie erneut geprüft.
+
+**Ergänzung – notwendige KI-Bewegung und Verfolgung (implementiert):**
+
+- Ohne gültigen Angriff sucht die KI eine freie Angriffslinie innerhalb der
+  Waffenreichweite. Ist das in einem Zug möglich, verwendet sie erreichbare
+  Rasterfelder wie bisher; Verbündete werden dabei nicht absichtlich beschossen.
+- Liegt eine geeignete Angriffsposition weiter entfernt, plant sie einen Weg über
+  mehrere Züge. Dafür dient `approach_planning_distance` im Gegnerprofil
+  (Standard 12 m Weglänge). Ein nötiger Umweg darf zunächst vom Gegner wegführen,
+  statt nur den Luftlinienabstand zu verkleinern.
+- Die Vorausschau verwendet dieselben Boden-, Körper-, Wand- und Eckprüfungen
+  wie Spielerbewegung. Sie bevorzugt die kürzeste erreichbare Route zu einer
+  tatsächlichen Angriffsmöglichkeit; bei gleich langen Routen zählt die
+  Angriffsbewertung. Einzelschritte müssen in einen eigenen Bewegungszug passen:
+  mit nur 1 m Budget werden keine diagonalen Schritte von etwa 1,41 m eingeplant.
+- Aus dem längeren Weg wird nur der Teil innerhalb des normalen eigenen
+  Bewegungsbudgets und `movement_search_radius` ausgeführt. Die Vorausschau
+  gewährt keine zusätzliche Bewegung und keinen Angriff im selben Zug.
+- Sichtbare Gegner werden am Beginn eines eigenen KI-Zugs mit ihrer tatsächlich
+  gesehenen Position gemerkt. Nach Sichtverlust kann die KI dorthin weiterlaufen,
+  ohne den unbekannten aktuellen Standort des Gegners für die Zielplanung zu nutzen.
+  Andere sichtbare Gegner haben Vorrang vor der Suche nach verdeckten Zielen.
+- `target_memory_turns` bestimmt die Erinnerungsdauer (Standard 3 eigene Züge;
+  0 schaltet die Verfolgung nach Sichtverlust ab). Erneuter Sichtkontakt aktualisiert
+  die Position. Veraltete Einträge, ausgeschiedene Ziele und erfolglos erreichte
+  Suchpositionen werden beim nächsten Beobachtungsdurchlauf verworfen.
+- Das Gedächtnis liegt ausschließlich im CombatParticipant und enthält Actor-IDs,
+  Positionen und Alter. Rückkehr nach eigener Flucht leert es; keine neuen
+  Charakter- oder Save-Felder und keine Referenzzyklen zwischen Teilnehmern.
+- Ohne gefundenen mehrzügigen Weg bleibt die bisherige lokale Annäherung möglich.
+  Ist keine sinnvolle Bewegung erreichbar, gibt die KI ihren Zug sauber frei.
+  Bei jedem eigenen Zug und vor dem Bewegungsstart wird neu geprüft.
+- `test_npc_navigation.tscn`: 55 Prüfungen bestanden, einschließlich einer
+  mehrzügigen Sackgassenumgehung bis zum tatsächlichen Angriff, ohne Pendeln,
+  mit nur 1 m Zugbudget; außerdem Sichtverlust, kein Standortwissen über verdeckte
+  Gegner, Verfall/Abschaltung des Gedächtnisses, physische Verfolgung, erneuter
+  Sichtkontakt, Flucht/Rückkehr und vollständig blockierte Wege.
+- Grenze: begrenzte lokale Vorausschau statt weltweiter Navigation. Eine Route
+  außerhalb der eingestellten Planungslänge wird nicht vollständig vorausberechnet.
+  Vorhergesagte gegnerische Bewegungen, automatisches Heilen/Fliehen und eigene
+  Fernkämpfer-Abstandstaktiken bleiben offen.
+
+**Ergänzung – taktische Positionswahl (implementiert):**
+
+- Die KI kann einen verfügbaren Frontalangriff zugunsten einer deutlich besseren
+  Flanken- oder Rückenposition aufgeben. Bewertet werden die vorhandenen
+  Trefferzonen, richtungsabhängige Rüstung und freie Angriffslinien.
+- Der Positionsgewinn muss den aufgegebenen Angriffszug und den Wegaufwand
+  aufwiegen. Standardbedingung nach Prüfung des tatsächlichen Weges:
+  `zukünftige Bewertung − 0,5 × Weglänge > 2 × aktuelle Angriffsbewertung + 3`.
+- Ein voraussichtlich ausschaltender Treffer hat Vorrang vor dem Positionswechsel.
+  Maßgeblich bleibt die bestehende SP-Regel:
+  `Schaden >= aktuelle SP + SP-Basis`; 0 SP allein bedeutet kein Ausscheiden.
+- Die Schadensschätzung verwendet dieselben Zonen-, Robustheits-, Schutz- und
+  Mindestschadensregeln wie der Resolver. Ausweichen wird erst bei der tatsächlichen
+  Angriffsausführung gewürfelt.
+- Pro Gegnerprofil einstellbar: `tactical_reposition_enabled` (Standard aktiv),
+  `reposition_attack_multiplier` (2), `reposition_min_gain` (3),
+  `reposition_path_cost` (0,5 pro Meter) und `reposition_cooldown_turns` (1).
+- Nach Beginn eines taktischen Bewegungsversuchs ist standardmäßig einen eigenen
+  Zug lang kein weiterer Positionswechsel anstelle eines verfügbaren Angriffs
+  erlaubt. Das verhindert aufeinanderfolgendes Umkreisen, auch nach einer Drehung
+  des Gegners. Normale Annäherung ohne gültigen Angriff bleibt möglich.
+- Die Abklingzeit liegt ausschließlich im CombatParticipant, wird bei der Planung
+  eines tatsächlichen eigenen Zugs heruntergezählt und bei Wiedereintritt nach
+  Flucht zurückgesetzt. Keine neuen persistenten Charakterdaten oder Save-Felder.
+- Die Bewertung verwendet erreichbare Rasterfelder und deren tatsächliche
+  Wegkosten. Auch taktische Umwege müssen das normale Bewegungsbudget einhalten;
+  unerreichbare oder zu teure Wege führen zum verfügbaren Angriff zurück.
+- Bewegung verbraucht den gesamten Zug; ein Folgeangriff ist frühestens im nächsten
+  eigenen Zug möglich und wird dann anhand des aktuellen Weltzustands neu geprüft.
+- Grenze der Planung: Gegnerische Drehungen und Gegenangriffe werden nicht als
+  vollständige Folgerunde simuliert. Die Häufigkeit der Manöver bleibt im Spieltest
+  über die Profilwerte abzustimmen.
+
+Ohne gültigen Angriff bewertet die KI wie bisher bessere Standorte. Für Kampfzüge
+berechnet `combat_grid.gd` alle erreichbaren Rasterwege gemeinsam; ein separates
+Navmesh ist nicht erforderlich. Das Standardsuchbudget begrenzt die betrachtete
+Wegstrecke eines ausgeführten Zugs zusätzlich auf 6 m; die mehrzügige
+Annäherungsplanung betrachtet standardmäßig bis 12 m. Das frühere Profilfeld `max_path_candidates` bleibt
+aus Kompatibilitätsgründen erhalten und wird bei der Rasterplanung nicht verwendet.
+Das bestehende lokale AStar-Wegenetz in `flee_route.gd` bleibt für Flucht erhalten.
+Bewegung verbraucht den ganzen Zug; der Angriff folgt frühestens im nächsten eigenen
+Zug. Der MOVE-Resolver bestätigt nur die bereits physisch erreichte Zellmitte.
+
+Flucht und KI verwenden denselben Wegfolger mit getrennten Besitzer-Handles.
+Blockierung, Zugende, Zielverlust, KO und Szenenabbau brechen eigene Aufträge ab.
+Steckenbleiben und ein Wegzeitlimit verhindern dauerhaft gesperrte Züge.
+Neue und zurückkehrende Teilnehmer werden über die bestehenden Session-Verträge
+im nächsten Planungsdurchlauf berücksichtigt.
+
+**Prüfstand der taktischen Positionswahl:**
+
+- `test_npc_tactics.tscn`: 18 Prüfungen bestanden; abgedeckt sind direkter Angriff
+  ohne Vorteil, Flanke trotz gültigem Frontalangriff, Weg-/Angriffskosten, reine
+  Planung ohne Mutation, eigener Bewegungszug, Gegnerdrehung und Folgeangriff,
+  Abklingzeit, Profilabschaltung, hohe Wegkosten, tatsächliche SP-Ausscheidensgrenze,
+  blockierte Wege und Wiedereintritt.
+- Bestehende Prüfungen für NPC-KI (36), Richtungsrüstung (32) und Blickrichtung (12)
+  ebenfalls bestanden.
+- Eine visuelle Prüfung und Abstimmung des Kampfgefühls im Spiel bleibt offen.
+
+`test_npc_combat_ai.tscn` prüft Waffen-/Munitionswahl, Angriffe, physische Bewegung,
+Bewegungsradius, freundliche Abfänger, Folgezüge, Sicht-/Wahrnehmungsgrenzen,
+Zielverlust, Actor-Abbau und Besitzerwechsel zur Flucht. Zusätzlich prüft die
+Szene die Anbindung eines echten registrierten NPCs über CombatManager im
+vorhandenen Level und das normale Kampfende. Unter Godot 4.7.2 bestehen alle
+36 Prüfungen. Die vorhandenen Tests für Trefferzonen (58), Schadensregeln (17),
+Flucht (78), Fluchtbereiche (808), Kampfquest (31), gehaltene Waffen (36) und
+LimboAI (11) bestehen ebenfalls; ältere `/tmp/`-Testpfade wurden für die
+Windows-Prüfung nur in temporären Testkopien angepasst. Drei bestehende
+Prüfungen in Welt-/Partytests erwarten noch das alte Startinventar bzw. genau
+einen Party-Kindknoten ohne `OcclusionVisual`; diese Erwartungen bleiben offen.
+Frühere Headless-Editorimporte waren durch DLL-/Dateizugriffsfehler bei Terrain3D,
+LimboAI und Editor-Plugins blockiert. Beim Abschluss des Kampfrasters am 17.11.2026
+besteht der vollständige Editorimport einschließlich Klassenindex und erzeugter
+Script-UIDs. Es verbleibt die bekannte Warnung zum verschachtelten Projekt im
+FantasyVillage-Assetpaket. Die Rasteransicht wurde gerendert geprüft; eine
+vollständige visuelle KI-Prüfung im regulären Level bleibt offen.
+Grenzen: Navigation unterstützt weiterhin vor allem ebene Böden, keine komplexen
+Höhenwechsel. Eigene Fernkämpfer-Taktiken, automatisches Heilen/Fliehen,
+Fähigkeitskombinationen und gemeinsame Gruppenplanung sind noch nicht implementiert.
 
 Genauigkeit kommt vom Attribut der Verwendung bzw. Quelltalent der Fähigkeit.
 Ausweichen = `clamp(0,03 × (Ziel-Gewandheit − Genauigkeit), 0, 0,6)`.
@@ -1034,7 +1453,7 @@ Abbruch, Fehlschlag, Wiederholbarkeit und Umgang mit Questgegenständen.
 
 ## Speichern, Laden und Levelwechsel
 
-**Umgesetzt mit bekannten Grenzen.** `WorldSaveStore.VERSION` ist **11**.
+**Umgesetzt mit bekannten Grenzen.** `WorldSaveStore.VERSION` ist **14**.
 Writer/Reader, Typ-/ID-Prüfung und Migration bilden einen Vertrag. Schreiben:
 temporäre Datei, Prüfung, Ersetzen; maximale Dateigröße 8 MiB.
 
@@ -1048,6 +1467,9 @@ temporäre Datei, Prüfung, Ersetzen; maximale Dateigröße 8 MiB.
 | 9 | Itemkampfwert, Talent-ID, Bruchchance |
 | 10 | explizite Rüstungskennzeichnung |
 | 11 | Charakterstimme `voice`, ältere Spielstände erhalten 1,0 |
+| 12 | Waffenreichweiten und Munition |
+| 13 | Körperprofile, Trefferzonen und örtlicher Rüstungsschutz |
+| 14 | Rüstungs-Richtungsfaktoren; ältere Spielstände erhalten Profilstandards |
 
 Unterstützte Altstände werden mit definierten Standardwerten übernommen;
 Versionen 1–7 starten ohne entdeckte Karte, alte Items ohne Rüstungsfeld mit false.

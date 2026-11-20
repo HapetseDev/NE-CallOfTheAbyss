@@ -1,0 +1,6 @@
+[gd_resource type="Resource" load_steps=3 format=3]
+[ext_resource type="Script" path="res://src/resources/combat/ai/combat_ai_profile.gd" id="1"]
+[ext_resource type="BehaviorTree" path="res://src/resources/combat/ai/melee_tree.tres" id="2"]
+[resource]
+script = ExtResource("1")
+behavior_tree = ExtResource("2")

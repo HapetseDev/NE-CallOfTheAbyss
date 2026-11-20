@@ -76,6 +76,11 @@ var _combat_pending_followup: Callable = Callable()
 var _saved_pre_combat_transform: Transform3D
 var _saved_pre_combat_fov: float = 50.0
 var _has_saved_pre_combat_transform: bool = false
+## Besitzergebundene Pause für eine bewusste Spielereingabe, z.B. Rasterbewegung.
+## Andere Systeme können diese Pose nicht versehentlich wieder freigeben.
+var _combat_hold_owner_id: int = 0
+var _combat_hold_transform: Transform3D
+var _combat_hold_fov: float = 50.0
 
 var events: CameraEventHub = CameraEventHub.new()
 
@@ -538,6 +543,11 @@ func _first_target_playable(targets: Array[CombatParticipant]) -> Playable:
 ## gehalten wird, damit _orbit_angle nie "hinterherhinkt" und der Rücksprung
 ## in den Orbit (siehe unten) nahtlos an der richtigen Position ansetzt.
 func _update_combat_camera(delta: float) -> void:
+	if _combat_hold_owner_id != 0:
+		if camera:
+			camera.global_transform = _combat_hold_transform
+			camera.fov = _combat_hold_fov
+		return
 	_update_combat_focus()
 	_orbit_angle = wrapf(_orbit_angle + deg_to_rad(combat_orbit_speed_deg) * delta, 0.0, TAU)
 	if _combat_shot_hold_timer > 0.0:
@@ -624,7 +634,7 @@ func _show_combat_shot(xf: Transform3D, duration: float, subject: Node3D = null)
 	if camera == null:
 		return
 	_ensure_combat_mode()
-	if _dialogue_active:
+	if _dialogue_active or _combat_hold_owner_id != 0:
 		return
 	var event: CameraShotEvent = CameraShotEvent.make(
 		subject, CameraShot.Kind.MEDIUM, null, duration, CameraShot.Look.NONE, CameraShotEvent.SOURCE_COMBAT
@@ -656,9 +666,34 @@ func _ensure_combat_mode() -> void:
 	_combat_pending_followup = Callable()
 
 
+## Hält die aktuell sichtbare Kampfkamera für eine interaktive Bewegungswahl.
+## Gibt false zurück, wenn eine andere Eingabe sie bereits hält.
+func hold_combat_camera(owner_id: int) -> bool:
+	if owner_id == 0 or camera == null or not _combat_active:
+		return false
+	if _combat_hold_owner_id != 0 and _combat_hold_owner_id != owner_id:
+		return false
+	_kill_camera_tween()
+	_combat_hold_owner_id = owner_id
+	_combat_hold_transform = camera.global_transform
+	_combat_hold_fov = camera.fov
+	return true
+
+
+func release_combat_camera(owner_id: int) -> void:
+	if owner_id == 0 or _combat_hold_owner_id != owner_id:
+		return
+	_combat_hold_owner_id = 0
+
+
+func is_combat_camera_held(owner_id: int = 0) -> bool:
+	return _combat_hold_owner_id != 0 and (owner_id == 0 or owner_id == _combat_hold_owner_id)
+
+
 func _leave_combat_mode() -> void:
 	if not _combat_active:
 		return
+	_combat_hold_owner_id = 0
 	if _dialogue_active or camera == null or not _has_saved_pre_combat_transform:
 		_combat_active = false
 		_has_saved_pre_combat_transform = false

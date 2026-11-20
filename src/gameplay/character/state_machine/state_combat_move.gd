@@ -1,32 +1,23 @@
 class_name StateCombatMove extends State
 
-## "Bewegen"-Kampfzug: freie Positionierung statt festem Schritt. Beim Eintritt
-## erscheint ein Kreis (ActionRangeIndicator, weltraumfest an der
-## Ausgangsposition, nicht am Spieler) mit Radius = effektive Gewandheit *
-## CombatBalance.STANDARD_LENGTH. Solange dieser State aktiv ist, läuft die
-## Runde nicht weiter (wie bei jeder anderen Zugwahl auch) – der Spieler hat
-## also Zeit, sich mit WASD frei innerhalb des Kreises zu positionieren.
-## "Bewegung ausführen" beendet den Zug regulär über CombatResolver (wie
-## Gegenstand/Fähigkeit/…). "Abbrechen" macht die Bewegung rückgängig und
-## kehrt ohne Zugverbrauch ins Kampfmenü (CombatTurn) zurück.
-
+## Nur im Kampf: Feld auswählen, dann den geprüften Rasterweg physisch ablaufen.
+const GRID := preload("res://src/world/combat/combat_grid.gd")
 @onready var combat_wait: State = $"../CombatWait"
 @onready var combat_turn: State = $"../CombatTurn"
-
-var _session: CombatSession = null
-var _participant: CombatParticipant = null
-var _origin_position: Vector3 = Vector3.ZERO
-var _radius: float = CombatBalance.STANDARD_LENGTH
-var _done: bool = false
-var _next_state: State = null
-
+var _session: CombatSession
+var _participant: CombatParticipant
+var _fields: Dictionary = {}
+var _selected := Vector2i.ZERO
+var _done := false
+var _moving := false
+var _next_state: State
 var _canvas_layer: CanvasLayer
 var _vbox: VBoxContainer
-var _range_indicator: ActionRangeIndicator
-
+var _camera_hold_id: int = 0
 
 func enter() -> void:
 	_done = false
+	_moving = false
 	_next_state = null
 	_session = player.get_combat_session()
 	_participant = _session.get_participant(player) if _session else null
@@ -34,158 +25,147 @@ func enter() -> void:
 		_done = true
 		_next_state = combat_wait
 		return
-	_origin_position = player.global_position
 	player.stop_horizontal_velocity()
-	var gewandheit := player.get_effective_attribute(CharacterEnums.Attribute.GEWANDHEIT)
-	_radius = maxf(CombatBalance.STANDARD_LENGTH, gewandheit * CombatBalance.STANDARD_LENGTH)
-	_show_range_indicator()
+	_fields = GRID.reachable(player, _session)
+	_selected = GRID.cell(player.global_position)
+	_camera_hold_id = get_instance_id()
+	if CameraSystem.instance:
+		CameraSystem.instance.hold_combat_camera(_camera_hold_id)
 	_build_menu()
-	_render_menu()
-
+	_refresh()
+	set_process_unhandled_input(true)
 
 func exit() -> void:
-	_destroy_menu()
-	_destroy_range_indicator()
-
+	set_process_unhandled_input(false)
+	if CameraSystem.instance:
+		CameraSystem.instance.release_combat_camera(_camera_hold_id)
+	_camera_hold_id = 0
+	player.cancel_combat_path(get_instance_id())
+	if is_instance_valid(_session) and is_instance_valid(_session.grid_display):
+		_session.grid_display.show_fields({}, Vector2i.ZERO)
+	if is_instance_valid(_canvas_layer):
+		_canvas_layer.queue_free()
+	_canvas_layer = null
+	_vbox = null
+	_fields.clear()
 
 func process(_delta: float) -> State:
 	if _done:
 		return _next_state
-	_update_movement()
+	if not is_instance_valid(_session) or _session.state != CombatSession.SessionState.ACTIVE or _session.get_active_participant() != _participant or _participant.is_out_of_combat():
+		return combat_wait
 	return null
 
-
-func physics(_delta: float) -> State:
-	_clamp_to_radius()
+func handle_input(event: InputEvent) -> State:
+	if _done or _moving or _canvas_layer == null:
+		return null
+	var step := Vector2i.ZERO
+	if event.is_action_pressed("Left"):
+		step.x -= 1
+	if event.is_action_pressed("Right"):
+		step.x += 1
+	if event.is_action_pressed("Up"):
+		step.y -= 1
+	if event.is_action_pressed("Down"):
+		step.y += 1
+	if step != Vector2i.ZERO and _fields.has(_selected + step):
+		_selected += step
+		_refresh()
 	return null
 
-
-# --- Freie Bewegung im Kreis ---
-# Bewusst direktes Input.get_axis() statt player.get_move_direction():
-# Anführer und Begleiter behandeln Bewegungseingabe unterschiedlich
-# (Maus-Klick-Bewegung vs. hart auf ZERO gesetzt, siehe player.gd) –
-# hier soll aber jedes Partymitglied während des eigenen Kampfzugs gleich
-# funktionieren, unabhängig davon, ob es der Leader oder ein Follower ist.
-
-func _update_movement() -> void:
-	if not player.is_on_floor():
-		_update_airborne_animation()
-	var kx := Input.get_axis("Left", "Right")
-	var kz := Input.get_axis("Up", "Down")
-	var move_dir := Vector3(kx, 0.0, kz)
-	if move_dir.length_squared() > 0.0001:
-		move_dir = move_dir.normalized()
-		player.direction = move_dir
-		player.set_horizontal_velocity(move_dir * CombatBalance.COMBAT_MOVE_SPEED)
-		player.set_direction()
-		player.update_animation("walk")
-	else:
-		player.direction = Vector3.ZERO
-		player.stop_horizontal_velocity()
-		player.update_animation("idle")
-
-
-func _clamp_to_radius() -> void:
-	var offset := player.global_position - _origin_position
-	offset.y = 0.0
-	if offset.length() <= _radius:
+func _unhandled_input(event: InputEvent) -> void:
+	if _canvas_layer == null or _done or _moving:
 		return
-	var clamped := offset.normalized() * _radius
-	player.global_position = Vector3(
-		_origin_position.x + clamped.x, player.global_position.y, _origin_position.z + clamped.z
-	)
-
-
-# --- Kreis-Anzeige ---
-# Weltraumfest an der Ausgangsposition statt am Spieler befestigt (im
-# Unterschied zu ActionRangeIndicator-Nutzung in state_action_menu.gd/
-# state_party_skills.gd, wo der Spieler während der Menüwahl stehen bleibt) –
-# hier bewegt sich der Spieler ja gerade innerhalb des Kreises.
-
-func _show_range_indicator() -> void:
-	if _range_indicator == null or not is_instance_valid(_range_indicator):
-		_range_indicator = ActionRangeIndicator.new()
-		_range_indicator.name = "CombatMoveRangeIndicator"
-		player.get_parent().add_child(_range_indicator)
-	# Nicht am Spieler befestigt (anders als _ready()s Y_OFFSET-Annahme in
-	# ActionRangeIndicator, das sonst nur relativ zum Elternknoten "Spieler"
-	# positioniert wird), daher hier explizit inklusive Y_OFFSET gesetzt.
-	_range_indicator.global_position = _origin_position + Vector3(0.0, ActionRangeIndicator.Y_OFFSET, 0.0)
-	_range_indicator.show_range(_radius)
-
-
-func _destroy_range_indicator() -> void:
-	if is_instance_valid(_range_indicator):
-		_range_indicator.queue_free()
-	_range_indicator = null
-
-
-# --- Menü ---
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var camera := player.get_viewport().get_camera_3d()
+		if camera == null:
+			return
+		var origin := camera.project_ray_origin(event.position)
+		var query := PhysicsRayQueryParameters3D.create(origin, origin + camera.project_ray_normal(event.position) * 1000.0, player.collision_mask, GRID._exclusions(player))
+		var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
+		if not hit.is_empty() and _fields.has(GRID.cell(hit.position)):
+			_selected = GRID.cell(hit.position)
+			_refresh()
+			player.get_viewport().set_input_as_handled()
 
 func _build_menu() -> void:
 	_canvas_layer = CanvasLayer.new()
 	_canvas_layer.layer = 10
 	player.add_child(_canvas_layer)
-	var root_control := Control.new()
-	root_control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_canvas_layer.add_child(root_control)
+	var root := Control.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_canvas_layer.add_child(root)
+	var alignment := CenterContainer.new()
+	alignment.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	alignment.offset_top = -NEDimensions.SPACING_XL * 7
+	alignment.offset_bottom = -NEDimensions.SPACING_L
+	alignment.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(alignment)
 	var panel := PanelContainer.new()
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	panel.offset_top -= 140.0
-	panel.offset_bottom -= 40.0
-	root_control.add_child(panel)
+	alignment.add_child(panel)
+	var margin := MarginContainer.new()
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, NEDimensions.PANEL_MARGIN)
+	panel.add_child(margin)
 	_vbox = VBoxContainer.new()
-	_vbox.custom_minimum_size = Vector2(280, 0)
-	panel.add_child(_vbox)
+	_vbox.add_theme_constant_override("separation", NEDimensions.SPACING_S)
+	margin.add_child(_vbox)
 
-
-func _destroy_menu() -> void:
-	if is_instance_valid(_canvas_layer):
-		_canvas_layer.queue_free()
-	_canvas_layer = null
-	_vbox = null
-
-
-func _add_label(text: String) -> void:
+func _refresh() -> void:
+	for child in _vbox.get_children():
+		_vbox.remove_child(child)
+		child.queue_free()
 	var label := Label.new()
-	label.text = text
+	label.text = "Raster: 1 m · Weg %.2f / %.1f m\nFeld anklicken oder mit WASD wählen" % [float(_fields.get(_selected, {}).get("cost", 0.0)), GRID.budget(player)]
+	if _moving:
+		label.text = "Bewegung wird ausgeführt …"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_vbox.add_child(label)
-
-
-func _add_button(text: String, callback: Callable) -> void:
-	var btn := Button.new()
-	btn.text = text
-	btn.pressed.connect(callback)
-	_vbox.add_child(btn)
-
-
-func _render_menu() -> void:
-	for child in _vbox.get_children():
-		child.queue_free()
-	_add_label("Bewegen (Radius %.1f m) – WASD zum Positionieren" % _radius)
-	_add_button("Bewegung ausführen", _on_confirm_pressed)
-	_add_button("Abbrechen", _on_cancel_pressed)
-
+	var confirm := Button.new()
+	confirm.text = "Bewegung ausführen"
+	confirm.disabled = _moving or not _fields.has(_selected) or float(_fields[_selected].cost) < GRID.EPSILON
+	confirm.pressed.connect(_on_confirm_pressed)
+	_vbox.add_child(confirm)
+	var cancel := Button.new()
+	cancel.text = "Abbrechen"
+	cancel.disabled = _moving
+	cancel.pressed.connect(_on_cancel_pressed)
+	_vbox.add_child(cancel)
+	if is_instance_valid(_session.grid_display):
+		_session.grid_display.show_fields(_fields, _selected)
 
 func _on_confirm_pressed() -> void:
+	if _moving or _done:
+		return
+	# Belegung und Weg vor dem Start erneut prüfen (z.B. neue Teilnehmer).
+	_fields = GRID.reachable(player, _session)
+	if not _fields.has(_selected) or float(_fields[_selected].cost) < GRID.EPSILON:
+		_refresh()
+		return
+	_moving = player.begin_combat_path(get_instance_id(), _fields[_selected].path, CombatBalance.COMBAT_MOVE_SPEED, _on_arrived)
+	_refresh()
+
+func _on_arrived(arrived: bool) -> void:
+	if _done or not is_instance_valid(_session):
+		return
+	if not arrived:
+		GRID.place(player, _session)
 	var action := CombatAction.new()
 	action.actor = _participant
 	action.type = CombatAction.ActionType.MOVE
 	action.move_target_position = player.global_position
 	var result := CombatResolver.resolve_action(action)
-	if is_instance_valid(_session):
-		_session.announce_action(_participant, action, result)
-		for target in result.defeated_targets:
-			_session.mark_defeated(target)
-		_session.end_turn(_participant)
+	if not arrived:
+		result.success = false
+		result.failed_reason = "movement_blocked"
+	_session.announce_action(_participant, action, result)
+	_session.end_turn(_participant)
 	_next_state = combat_wait
 	_done = true
 
-
 func _on_cancel_pressed() -> void:
-	player.global_position = _origin_position
-	player.stop_horizontal_velocity()
+	if _moving:
+		return
 	_next_state = combat_turn
 	_done = true

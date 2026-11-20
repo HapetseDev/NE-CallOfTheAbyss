@@ -45,7 +45,7 @@ dieselbe Slot-Liste.
 Der Roundtrip neuer Plätze und das Ergänzen alter Inventare werden durch
 `test_inventory_layout.tscn` geprüft.
 
-## Speichervertrag Version 13
+## Speichervertrag Version 14
 
 `LevelManager.instance.save_world(path)` erfasst den Zustand im freien Gameplay
 und schreibt JSON. Während Kampf/Dialog/anderer Eingabesperre liefert es
@@ -82,7 +82,7 @@ sollte sie keinen notwendigen Code nach dem `await` besitzen. Der Autoload führ
 den Ablauf unabhängig von diesem Aufrufer zu Ende. Isolierte Daten-Snapshots ohne
 aktive Welt bleiben mit `WorldSaveStore.read` lesbar, sind aber keine ladbaren
 Spielsitzungen. `install_world` bleibt eine niedrige Daten-API für Tests/Bootstrap.
-Das aktuelle Speicherformat ist Version 13; Version 8 führte die Kartendaten ein.
+Das aktuelle Speicherformat ist Version 14; Version 8 führte die Kartendaten ein.
 Version 11 speichert `CharacterResource.voice` (Tonhöhenfaktor 0,25–4,0); ältere
 Charakterdaten werden auf 1,0 migriert. Ungültige Voice-Werte werden abgelehnt.
 
@@ -118,7 +118,7 @@ getrennter gleichnamiger Slots, großer Listen, Suche und Schreibfehlern.
 
 Automatisches Speichern sowie Überschreiben, Umbenennen und Löschen über die
 Oberfläche sind nicht Bestandteil dieses Schritts. Bestehende Speicherdateien
-bleiben erhalten. Das aktuelle Speicherformat ist Version 13; Version 8 führte die Kartendaten ein.
+bleiben erhalten. Das aktuelle Speicherformat ist Version 14; Version 8 führte die Kartendaten ein.
 Version 11 speichert `CharacterResource.voice` (Tonhöhenfaktor 0,25–4,0); ältere
 Charakterdaten werden auf 1,0 migriert. Ungültige Voice-Werte werden abgelehnt.
 
@@ -661,3 +661,27 @@ Rüstungsabdeckung/-minderung und Wuchtschaden. Leere Abdeckung bedeutet Schutz
 Writer, Reader und Validierung verwenden denselben Vertrag. Die Migration
 verändert vorhandene Angaben nicht. `test_combat_anatomy.tscn` prüft zusätzlich
 einen vollständigen Welt-Rundlauf und echte Version-12-Migration.
+
+
+## Richtungsabhängige Rüstung – Speicherformat 14
+
+`ItemData.armor_direction_factors` ist ein Dictionary mit optionalen Schlüsseln
+`front`, `side`, `rear` und endlichen Faktoren von 0 bis 2. Leer bedeutet für
+Menschen vorne 1, seitlich 0,75, hinten 0,5; andere Körperprofile nutzen ohne
+Item-Overrides 1 in jeder Richtung. Natürlicher Schutz bleibt unverändert.
+Grundschutz und Zonenabdeckung bleiben in ihren bisherigen Feldern.
+
+Writer, Reader und Validierung verwenden Format 14. Beim Lesen der Versionen
+1–13 ergänzt der Codec nur fehlende Faktor-Dictionaries mit leeren Dictionaries;
+vorhandene Schutzwerte und gültige Overrides bleiben erhalten. Aktuelle Saves
+müssen das neue Feld enthalten. Unbekannte Richtungen, falsche Typen und Faktoren
+außerhalb des Bereichs werden abgelehnt. Die Schreibprüfung vor dem Ersetzen
+verhindert, dass ein ungültiger Kandidat den letzten gültigen Stand überschreibt.
+
+`test_directional_armor.tscn` prüft den Schadensablauf, Item-Overrides, Körperprofile,
+KI-Positionsbewertung, Inventartext, Welt-Rundlauf, Version-13-Migration und
+ungültige Schreib-/Leseversuche (32 Prüfungen). Inventar (50), Kampfausrüstung (30),
+Trefferzonen (58), Rüstung (55), NPC-KI (36) und Waffenmodelle (84) bestehen ebenfalls.
+Der Klassenindex und die neue Script-UID wurden aktualisiert; der zusätzliche
+Editorlauf erreichte beim Wiederöffnen vorhandener Szenen ein Zeitlimit. Die
+Laufzeit einschließlich gerenderter Inventaransicht ist geprüft.

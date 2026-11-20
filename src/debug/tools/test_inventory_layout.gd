@@ -27,7 +27,7 @@ func _run() -> void:
 		check(card.playable == members[i], "Inventare folgen Partyreihenfolge")
 		check(card._portrait.texture == members[i].character.get_portrait(), "Charakterportrait zugeordnet")
 		check(card._paperdoll.texture != null and card._paperdoll.texture == members[i].character.get_paperdoll(), "Eigene Paperdoll geladen")
-		check(card._more_info.text.is_empty(), "Weitere Infos bleibt leer")
+		check(card._item_preview.texture == null and card._more_info.visible, "Leere Gegenstandsauswahl zeigt Hinweis statt veralteter Vorschau")
 		check(card._quick_grid.get_child_count() == 9, "Neun Schnellplätze")
 		check(card._equip_buttons.has("schmuck") and card._equip_buttons.has("primaer_hand"), "Schmuck und beide Hände erreichbar")
 		check(card._inv_slots.size() >= 18, "Rucksack mit zwei Reihen")

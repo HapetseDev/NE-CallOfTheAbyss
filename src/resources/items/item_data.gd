@@ -8,7 +8,15 @@ extends Resource
 @export var world_object_id: String = ""
 @export var item_name: String = ""
 @export_multiline var description: String = ""
-@export var icon: Texture2D
+@export var icon: Texture2D:
+	get:
+		if icon:
+			return icon
+		# Ältere Speicherstände enthalten noch icon=null. Ansicht anhand der
+		# stabilen Item-ID ergänzen, ohne Zustands-/Save-Schemaänderung.
+		if item_id in ["Messer", "Dolch", "Schwert", "Speer", "Bogen", "Pfeil"]:
+			return load("res://assets/items/weapons/icons/" + item_id.to_lower() + ".png") as Texture2D
+		return null
 @export var world_texture: Texture2D
 @export var weight: float = 0.3
 @export var max_stack: int = 99
@@ -22,6 +30,9 @@ extends Resource
 @export var armor_zones: Array[String] = []
 ## Schadensminderung je Typ: blunt, slash, pierce, magic.
 @export var armor_protection: Dictionary = {}
+## Optionale Richtungsfaktoren front/side/rear (0..2). Leer: Mensch 1/0,75/0,5,
+## andere Körperprofile 1/1/1. 0 bedeutet aus dieser Richtung keine Abdeckung.
+@export var armor_direction_factors: Dictionary = {}
 ## Bruch nach ausgeführtem Angriff, auch beim Ausweichen; 0 = unzerbrechlich.
 @export_range(0.0, 1.0) var break_chance: float = 0.0
 ## Bevorzugter Körper-/Handplatz. Hände/Schnellausrüstung nehmen jedes Item auf.
@@ -63,3 +74,10 @@ func get_combat_value(mode: ItemUsageMode = null) -> int:
 
 func get_combat_skill_id(mode: ItemUsageMode = null) -> String:
 	return combat_skill_id if not combat_skill_id.is_empty() else (mode.related_skill_id if mode != null else "")
+
+
+func _validate_property(property: Dictionary) -> void:
+	# Registry-Laufzeitkopien duplizieren auch externe Resources. Bildassets
+	# bleiben geteilt, damit ihr stabiler Pfad für Speichern/Laden erhalten bleibt.
+	if property.name in ["icon", "world_texture"]:
+		property.usage |= PROPERTY_USAGE_NEVER_DUPLICATE

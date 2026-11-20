@@ -27,6 +27,7 @@ var _paperdoll: TextureRect
 var _paperdoll_hint: Label
 var _stats: Label
 var _more_info: Label
+var _item_preview: TextureRect
 var _content: VBoxContainer
 var _upper: BoxContainer
 var _equipment: HBoxContainer
@@ -121,7 +122,10 @@ func _build_layout() -> void:
 	_stats.size_flags_horizontal = SIZE_EXPAND_FILL
 	_stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_stats.size_flags_vertical = SIZE_EXPAND_FILL
-	_more_info = _label(_section(details, "Weitere Infos"), "")
+	var appearance := _section(details, "Gegenstandsansicht")
+	_item_preview = _picture(appearance, Vector2(NEDimensions.INVENTORY_PORTRAIT_SIZE, NEDimensions.INVENTORY_PORTRAIT_SIZE * 2))
+	_item_preview.hide()
+	_more_info = _label(appearance, "Gegenstand auswählen.")
 	_more_info.custom_minimum_size.y = NEDimensions.INVENTORY_PORTRAIT_SIZE
 	_label(_content, "Schnellausrüstung", NETypography.SIZE_H3)
 	_quick_grid = GridContainer.new()
@@ -190,6 +194,10 @@ func _inspect_inventory(index: int) -> void:
 
 func _inspect_item(item: ItemData) -> void:
 	_selected_item = item
+	_item_preview.texture = item.icon if item else null
+	_item_preview.visible = _item_preview.texture != null
+	_more_info.visible = not _item_preview.visible
+	_more_info.text = "Keine Abbildung vorhanden." if item else "Gegenstand auswählen."
 	if item == null:
 		_stats.text = "Gegenstand auswählen."
 		return
@@ -200,6 +208,10 @@ func _inspect_item(item: ItemData) -> void:
 		for id in item.armor_zones:
 			covered.append(CombatAnatomy.zone_label(id))
 		lines.append("Schutz: " + (", ".join(covered) if not covered.is_empty() else "nach angelegtem Körperplatz"))
+		var directions: PackedStringArray = []
+		for entry in [["front", "vorn"], ["side", "seitlich"], ["rear", "hinten"]]:
+			directions.append("%s %d %%" % [entry[1], roundi(CombatAnatomy.armor_direction_factor(item, playable.character if playable else null, entry[0]) * 100.0)])
+		lines.append("Rüstung: " + " · ".join(directions))
 		for type in CombatAnatomy.DAMAGE_TYPES:
 			if item.armor_protection.has(type):
 				lines.append("%s-Schutz: %.1f" % [CombatAnatomy.DAMAGE_LABELS[type], item.armor_protection[type]])
